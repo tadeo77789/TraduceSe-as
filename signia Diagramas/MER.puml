@@ -1,0 +1,119 @@
+@startuml 
+
+skinparam linetype ortho
+skinparam entity {
+  BackgroundColor #DBEAFE
+  BorderColor #3B82F6
+  FontName Arial
+}
+
+entity "usuario" as usuario {
+  * id_usuario : INT 
+  --
+  nombre : VARCHAR(255)
+  edad : INT
+  email : VARCHAR(255)
+  password : VARCHAR(255)
+  tema : BOOLEAN
+  idioma : VARCHAR(255)
+  termino_acept : BOOLEAN
+  fecha_terminos : DATETIME
+}
+
+entity "usuarioAuth" as usuarioAuth {
+  * id : INT 
+  --
+  proveedor : ENUM
+  provider_id : VARCHAR(255)
+  email_pr : VARCHAR(150)
+  id_usuario : INT 
+}
+
+entity "rol" as rol {
+  * id_rol : INT 
+  --
+  nombre : VARCHAR(100)
+  descripcion : VARCHAR(255)
+}
+
+entity "UsuarioRol" as UsuarioRol {
+  * id_usuario : INT 
+  * id_rol : INT 
+}
+
+entity "traduccion" as traduccion {
+  * id_traduccion : INT 
+  --
+  texto_entrada : VARCHAR(255)
+  texto_traducido : VARCHAR(255)
+  fecha_traduccion : DATETIME
+  is_deleted : BOOLEAN
+  id_usuario : INT 
+}
+
+entity "LexicoSenas" as LexicoSenas {
+  * id_lexico : INT 
+  --
+  palabras : VARCHAR(100)
+  tipo : ENUM
+  letra : CHAR(1)
+  idioma : VARCHAR(10)
+}
+
+entity "RecursosMultimedia" as RecursosMultimedia {
+  * id_recurso : INT 
+  --
+  tipo : ENUM
+  url : VARCHAR(255)
+  mime_type : VARCHAR(50)
+  orden : INT
+  id_lexico : INT <>
+}
+
+entity "Alarma" as Alarma {
+  * id_alarma : INT 
+  --
+  hora : TIME
+  mensaje : VARCHAR(255)
+  activa : BOOLEAN
+  id_usuario : INT 
+}
+
+entity "eventoUso" as eventoUso {
+  * id_eventos : INT 
+  --
+  seccion : VARCHAR(255)
+  accion : VARCHAR(255)
+  created_at : DATETIME
+  id_usuario : INT 
+}
+
+entity "seccionuso" as seccionuso {
+  * id_sesion : INT 
+  --
+  inicio : DATETIME
+  fin : DATETIME
+  duracion_seg : INT
+  id_usuario : INT 
+}
+
+entity "PasswordResetToken" as PasswordResetToken {
+  * id_token : INT 
+  --
+  token_hash : VARCHAR(255)
+  expires_at : DATETIME
+  used_at : DATETIME
+  id_usuario : INT 
+}
+
+usuario   ||--{ usuarioAuth
+usuario   ||--{ UsuarioRol
+usuario   ||--{ traduccion
+usuario   ||--{ Alarma
+usuario   ||--{ eventoUso
+usuario   ||--{ seccionuso
+usuario   ||--{ PasswordResetToken
+rol       ||--{ UsuarioRol
+LexicoSenas ||--{ RecursosMultimedia
+
+@enduml

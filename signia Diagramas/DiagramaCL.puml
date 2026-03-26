@@ -1,0 +1,425 @@
+@startuml DiagramaClases_Signia_v3
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+
+skinparam class {
+  BackgroundColor White
+  BorderColor #2C3E50
+  ArrowColor #2C3E50
+  HeaderBackgroundColor #2C3E50
+  HeaderFontColor White
+}
+
+skinparam package {
+  BackgroundColor #F8F9FA
+  BorderColor #ADB5BD
+  FontStyle bold
+}
+
+' ══════════════════════════════════════════
+' PATRON: SINGLETON
+' ══════════════════════════════════════════
+
+package "«Singleton»" #EAF4FB {
+
+  class DatabaseConnection <<Singleton>> {
+    - {static} instance : DatabaseConnection
+    - connection : Connection
+    --
+    - DatabaseConnection()
+    + {static} getInstance() : DatabaseConnection
+    + getConnection() : Connection
+    + disconnect() : void
+  }
+
+  class ConfiguracionApp <<Singleton>> {
+    - {static} instance : ConfiguracionApp
+    - idioma : String
+    - tema : String
+    --
+    - ConfiguracionApp()
+    + {static} getInstance() : ConfiguracionApp
+    + getIdioma() : String
+    + getTema() : String
+    + setIdioma(idioma : String) : void
+    + setTema(tema : String) : void
+  }
+}
+
+' ══════════════════════════════════════════
+' PATRON: FACTORY METHOD
+' ══════════════════════════════════════════
+
+package "«Factory Method»" #FFF3E0 {
+
+  abstract class TraduccionFactory {
+    + {abstract} crearTraduccion() : Traduccion
+    + procesarTraduccion() : Traduccion
+  }
+
+  class TraduccionTextoSenaFactory extends TraduccionFactory {
+    + crearTraduccion() : Traduccion
+  }
+
+  class TraduccionSenaTextoFactory extends TraduccionFactory {
+    + crearTraduccion() : Traduccion
+  }
+
+  class TraduccionVozSenaFactory extends TraduccionFactory {
+    + crearTraduccion() : Traduccion
+  }
+
+  abstract class NotificacionFactory {
+    + {abstract} crearNotificacion() : INotificacion
+    + enviarNotificacion() : void
+  }
+
+  class NotificacionPushFactory extends NotificacionFactory {
+    + crearNotificacion() : INotificacion
+  }
+
+  class AlarmaFactory extends NotificacionFactory {
+    + crearNotificacion() : INotificacion
+  }
+}
+
+' ══════════════════════════════════════════
+' INTERFAZ PRODUCTO (compartida entre patrones)
+' ══════════════════════════════════════════
+
+interface INotificacion {
+  + enviar() : void
+  + cancelar() : void
+}
+
+' ══════════════════════════════════════════
+' PATRON: OBSERVER
+' ══════════════════════════════════════════
+
+package "«Observer»" #EAF6EE {
+
+  interface IObserver {
+    + actualizar(evento : String, datos : Object) : void
+  }
+
+  interface IObservable {
+    + suscribir(observer : IObserver) : void
+    + desuscribir(observer : IObserver) : void
+    + notificar(evento : String, datos : Object) : void
+  }
+
+  class GestorEventos implements IObservable {
+    - observadores : List<IObserver>
+    --
+    + suscribir(observer : IObserver) : void
+    + desuscribir(observer : IObserver) : void
+    + notificar(evento : String, datos : Object) : void
+    + emitirEvento(evento : String, datos : Object) : void
+  }
+
+  ' ── Alineado con BD: tabla notificacion_push ──
+  class NotificacionObserver implements IObserver {
+    - id_notif : int
+    - titulo : String
+    - cuerpo : String
+    - leida : boolean
+    - created_at : DateTime
+    --
+    + actualizar(evento : String, datos : Object) : void
+    + enviar() : void
+    + cancelar() : void
+    + marcarLeida() : void
+  }
+
+  ' ── Alineado con BD: tabla alarma ──
+  class AlarmaObserver implements IObserver {
+    - id_alarma : int
+    - hora : Time
+    - mensaje : String
+    - activa : boolean
+    --
+    + actualizar(evento : String, datos : Object) : void
+    + enviar() : void
+    + cancelar() : void
+    + activar() : void
+    + desactivar() : void
+  }
+
+  ' ── Alineado con BD: tabla eventoUso ──
+  class EventoUsoObserver implements IObserver {
+    - id_eventos : int
+    - Seccion : String
+    - accion : String
+    - create_at : DateTime
+    --
+    + actualizar(evento : String, datos : Object) : void
+    + registrarEvento() : void
+  }
+}
+
+' ══════════════════════════════════════════
+' PATRON: COMMAND
+' ══════════════════════════════════════════
+
+package "«Command»" #F3E5F5 {
+
+  interface ICommand {
+    + ejecutar() : void
+    + deshacer() : void
+  }
+
+  class ComandoCambiarIdioma implements ICommand {
+    - usuario : Usuario
+    - idiomaAnterior : String
+    - idiomaNuevo : String
+    --
+    + ejecutar() : void
+    + deshacer() : void
+  }
+
+  class ComandoCambiarTema implements ICommand {
+    - usuario : Usuario
+    - temaAnterior : String
+    - temaNuevo : String
+    --
+    + ejecutar() : void
+    + deshacer() : void
+  }
+
+  class ComandoCambiarPassword implements ICommand {
+    - usuario : Usuario
+    - passwordHash : String
+    --
+    + ejecutar() : void
+    + deshacer() : void
+  }
+
+  class InvokerPerfil {
+    - historial : List<ICommand>
+    --
+    + ejecutarComando(cmd : ICommand) : void
+    + deshacerUltimo() : void
+    + limpiarHistorial() : void
+  }
+}
+
+' ══════════════════════════════════════════
+' DOMINIO — Tablas existentes en BD
+' ══════════════════════════════════════════
+
+package "Dominio" #FAFAFA {
+
+  ' ── BD: tabla usuario ──
+  class Usuario {
+    - id_usuario : int
+    - nombre : String
+    - edad : int
+    - email : String
+    - password : String
+    - tema : boolean
+    - Idioma : String
+    - termino_acept : boolean
+    - fecha_terminos : DateTime
+    --
+    + registrar() : void
+    + login() : void
+    + logout() : void
+    + actualizarPerfil() : void
+    + cambiarPassword() : void
+  }
+
+  ' ── BD: tabla traduccion — se agrega campo tipo ──
+  class Traduccion {
+    - id_traduccion : int
+    - Text_entrada : String
+    - Texto_traducido : String
+    - tipo : String
+    - fecha_traduccion : DateTime
+    - is_deleted : boolean
+    --
+    + guardarTraduccion() : void
+    + eliminarTraduccion() : void
+  }
+
+  ' ── BD: tabla LexicoSenas ──
+  class LexicoSenas {
+    - id_lexico : int
+    - palabras : String
+    - tipo : String
+    - letra : char
+    - idioma : String
+    --
+    + buscarPalabra() : void
+    + agregarPalabra() : void
+    + eliminarPalabra() : void
+  }
+
+  ' ── BD: tabla RecursosMultimedia ──
+  class RecursosMultimedia {
+    - id_recurso : int
+    - tipo : String
+    - url : String
+    - mime_type : String
+    - orden : int
+    --
+    + agregarRecurso() : void
+    + eliminarRecurso() : void
+  }
+
+  ' ── BD: tabla seccionuso ──
+  class SeccionUso {
+    - id_sesion : int
+    - Inicio : DateTime
+    - fin : DateTime
+    - Duracion_seg : int
+    --
+    + iniciarSesion() : void
+    + cerrarSesion() : void
+    + calcularDuracion() : void
+  }
+
+  ' ── BD: tabla PasswordResetToken ──
+  class PasswordResetToken {
+    - id_token : int
+    - token_hash : String
+    - expires_at : DateTime
+    - used_at : DateTime
+    --
+    + generarToken() : void
+    + validarToken() : void
+    + usarToken() : void
+  }
+
+  ' ── BD: tabla usuarioAuth ──
+  class UsuarioAuth {
+    - id : int
+    - proveedor : String
+    - provider_id : String
+    - email_provider : String
+    --
+    + autenticar() : void
+    + vincularProveedor() : void
+  }
+
+  ' ══════════════════════════════════════════
+  ' TABLAS NUEVAS — Agregadas al modelo
+  ' ══════════════════════════════════════════
+
+  ' ── NUEVA: dispositivo_usuario ──
+  ' Necesaria para notificaciones push (RF4)
+  class DispositivoUsuario <<nueva>> {
+    - id_dispositivo : int
+    - token_push : String
+    - plataforma : String
+    - activo : boolean
+    --
+    + registrar() : void
+    + activar() : void
+    + revocar() : void
+  }
+
+  ' ── NUEVA: auditoria_accion ──
+  ' Trazabilidad de cambios en el sistema
+  class AuditoriaAccion <<nueva>> {
+    - id_auditoria : int
+    - tabla_afectada : String
+    - accion : String
+    - datos_anteriores : String
+    - datos_nuevos : String
+    - created_at : DateTime
+    --
+    + registrarCambio() : void
+  }
+
+  ' ── NUEVA: notificacion_push ──
+  ' RF4: Notificaciones en pantalla
+  class NotificacionPush <<nueva>> {
+    - id_notif : int
+    - titulo : String
+    - cuerpo : String
+    - leida : boolean
+    - created_at : DateTime
+    --
+    + enviar() : void
+    + marcarLeida() : void
+  }
+}
+
+' ══════════════════════════════════════════
+' RELACIONES DOMINIO — Tablas existentes
+' ══════════════════════════════════════════
+
+Usuario "1" -- "0..*" Traduccion
+Usuario "1" -- "0..*" AlarmaObserver
+Usuario "1" -- "0..*" SeccionUso
+Usuario "1" -- "0..*" EventoUsoObserver
+Usuario "1" -- "0..1" PasswordResetToken
+Usuario "1" -- "0..1" UsuarioAuth
+
+LexicoSenas "1" -- "0..*" RecursosMultimedia
+
+' ══════════════════════════════════════════
+' RELACIONES DOMINIO — Tablas nuevas
+' ══════════════════════════════════════════
+
+Usuario "1" -- "0..*" DispositivoUsuario
+Usuario "1" -- "0..*" AuditoriaAccion
+Usuario "1" -- "0..*" NotificacionPush
+
+DispositivoUsuario "1" -- "0..*" NotificacionObserver
+
+' ══════════════════════════════════════════
+' RELACIONES INotificacion (producto Factory)
+' ══════════════════════════════════════════
+
+NotificacionObserver ..|> INotificacion
+AlarmaObserver ..|> INotificacion
+NotificacionFactory ..> INotificacion : retorna
+
+' ══════════════════════════════════════════
+' RELACIONES FACTORY METHOD
+' ══════════════════════════════════════════
+
+TraduccionTextoSenaFactory ..> Traduccion : crea
+TraduccionSenaTextoFactory ..> Traduccion : crea
+TraduccionVozSenaFactory ..> Traduccion : crea
+
+NotificacionPushFactory ..> NotificacionObserver : crea
+AlarmaFactory ..> AlarmaObserver : crea
+
+' ══════════════════════════════════════════
+' RELACIONES OBSERVER
+' ══════════════════════════════════════════
+
+GestorEventos --> NotificacionObserver
+GestorEventos --> AlarmaObserver
+GestorEventos --> EventoUsoObserver
+
+GestorEventos ..> Traduccion : observa cambios
+GestorEventos ..> Usuario : observa eventos
+
+' ══════════════════════════════════════════
+' RELACIONES COMMAND
+' ══════════════════════════════════════════
+
+InvokerPerfil --> ComandoCambiarIdioma
+InvokerPerfil --> ComandoCambiarTema
+InvokerPerfil --> ComandoCambiarPassword
+
+ComandoCambiarIdioma --> Usuario
+ComandoCambiarTema --> Usuario
+ComandoCambiarPassword --> Usuario
+
+' ══════════════════════════════════════════
+' RELACIONES SINGLETON
+' ══════════════════════════════════════════
+
+DatabaseConnection ..> Usuario : gestiona
+DatabaseConnection ..> Traduccion : gestiona
+ConfiguracionApp ..> Usuario : configura
+
+@enduml
