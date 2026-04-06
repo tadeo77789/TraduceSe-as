@@ -38,6 +38,15 @@ desktop.ini
 .AppleDouble
 
 # ─────────────────────────────────────────────
+# CLAUDE CODE — configuración local del agente
+# ─────────────────────────────────────────────
+# La carpeta .claude contiene configuración local de Claude Code
+# (historial de sesiones, caché, ajustes personales). No es parte
+# del proyecto y no debe subirse al repositorio.
+.claude/
+CLAUDE.md
+
+# ─────────────────────────────────────────────
 # EDITORES — configuración local del editor
 # ─────────────────────────────────────────────
 # Configuración personal de VS Code (excepto tareas compartidas)

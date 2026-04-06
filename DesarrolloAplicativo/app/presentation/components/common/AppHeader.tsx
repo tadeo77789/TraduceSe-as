@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
+import { BorderRadius, Shadows, Spacing } from '../../../constants/theme';
 
 interface AppHeaderProps {
   showBack?: boolean;
@@ -16,19 +18,23 @@ interface AppHeaderProps {
  */
 export const AppHeader: React.FC<AppHeaderProps> = ({
   showBack = false,
-  showProfile = false, // en web el perfil está en la top bar
+  showProfile = false,
   onBack,
   onProfile,
 }) => {
-  // En web no mostramos este header duplicado
   if (Platform.OS === 'web') return null;
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={['#9333EA', '#7C3AED']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      style={styles.container}
+    >
       <View style={styles.left}>
         {showBack ? (
           <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={22} color={Colors.textPrimary} />
+            <Ionicons name="arrow-back" size={22} color="#fff" />
           </TouchableOpacity>
         ) : (
           <View style={styles.logoRow}>
@@ -42,10 +48,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
       {showProfile && (
         <TouchableOpacity style={styles.profileBtn} onPress={onProfile}>
-          <Ionicons name="person-circle-outline" size={34} color={Colors.textPrimary} />
+          <Ionicons name="person-circle-outline" size={34} color="#fff" />
         </TouchableOpacity>
       )}
-    </View>
+    </LinearGradient>
   );
 };
 
@@ -53,10 +59,10 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.primaryHeader,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing[3],
     justifyContent: 'space-between',
+    ...Shadows.primary,
   },
   left: {
     flexDirection: 'row',
@@ -65,21 +71,24 @@ const styles = StyleSheet.create({
   logoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: Spacing[2],
   },
   logoBox: {
-    width: 36,
-    height: 36,
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
+    width: 38,
+    height: 38,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    borderRadius: BorderRadius.DEFAULT,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
   },
-  logoEmoji: { fontSize: 18 },
+  logoEmoji: { fontSize: 20 },
   appName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.textPrimary,
+    fontSize: 19,
+    fontWeight: '800',
+    color: '#fff',
+    letterSpacing: 0.3,
   },
   backBtn: { padding: 4 },
   profileBtn: { padding: 2 },

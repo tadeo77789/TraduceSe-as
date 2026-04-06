@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, AuthState, LoginPayload, RegisterPayload } from '../types';
 
@@ -19,31 +19,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
+    const loadStoredAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem('@auth_token');
+        const userStr = await AsyncStorage.getItem('@auth_user');
+        if (token && userStr) {
+          setState({
+            user: JSON.parse(userStr),
+            token,
+            isLoading: false,
+            isAuthenticated: true,
+          });
+        } else {
+          setState(prev => ({ ...prev, isLoading: false }));
+        }
+      } catch {
+        setState(prev => ({ ...prev, isLoading: false }));
+      }
+    };
     loadStoredAuth();
   }, []);
 
-  const loadStoredAuth = async () => {
-    try {
-      const token = await AsyncStorage.getItem('@auth_token');
-      const userStr = await AsyncStorage.getItem('@auth_user');
-      if (token && userStr) {
-        setState({
-          user: JSON.parse(userStr),
-          token,
-          isLoading: false,
-          isAuthenticated: true,
-        });
-      } else {
-        setState(prev => ({ ...prev, isLoading: false }));
-      }
-    } catch {
-      setState(prev => ({ ...prev, isLoading: false }));
-    }
-  };
-
-  const login = async (payload: LoginPayload) => {
+  const login = useCallback(async (payload: LoginPayload) => {
     // TODO: conectar con el backend real
-    // Simulación temporal para desarrollo
     const mockUser: User = {
       id_usuario: 1,
       nombre: 'Usuario',
@@ -57,9 +55,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await AsyncStorage.setItem('@auth_token', mockToken);
     await AsyncStorage.setItem('@auth_user', JSON.stringify(mockUser));
     setState({ user: mockUser, token: mockToken, isLoading: false, isAuthenticated: true });
-  };
+  }, []);
 
-  const register = async (payload: RegisterPayload) => {
+  const register = useCallback(async (payload: RegisterPayload) => {
     // TODO: conectar con el backend real
     const mockUser: User = {
       id_usuario: 1,
@@ -74,19 +72,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await AsyncStorage.setItem('@auth_token', mockToken);
     await AsyncStorage.setItem('@auth_user', JSON.stringify(mockUser));
     setState({ user: mockUser, token: mockToken, isLoading: false, isAuthenticated: true });
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await AsyncStorage.removeItem('@auth_token');
     await AsyncStorage.removeItem('@auth_user');
     setState({ user: null, token: null, isLoading: false, isAuthenticated: false });
-  };
+  }, []);
 
-  return (
-    <AuthContext.Provider value={{ ...state, login, register, logout }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo<AuthContextType>(
+    () => ({ ...state, login, register, logout }),
+    [state, login, register, logout]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

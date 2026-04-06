@@ -8,7 +8,7 @@ Carpeta raíz del desarrollo del sistema **Traduce Señas**. Contiene las tres c
 DesarrolloAplicativo/
 ├── app/        → Aplicación móvil y web (React Native + Expo)
 ├── backend/    → Servidor API REST (Node.js + Express)
-└── BD/         → Scripts y modelo de base de datos (MySQL)
+└── BD/         → Scripts y modelo de base de datos (PostgresSQL)
 ```
 
 ---

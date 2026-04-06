@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -7,61 +7,19 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from '../../../constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
-import { useAuth } from '../../../state/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
+import { useRegisterForm } from '../../../hooks/useRegisterForm';
 
 export const RegisterScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { register } = useAuth();
-
-  const [form, setForm] = useState({
-    nombre: '',
-    correo: '',
-    password: '',
-    terminos: false,
-  });
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const set = (key: string, value: string | boolean) =>
-    setForm(prev => ({ ...prev, [key]: value }));
-
-  const validate = () => {
-    const e: Record<string, string> = {};
-    if (!form.nombre.trim()) e.nombre = 'El nombre es obligatorio';
-    if (!form.correo) e.correo = 'El correo es obligatorio';
-    else if (!/\S+@\S+\.\S+/.test(form.correo)) e.correo = 'Correo inválido';
-    if (!form.password) e.password = 'La contraseña es obligatoria';
-    else if (form.password.length < 8) e.password = 'Mínimo 8 caracteres';
-    if (!form.terminos) e.terminos = 'Debes aceptar los términos';
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const handleRegister = async () => {
-    if (!validate()) return;
-    setLoading(true);
-    try {
-      await register({
-        nombre: form.nombre,
-        edad: 0,
-        email: form.correo,
-        password: form.password,
-        termino_acept: form.terminos,
-      });
-    } catch {
-      Alert.alert('Error', 'No se pudo crear la cuenta. Intenta de nuevo.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { form, setField, loading, errors, handleRegister } = useRegisterForm();
 
   return (
     <KeyboardAvoidingView
@@ -71,40 +29,48 @@ export const RegisterScreen: React.FC = () => {
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         {/* Logo */}
         <View style={styles.logoCorner}>
-          <View style={styles.logoBox}>
+          <LinearGradient
+            colors={['#9333EA', '#7C3AED']}
+            style={styles.logoBox}
+          >
             <Text style={styles.logoEmoji}>👌</Text>
-          </View>
+          </LinearGradient>
+          <Text style={styles.brandName}>TraduceSeña</Text>
         </View>
 
         {/* Card */}
         <View style={styles.card}>
-          <Text style={styles.title}>Crea tu Cuenta</Text>
+          <Text style={styles.title}>Crea tu cuenta</Text>
+          <Text style={styles.subtitle}>Únete y empieza a comunicarte</Text>
 
           <Input
-            label="nombre"
-            placeholder="escribe tu nombre completo"
+            label="Nombre completo"
+            placeholder="Tu nombre completo"
             value={form.nombre}
-            onChangeText={v => set('nombre', v)}
+            onChangeText={v => setField('nombre', v)}
+            leftIcon="person-outline"
             error={errors.nombre}
             containerStyle={styles.inputGap}
           />
 
           <Input
-            label="correo"
-            placeholder="introduzca su correo electronico"
+            label="Correo electrónico"
+            placeholder="correo@ejemplo.com"
             value={form.correo}
-            onChangeText={v => set('correo', v)}
+            onChangeText={v => setField('correo', v)}
             keyboardType="email-address"
+            leftIcon="mail-outline"
             error={errors.correo}
             containerStyle={styles.inputGap}
           />
 
           <Input
-            label="contraseña"
-            placeholder="crea tu contraseña"
+            label="Contraseña"
+            placeholder="Mínimo 8 caracteres"
             value={form.password}
-            onChangeText={v => set('password', v)}
+            onChangeText={v => setField('password', v)}
             isPassword
+            leftIcon="lock-closed-outline"
             hint="mínimo 8 caracteres"
             error={errors.password}
             containerStyle={styles.inputGap}
@@ -113,24 +79,37 @@ export const RegisterScreen: React.FC = () => {
           {/* Checkbox términos */}
           <TouchableOpacity
             style={styles.checkRow}
-            onPress={() => set('terminos', !form.terminos)}
+            onPress={() => setField('terminos', !form.terminos)}
           >
             <View style={[styles.checkbox, form.terminos && styles.checkboxChecked]}>
-              {form.terminos && <Ionicons name="checkmark" size={14} color="#fff" />}
+              {form.terminos && <Ionicons name="checkmark" size={13} color="#fff" />}
             </View>
-            <Text style={styles.termsText}>acepto términos y condiciones de esta aplicacion</Text>
+            <Text style={styles.termsText}>
+              Acepto los{' '}
+              <Text style={styles.termsLink}>términos y condiciones</Text>
+            </Text>
           </TouchableOpacity>
           {errors.terminos && <Text style={styles.errorText}>{errors.terminos}</Text>}
 
           <Button
-            title="registrarse"
+            title="Crear cuenta"
             onPress={handleRegister}
             loading={loading}
+            fullWidth
             style={styles.registerBtn}
           />
 
-          <TouchableOpacity onPress={() => navigation.navigate('Login' as never)}>
-            <Text style={styles.loginLink}>¿Ya tienes cuenta? Inicia sesión</Text>
+          <View style={styles.separator}>
+            <View style={styles.separatorLine} />
+            <Text style={styles.separatorText}>¿ya tienes cuenta?</Text>
+            <View style={styles.separatorLine} />
+          </View>
+
+          <TouchableOpacity
+            style={styles.loginBtn}
+            onPress={() => navigation.navigate('Login' as never)}
+          >
+            <Text style={styles.loginBtnText}>Inicia sesión</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -139,36 +118,47 @@ export const RegisterScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.background },
-  scroll: { flexGrow: 1, padding: 20, paddingTop: 48 },
-  logoCorner: { marginBottom: 24 },
+  root: { flex: 1, backgroundColor: Colors.backgroundGray },
+  scroll: { flexGrow: 1, padding: 24, paddingTop: 52 },
+  logoCorner: { marginBottom: 28, flexDirection: 'row', alignItems: 'center', gap: 10 },
   logoBox: {
-    width: 44,
-    height: 44,
-    backgroundColor: Colors.primary,
-    borderRadius: 10,
+    width: 46,
+    height: 46,
+    borderRadius: 13,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  logoEmoji: { fontSize: 22 },
-  card: {
-    backgroundColor: Colors.primaryBg,
-    borderRadius: 20,
-    padding: 24,
-    shadowColor: '#000',
+    shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
     elevation: 6,
+  },
+  logoEmoji: { fontSize: 24 },
+  brandName: { fontSize: 20, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.3 },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 28,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 8,
   },
   title: {
     fontSize: 26,
     fontWeight: '800',
     color: Colors.textPrimary,
-    marginBottom: 24,
+    marginBottom: 6,
     textAlign: 'center',
   },
-  inputGap: { marginBottom: 14 },
+  subtitle: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: 28,
+  },
+  inputGap: { marginBottom: 16 },
   checkRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -177,9 +167,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 6,
     borderWidth: 2,
     borderColor: Colors.primaryLighter,
     alignItems: 'center',
@@ -190,17 +180,23 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
   },
   termsText: { flex: 1, fontSize: 13, color: Colors.textSecondary },
-  errorText: { fontSize: 12, color: Colors.error, marginBottom: 8 },
-  registerBtn: {
-    alignSelf: 'center',
-    marginTop: 16,
-    paddingHorizontal: 32,
+  termsLink: { color: Colors.primary, fontWeight: '600' },
+  errorText: { fontSize: 12, color: Colors.error, marginBottom: 8, fontWeight: '500' },
+  registerBtn: { marginTop: 20 },
+  separator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+    gap: 10,
   },
-  loginLink: {
-    textAlign: 'center',
-    marginTop: 16,
-    color: Colors.primary,
-    fontSize: 13,
-    textDecorationLine: 'underline',
+  separatorLine: { flex: 1, height: 1, backgroundColor: Colors.border },
+  separatorText: { fontSize: 12, color: Colors.textHint, fontWeight: '500' },
+  loginBtn: {
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+    borderRadius: 14,
+    paddingVertical: 13,
+    alignItems: 'center',
   },
+  loginBtnText: { color: Colors.primary, fontSize: 15, fontWeight: '700' },
 });

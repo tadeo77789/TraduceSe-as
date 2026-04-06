@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { Colors } from '../../constants/colors';
 
@@ -48,8 +49,13 @@ export const LandingScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
+      {/* Header con gradiente */}
+      <LinearGradient
+        colors={['#9333EA', '#7C3AED']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
         <View style={styles.logoRow}>
           <View style={styles.logoBox}>
             <Text style={styles.logoEmoji}>👌</Text>
@@ -60,17 +66,18 @@ export const LandingScreen: React.FC = () => {
           onPress={() => navigation.navigate('Login' as never)}
           style={styles.loginBtn}
         >
-          <Ionicons name="person-circle-outline" size={32} color={Colors.textPrimary} />
+          <Ionicons name="person-circle-outline" size={32} color="#fff" />
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Notificación emergente */}
         {showNotif && (
           <View style={styles.notifCard}>
+            <View style={styles.notifAccent} />
             <View style={styles.notifContent}>
-              <Text style={styles.notifTitle}>aviso</Text>
-              <Text style={styles.notifMsg}>recuerda esta palabra</Text>
+              <Text style={styles.notifTitle}>Aviso</Text>
+              <Text style={styles.notifMsg}>Recuerda esta palabra</Text>
               <TouchableOpacity style={styles.notifAction}>
                 <Text style={styles.notifActionText}>Abrir</Text>
               </TouchableOpacity>
@@ -83,7 +90,10 @@ export const LandingScreen: React.FC = () => {
 
         {/* Slider de imágenes */}
         <View style={styles.sliderSection}>
-          <Text style={styles.sliderTag}>Fomenta una sociedad más inclusiva</Text>
+          <View style={styles.sliderTagRow}>
+            <View style={styles.sliderTagDot} />
+            <Text style={styles.sliderTag}>Fomenta una sociedad más inclusiva</Text>
+          </View>
 
           <View style={styles.sliderWrapper}>
             <FlatList
@@ -100,15 +110,20 @@ export const LandingScreen: React.FC = () => {
                     style={styles.slideImage}
                     resizeMode="cover"
                   />
+                  {/* Overlay gradient en imagen */}
+                  <LinearGradient
+                    colors={['transparent', 'rgba(0,0,0,0.35)']}
+                    style={styles.slideOverlay}
+                  />
                 </View>
               )}
             />
             {/* Flechas */}
             <TouchableOpacity style={[styles.arrow, styles.arrowLeft]}>
-              <Ionicons name="chevron-back" size={20} color={Colors.textPrimary} />
+              <Ionicons name="chevron-back" size={20} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity style={[styles.arrow, styles.arrowRight]}>
-              <Ionicons name="chevron-forward" size={20} color={Colors.textPrimary} />
+              <Ionicons name="chevron-forward" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
 
@@ -128,27 +143,38 @@ export const LandingScreen: React.FC = () => {
         </View>
 
         {/* Testimonio */}
-        <View style={styles.testimonial}>
-          <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=300' }}
-            style={styles.testimonialImage}
-          />
-          <View style={styles.testimonialText}>
-            <Text style={styles.testimonialQuote}>
-              "él es Juan, un pequeño estudiante sordomudo el cual probó la app y dijo: La app ha
-              facilitado mi comunicación con mis compañeros sordos en clase. Es increíble cómo una
-              app puede cambiar tanto."
-            </Text>
+        <View style={styles.testimonialCard}>
+          <View style={styles.testimonialInner}>
+            <Image
+              source={{ uri: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=300' }}
+              style={styles.testimonialImage}
+            />
+            <View style={styles.testimonialText}>
+              <Ionicons name="chatbubble-ellipses" size={18} color={Colors.primaryLighter} style={{ marginBottom: 6 }} />
+              <Text style={styles.testimonialQuote}>
+                "La app ha facilitado mi comunicación con mis compañeros en clase. Es increíble cómo
+                una app puede cambiar tanto."
+              </Text>
+              <Text style={styles.testimonialName}>— Juan, estudiante</Text>
+            </View>
           </View>
         </View>
 
         {/* CTA */}
         <View style={styles.cta}>
           <TouchableOpacity
-            style={styles.ctaBtn}
             onPress={() => navigation.navigate('Register' as never)}
+            activeOpacity={0.85}
           >
-            <Text style={styles.ctaBtnText}>Comenzar ahora</Text>
+            <LinearGradient
+              colors={['#9333EA', '#7C3AED', '#6D28D9']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.ctaBtn}
+            >
+              <Text style={styles.ctaBtnText}>Comenzar ahora</Text>
+              <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 8 }} />
+            </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Login' as never)}>
             <Text style={styles.ctaLink}>Ya tengo cuenta</Text>
@@ -162,124 +188,179 @@ export const LandingScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.backgroundGray,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.primaryHeader,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: 48,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    paddingTop: 50,
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
   },
   logoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   logoBox: {
-    width: 36,
-    height: 36,
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
+    width: 38,
+    height: 38,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
   },
-  logoEmoji: { fontSize: 18 },
+  logoEmoji: { fontSize: 20 },
   appName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.textPrimary,
+    fontSize: 19,
+    fontWeight: '800',
+    color: '#fff',
+    letterSpacing: 0.3,
   },
   loginBtn: { padding: 4 },
   // Notificación
   notifCard: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
+    backgroundColor: '#fff',
     margin: 16,
-    borderRadius: 12,
+    marginBottom: 8,
+    borderRadius: 14,
     padding: 12,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
     alignSelf: 'flex-end',
-    maxWidth: 220,
+    maxWidth: 230,
+    overflow: 'hidden',
   },
-  notifContent: { flex: 1 },
+  notifAccent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    backgroundColor: Colors.primary,
+    borderTopLeftRadius: 14,
+    borderBottomLeftRadius: 14,
+  },
+  notifContent: { flex: 1, paddingLeft: 8 },
   notifTitle: { fontSize: 13, fontWeight: '700', color: Colors.textPrimary },
   notifMsg: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
   notifAction: {
     backgroundColor: Colors.primary,
-    borderRadius: 6,
+    borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 5,
     marginTop: 6,
     alignSelf: 'flex-start',
   },
   notifActionText: { color: '#fff', fontSize: 12, fontWeight: '600' },
   notifClose: { padding: 4 },
   // Slider
-  sliderSection: { padding: 16 },
+  sliderSection: { padding: 16, paddingTop: 12 },
+  sliderTagRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
+  sliderTagDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primary },
   sliderTag: {
     fontSize: 13,
     color: Colors.textSecondary,
-    marginBottom: 12,
-    fontStyle: 'italic',
+    fontWeight: '500',
   },
   sliderWrapper: {
     position: 'relative',
-    borderRadius: 16,
+    borderRadius: 18,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
+    elevation: 6,
   },
-  slide: { width: width - 32, height: 200 },
-  slideImage: { width: '100%', height: '100%', borderRadius: 16 },
+  slide: { width: width - 32, height: 210 },
+  slideImage: { width: '100%', height: '100%' },
+  slideOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+  },
   arrow: {
     position: 'absolute',
     top: '50%',
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: 'rgba(124,58,237,0.7)',
     borderRadius: 20,
-    padding: 6,
-    transform: [{ translateY: -16 }],
+    padding: 7,
+    transform: [{ translateY: -17 }],
   },
-  arrowLeft: { left: 8 },
-  arrowRight: { right: 8 },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 10 },
+  arrowLeft: { left: 10 },
+  arrowRight: { right: 10 },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 12 },
   dot: { width: 8, height: 8, borderRadius: 4 },
-  dotActive: { backgroundColor: Colors.primary },
+  dotActive: { backgroundColor: Colors.primary, width: 22 },
   dotInactive: { backgroundColor: Colors.primaryLighter },
   caption: {
     fontSize: 14,
     color: Colors.textSecondary,
     textAlign: 'center',
     marginTop: 12,
-    lineHeight: 20,
+    lineHeight: 22,
   },
   // Testimonio
-  testimonial: {
+  testimonialCard: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  testimonialInner: {
     flexDirection: 'row',
-    margin: 16,
-    gap: 12,
+    gap: 14,
     alignItems: 'flex-start',
   },
-  testimonialImage: { width: 90, height: 110, borderRadius: 12 },
+  testimonialImage: { width: 86, height: 110, borderRadius: 14 },
   testimonialText: { flex: 1 },
   testimonialQuote: {
     fontSize: 13,
     color: Colors.textSecondary,
-    lineHeight: 20,
+    lineHeight: 21,
     fontStyle: 'italic',
   },
-  // CTA
-  cta: { alignItems: 'center', padding: 24, gap: 12 },
-  ctaBtn: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 40,
-    paddingVertical: 14,
-    borderRadius: 10,
+  testimonialName: {
+    marginTop: 8,
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: '700',
   },
-  ctaBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  ctaLink: { color: Colors.primary, fontSize: 14, fontWeight: '500' },
+  // CTA
+  cta: { alignItems: 'center', padding: 28, gap: 16 },
+  ctaBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 44,
+    paddingVertical: 16,
+    borderRadius: 16,
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  ctaBtnText: { color: '#fff', fontSize: 17, fontWeight: '800', letterSpacing: 0.3 },
+  ctaLink: { color: Colors.primary, fontSize: 14, fontWeight: '600' },
 });

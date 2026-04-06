@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  ListRenderItem,
 } from 'react-native';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
@@ -30,10 +31,13 @@ const MOCK_TIMES: Record<number, string> = {
   6: '08:00', 7: '06:00', 8: '09:00', 9: '12:09', 10: '09:00',
 };
 
+const Separator = () => <View style={styles.separator} />;
+const keyExtractor = (item: Traduccion) => String(item.id_traduccion);
+
 export const HistoryScreen: React.FC = () => {
   const [items, setItems] = useState<Traduccion[]>(MOCK_HISTORY);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = useCallback((id: number) => {
     Alert.alert('Eliminar', '¿Eliminar esta traducción?', [
       { text: 'Cancelar', style: 'cancel' },
       {
@@ -41,11 +45,31 @@ export const HistoryScreen: React.FC = () => {
         onPress: () => setItems(prev => prev.filter(t => t.id_traduccion !== id)),
       },
     ]);
-  };
+  }, []);
 
-  const handleReuse = (item: Traduccion) => {
+  const handleReuse = useCallback((item: Traduccion) => {
     Alert.alert('Reusar', `Traducir: "${item.texto_entrada}"`);
-  };
+  }, []);
+
+  const renderItem: ListRenderItem<Traduccion> = useCallback(({ item }) => (
+    <View style={styles.row}>
+      <Text style={styles.rowText} numberOfLines={1}>{item.texto_entrada}</Text>
+      <Text style={styles.rowDate}>{item.fecha_traduccion}</Text>
+      <Text style={styles.rowTime}>{MOCK_TIMES[item.id_traduccion]}</Text>
+      <TouchableOpacity
+        style={styles.iconBtn}
+        onPress={() => handleReuse(item)}
+      >
+        <Ionicons name="exit-outline" size={20} color={Colors.textSecondary} />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.iconBtn}
+        onPress={() => handleDelete(item.id_traduccion)}
+      >
+        <Ionicons name="trash-outline" size={20} color={Colors.textSecondary} />
+      </TouchableOpacity>
+    </View>
+  ), [handleDelete, handleReuse]);
 
   return (
     <View style={styles.root}>
@@ -61,27 +85,13 @@ export const HistoryScreen: React.FC = () => {
         ) : (
           <FlatList
             data={items}
-            keyExtractor={item => String(item.id_traduccion)}
-            renderItem={({ item }) => (
-              <View style={styles.row}>
-                <Text style={styles.rowText} numberOfLines={1}>{item.texto_entrada}</Text>
-                <Text style={styles.rowDate}>{item.fecha_traduccion}</Text>
-                <Text style={styles.rowTime}>{MOCK_TIMES[item.id_traduccion]}</Text>
-                <TouchableOpacity
-                  style={styles.iconBtn}
-                  onPress={() => handleReuse(item)}
-                >
-                  <Ionicons name="exit-outline" size={20} color={Colors.textSecondary} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.iconBtn}
-                  onPress={() => handleDelete(item.id_traduccion)}
-                >
-                  <Ionicons name="trash-outline" size={20} color={Colors.textSecondary} />
-                </TouchableOpacity>
-              </View>
-            )}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            keyExtractor={keyExtractor}
+            renderItem={renderItem}
+            ItemSeparatorComponent={Separator}
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            removeClippedSubviews
           />
         )}
       </View>
