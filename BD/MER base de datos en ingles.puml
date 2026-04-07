@@ -1,0 +1,122 @@
+@startuml 
+
+skinparam linetype ortho
+skinparam entity {
+  BackgroundColor #DBEAFE
+  BorderColor #3B82F6
+  FontName Arial
+}
+
+entity "User" as user {
+  * user_id : INT (PK)
+  --
+  name : VARCHAR(255)
+  age : INT
+  email : VARCHAR(255)
+  password : VARCHAR(255)
+  theme : BOOLEAN
+  language : VARCHAR(255)
+  terms_accepted : BOOLEAN
+  terms_date : DATETIME
+}
+
+entity "UserAuth" as userAuth {
+  * auth_id : INT (PK)
+  --
+  provider : VARCHAR(50)
+  provider_id : VARCHAR(255)
+  email_pr : VARCHAR(150)
+  user_id : INT (FK)
+}
+
+entity "Role" as role {
+  * role_id : INT (PK)
+  --
+  name : VARCHAR(100)
+  description : VARCHAR(255)
+}
+
+entity "UserRole" as userRole {
+  * user_id : INT (FK)
+  * role_id : INT (FK)
+}
+
+entity "Translation" as translation {
+  * translation_id : INT (PK)
+  --
+  input_text : VARCHAR(255)
+  translated_text : VARCHAR(255)
+  translation_date : TIMESTAMP
+  is_deleted : BOOLEAN
+  user_id : INT (FK)
+}
+
+entity "LexiconSenas" as lexicon {
+  * lexicon_id : INT (PK)
+  --
+  word : VARCHAR(100)
+  type : VARCHAR(50)
+  letter : CHAR(1)
+  language : VARCHAR(10)
+}
+
+entity "MultimediaResource" as multimedia {
+  * resource_id : INT (PK)
+  --
+  type : VARCHAR(50)
+  url : VARCHAR(255)
+  mime_type : VARCHAR(50)
+  display_order : INT
+  lexicon_id : INT (FK)
+}
+
+entity "Alarm" as alarm {
+  * alarm_id : INT (PK)
+  --
+  time : TIME
+  message : VARCHAR(255)
+  active : BOOLEAN
+  user_id : INT (FK)
+}
+
+entity "UsageEvent" as usageEvent {
+  * event_id : INT (PK)
+  --
+  section : VARCHAR(255)
+  action : VARCHAR(255)
+  created_at : DATETIME
+  user_id : INT (FK)
+}
+
+entity "UserSession" as userSession {
+  * session_id : INT (PK)
+  --
+  start_time : TIMESTAMP
+  end_time : TIMESTAMP
+  duration_seconds : INT
+  user_id : INT (FK)
+}
+
+entity "PasswordResetToken" as resetToken {
+  * token_id : INT (PK)
+  --
+  token_hash : VARCHAR(255)
+  expires_at : TIMESTAMP
+  used_at : TIMESTAMP
+  user_id : INT (FK)
+}
+
+' RELATIONSHIPS (igual a la imagen)
+user ||--o{ userAuth
+user ||--o{ userRole
+user ||--o{ translation
+user ||--o{ alarm
+user ||--o{ usageEvent
+user ||--o{ userSession
+user ||--o{ resetToken
+
+role ||--o{ userRole
+
+lexicon ||--o{ multimedia
+
+@enduml   
