@@ -8,6 +8,7 @@ import {
   Switch,
   Alert,
   ListRenderItem,
+  useWindowDimensions,
 } from 'react-native';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
@@ -132,6 +133,8 @@ const clock = StyleSheet.create({
 
 // ─── Pantalla principal ───────────────────────────────────────────────────────
 export const AlarmsScreen: React.FC = () => {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const [alarms, setAlarms] = useState<AlarmaExtended[]>(MOCK_ALARMS);
   const [pickerHour, setPickerHour] = useState(7);
   const [pickerMinute] = useState(0);
@@ -237,7 +240,7 @@ export const AlarmsScreen: React.FC = () => {
   return (
     <View style={styles.root}>
       <AppHeader />
-      <View style={styles.container}>
+      <View style={[styles.container, !isTablet && styles.containerMobile]}>
         {/* Lista de alarmas */}
         <View style={styles.listSection}>
           <View style={styles.sectionHeader}>
@@ -259,7 +262,7 @@ export const AlarmsScreen: React.FC = () => {
         </View>
 
         {/* Panel selector de hora */}
-        <View style={styles.pickerPanel}>
+        <View style={[styles.pickerPanel, !isTablet && styles.pickerPanelMobile]}>
           <Text style={styles.pickerTitle}>Nueva alarma</Text>
           <ClockPicker
             hour={pickerHour}
@@ -305,7 +308,8 @@ export const AlarmsScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.backgroundGray },
-  container: { flex: 1, flexDirection: 'row', padding: 12, gap: 12 },
+  container: { flex: 1, flexDirection: 'row', padding: 16, gap: 14 },
+  containerMobile: { flexDirection: 'column' },
 
   // Lista
   listSection: { flex: 1 },
@@ -313,45 +317,45 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: 14,
   },
-  sectionTitle: { fontSize: 16, fontWeight: '800', color: Colors.textPrimary },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: Colors.textPrimary },
   countBadge: {
     backgroundColor: Colors.primaryBg,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     borderRadius: 20,
   },
-  countText: { fontSize: 11, color: Colors.primary, fontWeight: '700' },
-  list: { gap: 10 },
+  countText: { fontSize: 12, color: Colors.primary, fontWeight: '700' },
+  list: { gap: 12 },
 
   // Alarm card
   alarmCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: 20,
+    padding: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    elevation: 3,
-    gap: 10,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+    gap: 12,
   },
   alarmIconBg: {
-    width: 44, height: 44, borderRadius: 12,
+    width: 48, height: 48, borderRadius: 14,
     alignItems: 'center', justifyContent: 'center',
   },
   alarmInfo: { flex: 1 },
-  alarmTime: { fontSize: 22, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.5 },
+  alarmTime: { fontSize: 24, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.5 },
   alarmTimeOff: { color: Colors.textHint },
-  alarmMsg: { fontSize: 11, color: Colors.textSecondary, marginBottom: 6 },
+  alarmMsg: { fontSize: 12, color: Colors.textSecondary, marginBottom: 8 },
 
   // Días en card
-  diasRow: { flexDirection: 'row', gap: 3, marginBottom: 8 },
+  diasRow: { flexDirection: 'row', gap: 4, marginBottom: 10 },
   diaBadge: {
-    width: 20, height: 20, borderRadius: 10,
+    width: 22, height: 22, borderRadius: 11,
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: '#F3F4F6',
   },
@@ -359,74 +363,75 @@ const styles = StyleSheet.create({
   diaText: { fontSize: 9, color: Colors.textHint, fontWeight: '700' },
   diaTextActive: { color: Colors.primary },
 
-  alarmActions: { flexDirection: 'row', gap: 6 },
+  alarmActions: { flexDirection: 'row', gap: 8 },
   alarmBtnDelete: {
-    flexDirection: 'row', alignItems: 'center', gap: 3,
-    paddingHorizontal: 8, paddingVertical: 4,
-    borderRadius: 8, borderWidth: 1,
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: 10, paddingVertical: 5,
+    borderRadius: 10, borderWidth: 1,
     borderColor: Colors.danger, backgroundColor: '#FFF5F5',
   },
   alarmBtnDeleteText: { color: Colors.danger, fontSize: 11, fontWeight: '600' },
   alarmBtnEdit: {
-    flexDirection: 'row', alignItems: 'center', gap: 3,
-    paddingHorizontal: 8, paddingVertical: 4,
-    borderRadius: 8, borderWidth: 1,
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: 10, paddingVertical: 5,
+    borderRadius: 10, borderWidth: 1,
     borderColor: Colors.border, backgroundColor: '#fff',
   },
   alarmBtnEditText: { color: Colors.textSecondary, fontSize: 11, fontWeight: '600' },
 
   // Panel picker
+  pickerPanelMobile: { alignSelf: 'stretch', minWidth: undefined },
   pickerPanel: {
     backgroundColor: '#fff',
-    borderRadius: 18,
-    padding: 12,
+    borderRadius: 22,
+    padding: 16,
     borderWidth: 1,
     borderColor: Colors.border,
-    minWidth: 210,
+    minWidth: 220,
     alignSelf: 'flex-start',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 4,
-    gap: 10,
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 14,
+    elevation: 6,
+    gap: 12,
   },
   pickerTitle: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '800',
     color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: 4,
   },
 
   // Selector de días
-  diasSelector: { gap: 6 },
+  diasSelector: { gap: 8 },
   diasLabel: {
     fontSize: 11,
     fontWeight: '700',
     color: Colors.textSecondary,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
-  diasGrid: { flexDirection: 'row', gap: 4, flexWrap: 'wrap' },
+  diasGrid: { flexDirection: 'row', gap: 5, flexWrap: 'wrap' },
   diaSelectorBtn: {
-    width: 26, height: 26, borderRadius: 13,
+    width: 30, height: 30, borderRadius: 15,
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: '#F3F4F6',
   },
   diaSelectorBtnActive: { backgroundColor: Colors.primary },
-  diaSelectorText: { fontSize: 9, color: Colors.textSecondary, fontWeight: '700' },
+  diaSelectorText: { fontSize: 10, color: Colors.textSecondary, fontWeight: '700' },
   diaSelectorTextActive: { color: '#fff' },
 
   pickerActions: {
     flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', paddingTop: 10,
+    alignItems: 'center', paddingTop: 12,
     borderTopWidth: 1, borderTopColor: Colors.border,
   },
-  addBtn: { borderRadius: 10, overflow: 'hidden' },
+  addBtn: { borderRadius: 12, overflow: 'hidden' },
   addBtnGrad: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    paddingHorizontal: 14, paddingVertical: 9, borderRadius: 10,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 18, paddingVertical: 11, borderRadius: 12,
   },
-  addBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  addBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
 });

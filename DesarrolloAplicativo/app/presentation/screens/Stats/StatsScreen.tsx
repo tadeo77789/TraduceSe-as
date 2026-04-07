@@ -1,11 +1,16 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  useWindowDimensions,
+  LayoutChangeEvent,
+} from 'react-native';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-
-const { width } = Dimensions.get('window');
 
 // ─── Gráfica de barras ────────────────────────────────────────────────────────
 const BarChart: React.FC<{
@@ -38,20 +43,29 @@ const BarChart: React.FC<{
   );
 };
 
-// ─── Gráfica de línea con segmentos ──────────────────────────────────────────
+// ─── Gráfica de línea — usa onLayout para medir el ancho real ─────────────────
 const LineChart: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
+  const [containerWidth, setContainerWidth] = useState(280);
+
   const max = Math.max(...data);
   const chartHeight = 80;
-  const chartWidth = width - 100;
-  const step = chartWidth / (data.length - 1);
+  const step = containerWidth / (data.length - 1);
 
   const points = data.map((v, i) => ({
     x: i * step,
     y: chartHeight - (v / max) * chartHeight,
   }));
 
+  const handleLayout = (e: LayoutChangeEvent) => {
+    const w = e.nativeEvent.layout.width;
+    if (w > 0) setContainerWidth(w);
+  };
+
   return (
-    <View style={[lineStyle.container, { height: chartHeight + 20 }]}>
+    <View
+      style={[lineStyle.container, { height: chartHeight + 20 }]}
+      onLayout={handleLayout}
+    >
       {/* Líneas conectoras */}
       {points.slice(0, -1).map((pt, i) => {
         const next = points[i + 1];
@@ -122,7 +136,7 @@ const bar = StyleSheet.create({
 });
 
 const lineStyle = StyleSheet.create({
-  container: { position: 'relative', width: '100%' },
+  container: { position: 'relative', width: '100%', overflow: 'hidden' },
   segment: {
     position: 'absolute', height: 2, borderRadius: 1,
     transformOrigin: 'left center',
@@ -202,62 +216,75 @@ const StatCard: React.FC<StatCardProps> = ({ title, description, accentColor, ch
 
 // ─── Pantalla principal ───────────────────────────────────────────────────────
 export const StatsScreen: React.FC = () => {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const isDesktop = width >= 1024;
+
   return (
     <View style={styles.root}>
       <AppHeader />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.content, isDesktop && styles.contentDesktop]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={[styles.innerWrapper, isDesktop && styles.innerWrapperWide]}>
 
-        {/* KPI Cards */}
-        <View style={styles.kpiGrid}>
-          {KPI_CARDS.map((kpi, i) => (
-            <LinearGradient key={i} colors={kpi.gradient} style={styles.kpiCard}>
-              <Ionicons name={kpi.icon} size={20} color={kpi.color} />
-              <Text style={[styles.kpiValue, { color: kpi.color }]}>{kpi.value}</Text>
-              <Text style={styles.kpiLabel}>{kpi.label}</Text>
-            </LinearGradient>
-          ))}
+          {/* KPI Cards — 4 cols en desktop, 2 en tablet/mobile */}
+          <View style={[styles.kpiGrid, isDesktop && styles.kpiGridDesktop]}>
+            {KPI_CARDS.map((kpi, i) => (
+              <LinearGradient key={i} colors={kpi.gradient} style={[styles.kpiCard, isDesktop && styles.kpiCardDesktop]}>
+                <Ionicons name={kpi.icon} size={20} color={kpi.color} />
+                <Text style={[styles.kpiValue, { color: kpi.color }]}>{kpi.value}</Text>
+                <Text style={styles.kpiLabel}>{kpi.label}</Text>
+              </LinearGradient>
+            ))}
+          </View>
+
+          {/* Stat Cards */}
+          <View style={[styles.cardsGrid, isTablet && styles.cardsGridTablet]}>
+            <StatCard
+              title="Actividad semanal"
+              accentColor={Colors.primary}
+              description="La actividad presenta un incremento progresivo hacia el fin de semana, alcanzando su punto más alto el sábado."
+            >
+              <BarChart data={WEEKLY_DATA} colors={['#A78BFA', '#7C3AED']} />
+            </StatCard>
+
+            <StatCard
+              title="Crecimiento mensual de usuarios"
+              accentColor="#06B6D4"
+              description="Crecimiento constante en la cantidad de usuarios, con un aumento cercano al 80% al finalizar el período."
+            >
+              <LineChart data={MONTHLY_LINE} color={Colors.primary} />
+            </StatCard>
+
+            <StatCard
+              title="Volumen de traducciones por semana"
+              accentColor="#10B981"
+              description="El volumen de traducciones crece semana a semana, alcanzando su punto máximo en la semana 4."
+            >
+              <BarChart
+                data={[
+                  { label: 'Sem 1', value: 20 },
+                  { label: 'Sem 2', value: 28 },
+                  { label: 'Sem 3', value: 35 },
+                  { label: 'Sem 4', value: 45 },
+                ]}
+                colors={['#67E8F9', '#06B6D4']}
+              />
+            </StatCard>
+
+            <StatCard
+              title="Uso por sección"
+              accentColor="#F59E0B"
+              description="Traducción concentra el 40% del uso total, posicionándose como la funcionalidad principal de la app."
+            >
+              <PieChart data={SECTION_PIE} />
+            </StatCard>
+          </View>
+
         </View>
-
-        <StatCard
-          title="Actividad semanal"
-          accentColor={Colors.primary}
-          description="La actividad presenta un incremento progresivo hacia el fin de semana, alcanzando su punto más alto el sábado."
-        >
-          <BarChart data={WEEKLY_DATA} colors={['#A78BFA', '#7C3AED']} />
-        </StatCard>
-
-        <StatCard
-          title="Crecimiento mensual de usuarios"
-          accentColor="#06B6D4"
-          description="Crecimiento constante en la cantidad de usuarios, con un aumento cercano al 80% al finalizar el período."
-        >
-          <LineChart data={MONTHLY_LINE} color={Colors.primary} />
-        </StatCard>
-
-        <StatCard
-          title="Volumen de traducciones por semana"
-          accentColor="#10B981"
-          description="El volumen de traducciones crece semana a semana, alcanzando su punto máximo en la semana 4."
-        >
-          <BarChart
-            data={[
-              { label: 'Sem 1', value: 20 },
-              { label: 'Sem 2', value: 28 },
-              { label: 'Sem 3', value: 35 },
-              { label: 'Sem 4', value: 45 },
-            ]}
-            colors={['#67E8F9', '#06B6D4']}
-          />
-        </StatCard>
-
-        <StatCard
-          title="Uso por sección"
-          accentColor="#F59E0B"
-          description="Traducción concentra el 40% del uso total, posicionándose como la funcionalidad principal de la app."
-        >
-          <PieChart data={SECTION_PIE} />
-        </StatCard>
-
       </ScrollView>
     </View>
   );
@@ -266,61 +293,64 @@ export const StatsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.backgroundGray },
   scroll: { flex: 1 },
-  content: { padding: 16, gap: 14, paddingBottom: 36 },
+  content: { padding: 20, paddingBottom: 40, alignItems: 'center' },
+  contentDesktop: { paddingHorizontal: 48, paddingVertical: 32 },
+  innerWrapper: { width: '100%', gap: 16 },
+  innerWrapperWide: { maxWidth: 960, alignSelf: 'center' },
 
   // KPI
   kpiGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 12,
     marginBottom: 4,
   },
+  kpiGridDesktop: { flexWrap: 'nowrap' },
   kpiCard: {
     flex: 1,
     minWidth: '45%',
-    borderRadius: 16,
-    padding: 14,
-    gap: 4,
+    borderRadius: 20,
+    padding: 18,
+    gap: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  kpiValue: {
-    fontSize: 22,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
-  kpiLabel: {
-    fontSize: 11,
-    color: Colors.textSecondary,
-    fontWeight: '500',
-  },
+  kpiCardDesktop: { minWidth: 0 },
+  kpiValue: { fontSize: 24, fontWeight: '800', letterSpacing: -0.5 },
+  kpiLabel: { fontSize: 12, color: Colors.textSecondary, fontWeight: '500' },
+
+  // StatCard grid
+  cardsGrid: { gap: 14 },
+  cardsGridTablet: { flexDirection: 'row', flexWrap: 'wrap' },
 
   // StatCard
   card: {
+    flex: 1,
+    minWidth: 280,
     backgroundColor: '#fff',
-    borderRadius: 18,
-    padding: 18,
+    borderRadius: 22,
+    padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowRadius: 14,
+    elevation: 4,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 14,
+    gap: 12,
+    marginBottom: 16,
   },
-  cardAccent: { width: 4, height: 18, borderRadius: 2 },
-  cardTitle: { fontSize: 14, fontWeight: '700', color: Colors.textPrimary },
+  cardAccent: { width: 4, height: 20, borderRadius: 2 },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
   cardDesc: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textSecondary,
-    lineHeight: 19,
-    marginTop: 12,
+    lineHeight: 20,
+    marginTop: 14,
   },
 });

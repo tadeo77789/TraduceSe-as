@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   ListRenderItem,
+  useWindowDimensions,
 } from 'react-native';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
@@ -63,6 +64,9 @@ const TIPO_CONFIG: Record<string, TipoConfig> = {
 const keyExtractor = (item: Traduccion) => String(item.id_traduccion);
 
 export const HistoryScreen: React.FC = () => {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const numCols = isTablet ? 2 : 1;
   const [items, setItems] = useState<Traduccion[]>(MOCK_HISTORY);
 
   const handleDelete = useCallback((id: number) => {
@@ -137,9 +141,12 @@ export const HistoryScreen: React.FC = () => {
         ) : (
           <FlatList
             data={items}
+            key={numCols}
+            numColumns={numCols}
             keyExtractor={keyExtractor}
             renderItem={renderItem}
             contentContainerStyle={styles.list}
+            columnWrapperStyle={isTablet ? styles.columnWrapper : undefined}
             showsVerticalScrollIndicator={false}
             initialNumToRender={10}
             maxToRenderPerBatch={10}
@@ -154,55 +161,57 @@ export const HistoryScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.backgroundGray },
-  container: { flex: 1, paddingHorizontal: 16, paddingTop: 16 },
+  container: { flex: 1, paddingHorizontal: 20, paddingTop: 20 },
+  columnWrapper: { gap: 12 },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '800',
     color: Colors.textPrimary,
   },
   countBadge: {
     backgroundColor: Colors.primaryBg,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
     borderRadius: 20,
   },
-  countText: { fontSize: 12, color: Colors.primary, fontWeight: '700' },
-  list: { gap: 10, paddingBottom: 24 },
+  countText: { fontSize: 13, color: Colors.primary, fontWeight: '700' },
+  list: { gap: 12, paddingBottom: 28 },
 
   // Card
   card: {
+    flex: 1,
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 14,
+    borderRadius: 20,
+    padding: 18,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   typeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 6,
     alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     borderRadius: 20,
-    marginBottom: 10,
+    marginBottom: 12,
   },
-  typeBadgeText: { fontSize: 11, fontWeight: '700' },
+  typeBadgeText: { fontSize: 12, fontWeight: '700' },
   cardText: {
     fontSize: 15,
     color: Colors.textPrimary,
     fontWeight: '500',
-    lineHeight: 22,
-    marginBottom: 12,
+    lineHeight: 23,
+    marginBottom: 14,
   },
   cardFooter: {
     flexDirection: 'row',
@@ -210,7 +219,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderTopWidth: 1,
     borderTopColor: Colors.border,
-    paddingTop: 10,
+    paddingTop: 12,
   },
   cardMeta: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   cardMetaText: { fontSize: 12, color: Colors.textHint },
@@ -218,25 +227,25 @@ const styles = StyleSheet.create({
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
     backgroundColor: Colors.primaryBg,
   },
   actionBtnDanger: { backgroundColor: '#FFF5F5' },
   actionText: { fontSize: 12, fontWeight: '600' },
 
   // Empty state
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 },
   emptyIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     backgroundColor: Colors.primaryBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
-  emptyText: { fontSize: 14, color: Colors.textSecondary, textAlign: 'center', maxWidth: 240 },
+  emptyTitle: { fontSize: 20, fontWeight: '700', color: Colors.textPrimary },
+  emptyText: { fontSize: 14, color: Colors.textSecondary, textAlign: 'center', maxWidth: 260, lineHeight: 22 },
 });

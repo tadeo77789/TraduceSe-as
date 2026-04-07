@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
@@ -26,6 +28,8 @@ const USER_STATS = [
 ];
 
 export const ProfileScreen: React.FC = () => {
+  const { width } = useWindowDimensions();
+  const isWide = width >= 768;
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [selectedIdioma, setSelectedIdioma] = useState('Español');
@@ -33,28 +37,43 @@ export const ProfileScreen: React.FC = () => {
   const displayName = user?.email?.split('@')[0] ?? 'Usuario';
   const displayEmail = user?.email ?? 'usuario@traducsenas.com';
 
-  const handleLogout = () => {
-    Alert.alert('Cerrar sesión', '¿Deseas cerrar sesión?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Cerrar sesión', onPress: logout },
-    ]);
+  const handleLogout = async () => {
+    if (Platform.OS === 'web') {
+      // eslint-disable-next-line no-restricted-globals
+      if (confirm('¿Deseas cerrar sesión?')) {
+        await logout();
+      }
+    } else {
+      Alert.alert('Cerrar sesión', '¿Deseas cerrar sesión?', [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Cerrar sesión', style: 'destructive', onPress: () => logout() },
+      ]);
+    }
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      'Eliminar cuenta',
-      '¿Estás seguro? Esta acción no se puede deshacer.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Eliminar', style: 'destructive', onPress: () => Alert.alert('Cuenta eliminada') },
-      ]
-    );
+    if (Platform.OS === 'web') {
+      // eslint-disable-next-line no-restricted-globals
+      if (confirm('¿Estás seguro? Esta acción no se puede deshacer.')) {
+        alert('Cuenta eliminada');
+      }
+    } else {
+      Alert.alert(
+        'Eliminar cuenta',
+        '¿Estás seguro? Esta acción no se puede deshacer.',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Eliminar', style: 'destructive', onPress: () => Alert.alert('Cuenta eliminada') },
+        ]
+      );
+    }
   };
 
   return (
     <View style={styles.root}>
       <AppHeader />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, isWide && styles.contentWide]} showsVerticalScrollIndicator={false}>
+        <View style={[styles.innerWrapper, isWide && styles.innerWrapperWide]}>
 
         {/* Avatar + nombre */}
         <View style={styles.avatarSection}>
@@ -191,6 +210,7 @@ export const ProfileScreen: React.FC = () => {
           <Button title="Cerrar sesión" onPress={handleLogout} fullWidth />
           <Button title="Eliminar cuenta" onPress={handleDeleteAccount} variant="danger" fullWidth />
         </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -199,78 +219,81 @@ export const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.backgroundGray },
   scroll: { flex: 1 },
-  content: { padding: 20, paddingBottom: 40 },
+  content: { padding: 20, paddingBottom: 48 },
+  contentWide: { alignItems: 'center', paddingVertical: 36 },
+  innerWrapper: { width: '100%' },
+  innerWrapperWide: { width: '100%', maxWidth: 640 },
 
   // Avatar
-  avatarSection: { alignItems: 'center', marginBottom: 20, paddingTop: 8 },
+  avatarSection: { alignItems: 'center', marginBottom: 24, paddingTop: 12 },
   avatarCircle: {
-    width: 90, height: 90, borderRadius: 45,
+    width: 100, height: 100, borderRadius: 50,
     alignItems: 'center', justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
     shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3, shadowRadius: 12, elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35, shadowRadius: 16, elevation: 10,
   },
-  userName: { fontSize: 20, fontWeight: '800', color: Colors.textPrimary, marginBottom: 4, textTransform: 'capitalize' },
-  userEmail: { fontSize: 13, color: Colors.textSecondary, marginBottom: 10 },
+  userName: { fontSize: 22, fontWeight: '800', color: Colors.textPrimary, marginBottom: 5, textTransform: 'capitalize' },
+  userEmail: { fontSize: 14, color: Colors.textSecondary, marginBottom: 12 },
   levelBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20,
   },
-  levelText: { fontSize: 12, fontWeight: '700', color: '#D97706' },
+  levelText: { fontSize: 13, fontWeight: '700', color: '#D97706' },
 
   // Stats del usuario
   statsRow: {
     flexDirection: 'row',
-    gap: 10,
-    marginBottom: 20,
+    gap: 12,
+    marginBottom: 24,
   },
   statCard: {
     flex: 1,
     backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 12,
+    borderRadius: 18,
+    padding: 16,
     alignItems: 'center',
-    gap: 4,
+    gap: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  statValue: { fontSize: 16, fontWeight: '800' },
-  statLabel: { fontSize: 10, color: Colors.textSecondary, textAlign: 'center' },
+  statValue: { fontSize: 18, fontWeight: '800' },
+  statLabel: { fontSize: 11, color: Colors.textSecondary, textAlign: 'center', lineHeight: 15 },
 
   // Sections
-  section: { marginBottom: 20 },
+  section: { marginBottom: 22 },
   sectionTitle: {
     fontSize: 12, fontWeight: '700', color: Colors.textSecondary,
-    textTransform: 'uppercase', letterSpacing: 0.8,
+    textTransform: 'uppercase', letterSpacing: 1,
     marginBottom: 10, marginLeft: 4,
   },
   sectionCard: {
-    backgroundColor: '#fff', borderRadius: 18, padding: 16,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
+    backgroundColor: '#fff', borderRadius: 22, padding: 18,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07, shadowRadius: 12, elevation: 4,
   },
-  inputStyle: { marginBottom: 12 },
-  forgotRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 2 },
+  inputStyle: { marginBottom: 14 },
+  forgotRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 4 },
   forgotLink: { fontSize: 13, color: Colors.primary, fontWeight: '600' },
   prefRow: {
     flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', paddingVertical: 4,
+    alignItems: 'center', paddingVertical: 6,
   },
-  prefLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  prefIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  prefLeft: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  prefIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   themeLabel: { fontSize: 15, color: Colors.textPrimary, fontWeight: '500' },
-  divider: { height: 1, backgroundColor: Colors.border, marginVertical: 12 },
+  divider: { height: 1, backgroundColor: Colors.border, marginVertical: 14 },
   idiomaLabel: {
-    fontSize: 12, fontWeight: '600', color: Colors.textSecondary,
-    textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10,
+    fontSize: 12, fontWeight: '700', color: Colors.textSecondary,
+    textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12,
   },
-  idiomaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  idiomaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   idiomaChip: {
-    paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20,
+    paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20,
     borderWidth: 1.5, borderColor: Colors.border, backgroundColor: '#fff',
   },
   idiomaChipActive: { backgroundColor: Colors.primaryBg, borderColor: Colors.primary },
@@ -278,9 +301,9 @@ const styles = StyleSheet.create({
   idiomaTextActive: { color: Colors.primary, fontWeight: '700' },
 
   // Acerca de
-  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 4 },
-  infoLabel: { flex: 1, fontSize: 14, color: Colors.textPrimary },
+  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 6 },
+  infoLabel: { flex: 1, fontSize: 15, color: Colors.textPrimary },
   infoValue: { fontSize: 13, color: Colors.textSecondary },
 
-  actionsSection: { gap: 12 },
+  actionsSection: { gap: 14 },
 });

@@ -7,18 +7,13 @@ import {
   TouchableOpacity,
   Image,
   Modal,
-  Dimensions,
+  useWindowDimensions,
   ListRenderItem,
 } from 'react-native';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-
-const { width } = Dimensions.get('window');
-const COLS = 5;
-const ITEM_SIZE = (width - 32 - (COLS - 1) * 10) / COLS;
-const ITEM_HEIGHT = ITEM_SIZE + 28;
 
 interface AlphabetItem {
   letter: string;
@@ -78,22 +73,35 @@ const ACCENT_COLORS = [
 ];
 
 export const AlphabetScreen: React.FC = () => {
+  const { width } = useWindowDimensions();
   const [selected, setSelected] = useState<AlphabetItem | null>(null);
+
+  const COLS = width >= 1024 ? 9 : width >= 768 ? 7 : 5;
+  const PADDING = width >= 768 ? 48 : 40;
+  const GAP = 10;
+  const ITEM_SIZE = (width - PADDING - (COLS - 1) * GAP) / COLS;
+  const ITEM_HEIGHT = ITEM_SIZE + 28;
 
   const handleSelect = useCallback((item: AlphabetItem) => setSelected(item), []);
   const handleClose = useCallback(() => setSelected(null), []);
+
+  const getItemLayout = useCallback((_: unknown, index: number) => ({
+    length: ITEM_HEIGHT,
+    offset: ITEM_HEIGHT * Math.floor(index / COLS),
+    index,
+  }), [ITEM_HEIGHT, COLS]);
 
   const renderItem: ListRenderItem<AlphabetItem> = useCallback(({ item, index }) => {
     const [bgColor, accentColor] = ACCENT_COLORS[index % ACCENT_COLORS.length];
     return (
       <TouchableOpacity
-        style={[styles.letterCard, { backgroundColor: bgColor }]}
+        style={[styles.letterCard, { backgroundColor: bgColor, width: ITEM_SIZE, height: ITEM_HEIGHT }]}
         onPress={() => handleSelect(item)}
         activeOpacity={0.75}
       >
         <Image
           source={{ uri: item.imageUrl }}
-          style={styles.handImage}
+          style={[styles.handImage, { width: ITEM_SIZE - 10, height: ITEM_SIZE - 10 }]}
           resizeMode="contain"
         />
         <View style={[styles.letterBadge, { backgroundColor: accentColor }]}>
@@ -101,7 +109,7 @@ export const AlphabetScreen: React.FC = () => {
         </View>
       </TouchableOpacity>
     );
-  }, [handleSelect]);
+  }, [handleSelect, ITEM_SIZE, ITEM_HEIGHT]);
 
   const selectedIndex = selected ? ALPHABET.findIndex(a => a.letter === selected.letter) : 0;
   const [modalBg, modalAccent] = ACCENT_COLORS[selectedIndex % ACCENT_COLORS.length];
@@ -124,6 +132,7 @@ export const AlphabetScreen: React.FC = () => {
 
         <FlatList
           data={ALPHABET}
+          key={COLS}
           numColumns={COLS}
           keyExtractor={keyExtractor}
           columnWrapperStyle={styles.row}
@@ -175,55 +184,51 @@ export const AlphabetScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.backgroundGray },
-  container: { flex: 1, padding: 16 },
+  container: { flex: 1, padding: 20 },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '800',
     color: Colors.textPrimary,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.textSecondary,
-    marginTop: 2,
+    marginTop: 3,
   },
   countBadge: {
     backgroundColor: Colors.primaryBg,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
     borderRadius: 20,
   },
-  countText: { fontSize: 12, color: Colors.primary, fontWeight: '700' },
+  countText: { fontSize: 13, color: Colors.primary, fontWeight: '700' },
 
-  grid: { paddingBottom: 20 },
+  grid: { paddingBottom: 24 },
   row: { gap: 10, marginBottom: 10 },
   letterCard: {
-    width: ITEM_SIZE,
-    height: ITEM_HEIGHT,
     alignItems: 'center',
-    borderRadius: 12,
-    paddingTop: 6,
+    borderRadius: 16,
+    paddingTop: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   handImage: {
-    width: ITEM_SIZE - 8,
-    height: ITEM_SIZE - 8,
-    borderRadius: 8,
+    borderRadius: 10,
   },
   letterBadge: {
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    marginTop: 4,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    marginTop: 5,
   },
   letterText: { color: '#fff', fontSize: 12, fontWeight: '800' },
 
@@ -236,67 +241,67 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     backgroundColor: '#fff',
-    borderRadius: 24,
-    width: 280,
+    borderRadius: 28,
+    width: 300,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    elevation: 12,
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.25,
+    shadowRadius: 32,
+    elevation: 16,
   },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 20,
-    paddingBottom: 16,
+    padding: 24,
+    paddingBottom: 18,
   },
   modalLetterBadge: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+    width: 64,
+    height: 64,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalLetter: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: '900',
     color: '#fff',
   },
   modalCloseBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalImage: {
-    width: 180,
-    height: 180,
+    width: 200,
+    height: 200,
     alignSelf: 'center',
   },
   modalTipBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 8,
+    gap: 10,
     marginHorizontal: 20,
-    marginTop: 8,
-    padding: 12,
+    marginTop: 10,
+    padding: 14,
     backgroundColor: Colors.primaryBg,
-    borderRadius: 12,
+    borderRadius: 14,
   },
   modalTip: {
     flex: 1,
     fontSize: 13,
     color: Colors.textPrimary,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   modalHint: {
     fontSize: 11,
     color: Colors.textHint,
     textAlign: 'center',
-    paddingVertical: 16,
+    paddingVertical: 18,
   },
 });

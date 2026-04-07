@@ -7,217 +7,264 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
 import { Input } from '../../components/common/Input';
-import { Button } from '../../components/common/Button';
 import { useLoginForm } from '../../../hooks/useLoginForm';
 
 export const LoginScreen: React.FC = () => {
   const navigation = useNavigation();
   const { email, setEmail, password, setPassword, loading, errors, handleLogin } = useLoginForm();
+  const { width } = useWindowDimensions();
+  const isWide = width >= 768;
 
+  const FormPanel = (
+    <ScrollView
+      contentContainerStyle={styles.formScroll}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Avatar */}
+      <View style={styles.avatarCircle}>
+        <Ionicons name="person" size={38} color={Colors.primary} />
+      </View>
+
+      {/* Inputs */}
+      <Input
+        placeholder="Correo electrónico"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        leftIcon="mail-outline"
+        error={errors.email}
+        containerStyle={styles.inputSpacing}
+      />
+
+      <Input
+        placeholder="Contraseña"
+        value={password}
+        onChangeText={setPassword}
+        isPassword
+        leftIcon="lock-closed-outline"
+        error={errors.password}
+        containerStyle={styles.inputSpacing}
+      />
+
+      {/* Olvidé contraseña */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate('ForgotPassword' as never)}
+        style={styles.forgotRow}
+      >
+        <Text style={styles.forgotText}>Has olvidado tu contraseña</Text>
+      </TouchableOpacity>
+
+      {/* Registrarse / Ingresar */}
+      <View style={styles.authRow}>
+        <TouchableOpacity
+          style={styles.registerBtn}
+          onPress={() => navigation.navigate('Register' as never)}
+        >
+          <Text style={styles.registerBtnText}>Registrarse</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.loginBtn, loading && styles.btnDisabled]}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Text style={styles.loginBtnText}>{loading ? 'Ingresando...' : 'Ingresar'}</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Google */}
+      <TouchableOpacity style={styles.googleBtn}>
+        <Ionicons name="logo-google" size={20} color="#DB4437" />
+        <Text style={styles.googleText}>google</Text>
+      </TouchableOpacity>
+
+      {/* Facebook */}
+      <TouchableOpacity style={styles.facebookBtn}>
+        <Ionicons name="logo-facebook" size={20} color="#fff" />
+        <Text style={styles.facebookText}>facebook</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+
+  // ── Layout web: imagen izquierda + formulario derecha ──
+  if (isWide) {
+    return (
+      <View style={styles.wideRoot}>
+        {/* Panel imagen */}
+        <View style={styles.imagePanel}>
+          <Image
+            source={require('../../../assets/images/slide1.jpg')}
+            style={styles.heroImage}
+            resizeMode="cover"
+          />
+          <View style={styles.imageOverlay} />
+          <View style={styles.imageBadge}>
+            <Text style={styles.imageBadgeText}>👌 TraduceSeña</Text>
+            <Text style={styles.imageTagline}>Comunícate sin barreras</Text>
+          </View>
+        </View>
+
+        {/* Panel formulario */}
+        <View style={styles.formPanel}>
+          {FormPanel}
+        </View>
+      </View>
+    );
+  }
+
+  // ── Layout móvil: fondo lavanda full screen ──
   return (
     <KeyboardAvoidingView
-      style={styles.root}
+      style={styles.mobileRoot}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        {/* Logo arriba */}
-        <View style={styles.logoCorner}>
-          <LinearGradient
-            colors={['#9333EA', '#7C3AED']}
-            style={styles.logoBox}
-          >
-            <Text style={styles.logoEmoji}>👌</Text>
-          </LinearGradient>
-          <Text style={styles.brandName}>TraduceSeña</Text>
-        </View>
-
-        {/* Card de formulario */}
-        <View style={styles.card}>
-          {/* Avatar */}
-          <LinearGradient
-            colors={['#E9D5FF', '#DDD6FE']}
-            style={styles.avatarCircle}
-          >
-            <Ionicons name="person" size={36} color={Colors.primary} />
-          </LinearGradient>
-
-          <Text style={styles.cardTitle}>Bienvenido</Text>
-          <Text style={styles.cardSubtitle}>Inicia sesión en tu cuenta</Text>
-
-          {/* Campos */}
-          <Input
-            label="Correo electrónico"
-            placeholder="correo@ejemplo.com"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            leftIcon="mail-outline"
-            error={errors.email}
-            containerStyle={styles.inputSpacing}
-          />
-
-          <Input
-            label="Contraseña"
-            placeholder="Tu contraseña"
-            value={password}
-            onChangeText={setPassword}
-            isPassword
-            leftIcon="lock-closed-outline"
-            error={errors.password}
-            containerStyle={styles.inputSpacing}
-          />
-
-          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword' as never)}>
-            <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
-          </TouchableOpacity>
-
-          {/* Botones Registrar / Ingresar */}
-          <View style={styles.authRow}>
-            <TouchableOpacity
-              style={styles.authBtn}
-              onPress={() => navigation.navigate('Register' as never)}
-            >
-              <Text style={styles.authBtnText}>Registrarse</Text>
-            </TouchableOpacity>
-            <Button
-              title="Ingresar"
-              onPress={handleLogin}
-              loading={loading}
-              style={styles.loginBtnStyle}
-            />
-          </View>
-
-          {/* Separador */}
-          <View style={styles.separator}>
-            <View style={styles.separatorLine} />
-            <Text style={styles.separatorText}>o continúa con</Text>
-            <View style={styles.separatorLine} />
-          </View>
-
-          {/* Social login */}
-          <TouchableOpacity style={styles.socialBtn}>
-            <Ionicons name="logo-google" size={20} color="#DB4437" />
-            <Text style={styles.socialText}>Continuar con Google</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.socialBtn, styles.facebookBtn]}>
-            <Ionicons name="logo-facebook" size={20} color="#fff" />
-            <Text style={[styles.socialText, styles.facebookText]}>Continuar con Facebook</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      {FormPanel}
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.backgroundGray },
-  scroll: { flexGrow: 1, padding: 24, paddingTop: 52 },
-  logoCorner: { marginBottom: 28, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  logoBox: {
-    width: 46,
-    height: 46,
-    borderRadius: 13,
-    alignItems: 'center',
+  // ── Web ──
+  wideRoot: { flex: 1, flexDirection: 'row' },
+  imagePanel: { flex: 1, overflow: 'hidden', position: 'relative' },
+  heroImage: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
+  imageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(109,40,217,0.35)',
+  },
+  imageBadge: {
+    position: 'absolute',
+    bottom: 40,
+    left: 40,
+  },
+  imageBadgeText: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#fff',
+    letterSpacing: 0.3,
+  },
+  imageTagline: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.85)',
+    marginTop: 6,
+    fontWeight: '500',
+  },
+  formPanel: {
+    width: 420,
+    backgroundColor: '#EDE9FE',
     justifyContent: 'center',
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
   },
-  logoEmoji: { fontSize: 24 },
-  brandName: { fontSize: 20, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.3 },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 24,
-    padding: 28,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 8,
+
+  // ── Móvil ──
+  mobileRoot: { flex: 1, backgroundColor: '#EDE9FE' },
+
+  // ── Formulario (compartido) ──
+  formScroll: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 48,
+    gap: 0,
   },
+
+  // Avatar
   avatarCircle: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#DDD6FE',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    alignSelf: 'center',
+    marginBottom: 32,
   },
-  cardTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: Colors.textPrimary,
-    marginBottom: 4,
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginBottom: 28,
-  },
+
+  // Inputs
   inputSpacing: { width: '100%', marginBottom: 14 },
+
+  // Olvidé contraseña
+  forgotRow: { alignSelf: 'flex-end', marginBottom: 24 },
   forgotText: {
-    alignSelf: 'flex-end',
+    fontSize: 12,
     color: Colors.primary,
-    fontSize: 13,
-    marginBottom: 24,
     fontWeight: '600',
   },
+
+  // Botones auth
   authRow: {
     flexDirection: 'row',
     gap: 12,
     marginBottom: 20,
-    justifyContent: 'center',
   },
-  authBtn: {
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-    borderRadius: 14,
-    paddingHorizontal: 28,
-    paddingVertical: 13,
-    minHeight: 48,
-    justifyContent: 'center',
-  },
-  authBtnText: { color: Colors.primary, fontSize: 15, fontWeight: '700' },
-  loginBtnStyle: { paddingHorizontal: 28 },
-  separator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'center',
-    width: '80%',
-    marginBottom: 16,
-    gap: 10,
-  },
-  separatorLine: { flex: 1, height: 1, backgroundColor: Colors.border },
-  separatorText: { fontSize: 12, color: Colors.textHint, fontWeight: '500' },
-  socialBtn: {
-    flexDirection: 'row',
+  registerBtn: {
+    flex: 1,
+    backgroundColor: '#C4B5FD',
+    borderRadius: 12,
+    paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
+  },
+  registerBtnText: {
+    color: '#5B21B6',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  loginBtn: {
+    flex: 1,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loginBtnText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  btnDisabled: { opacity: 0.6 },
+
+  // Social
+  googleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
     backgroundColor: '#fff',
-    paddingVertical: 13,
-    paddingHorizontal: 24,
-    alignSelf: 'center',
-    width: '80%',
-    marginBottom: 10,
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  googleText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#3C4043',
   },
   facebookBtn: {
-    backgroundColor: Colors.facebook,
-    borderColor: Colors.facebook,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    backgroundColor: '#1877F2',
+    borderRadius: 12,
+    paddingVertical: 14,
   },
-  socialText: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary },
-  facebookText: { color: '#fff' },
+  facebookText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
+  },
 });

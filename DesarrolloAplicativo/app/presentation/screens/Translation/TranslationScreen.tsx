@@ -8,14 +8,12 @@ import {
   ScrollView,
   Image,
   Alert,
-  Dimensions,
+  useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
-
-const { width } = Dimensions.get('window');
 
 type Mode = 'sena_texto' | 'texto_sena';
 
@@ -26,6 +24,10 @@ const TIPS = [
 ];
 
 export const TranslationScreen: React.FC = () => {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const isDesktop = width >= 1024;
+
   const [mode, setMode] = useState<Mode>('sena_texto');
   const [text, setText] = useState('');
   const [result, setResult] = useState('');
@@ -58,9 +60,11 @@ export const TranslationScreen: React.FC = () => {
       <AppHeader />
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, isDesktop && styles.contentDesktop]}
         showsVerticalScrollIndicator={false}
       >
+        <View style={[styles.innerWrapper, isTablet && styles.innerWrapperWide]}>
+
         {/* ── Toggle de modo ── */}
         <View style={styles.modeToggle}>
           <TouchableOpacity
@@ -115,7 +119,7 @@ export const TranslationScreen: React.FC = () => {
 
             {/* Imagen de cámara */}
             <Image
-              source={{ uri: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800' }}
+              source={require('../../../assets/images/camera_placeholder.jpg')}
               style={styles.cameraImage}
               resizeMode="cover"
             />
@@ -250,6 +254,7 @@ export const TranslationScreen: React.FC = () => {
           </LinearGradient>
         </TouchableOpacity>
 
+        </View>
       </ScrollView>
     </View>
   );
@@ -261,30 +266,33 @@ const CORNER_WIDTH = 3;
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.backgroundGray },
   scroll: { flex: 1 },
-  content: { paddingHorizontal: 28, paddingVertical: 16, paddingBottom: 36, gap: 16 },
+  content: { paddingHorizontal: 20, paddingVertical: 20, paddingBottom: 40, alignItems: 'center' },
+  contentDesktop: { paddingHorizontal: 48, paddingVertical: 32 },
+  innerWrapper: { width: '100%', gap: 18 },
+  innerWrapperWide: { maxWidth: 760, alignSelf: 'center' },
 
   // ── Toggle ──
   modeToggle: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: 14,
+    borderRadius: 18,
     borderWidth: 1.5,
     borderColor: Colors.primaryLighter,
     overflow: 'hidden',
     alignSelf: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
   },
   modeBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 11,
-    paddingHorizontal: 20,
-    gap: 7,
+    paddingVertical: 13,
+    paddingHorizontal: 24,
+    gap: 8,
     overflow: 'hidden',
   },
   modeBtnActive: {},
@@ -294,15 +302,15 @@ const styles = StyleSheet.create({
   // ── Cámara ──
   cameraCard: {
     width: '100%',
-    height: 260,
-    borderRadius: 20,
+    height: 280,
+    borderRadius: 24,
     overflow: 'hidden',
     backgroundColor: '#1a1a2e',
     shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
   },
   cameraImage: { width: '100%', height: '100%' },
   cameraOverlay: {
@@ -343,55 +351,55 @@ const styles = StyleSheet.create({
   // ── Input card ──
   inputCard: {
     backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 24,
+    padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowRadius: 14,
+    elevation: 4,
   },
   inputCardHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,
+    flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14,
   },
-  inputCardTitle: { fontSize: 14, fontWeight: '700', color: Colors.textPrimary },
+  inputCardTitle: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
   textArea: {
     fontSize: 15,
     color: Colors.textPrimary,
-    minHeight: 110,
+    minHeight: 120,
     backgroundColor: Colors.backgroundGray,
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 14,
+    padding: 14,
     borderWidth: 1,
     borderColor: Colors.border,
-    lineHeight: 22,
+    lineHeight: 23,
   },
-  charCount: { alignItems: 'flex-end', marginTop: 8 },
+  charCount: { alignItems: 'flex-end', marginTop: 10 },
   charCountText: { fontSize: 11, color: Colors.textHint },
 
   // ── Tips ──
-  tipsRow: { gap: 8 },
+  tipsRow: { gap: 10 },
   tipChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     backgroundColor: Colors.primaryBg,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14,
   },
-  tipText: { fontSize: 12, color: Colors.primary, fontWeight: '500', flex: 1, lineHeight: 18 },
+  tipText: { fontSize: 13, color: Colors.primary, fontWeight: '500', flex: 1, lineHeight: 19 },
 
   // ── Resultado ──
   resultCard: {
     backgroundColor: '#fff',
-    borderRadius: 20,
+    borderRadius: 24,
     overflow: 'hidden',
     shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 5,
     borderWidth: 1.5,
     borderColor: Colors.primaryLighter,
   },
@@ -399,58 +407,58 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    padding: 14,
+    padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
   resultIconBg: {
-    width: 32, height: 32, borderRadius: 10,
+    width: 36, height: 36, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center',
   },
-  resultTitle: { flex: 1, fontSize: 14, fontWeight: '700', color: Colors.textPrimary },
+  resultTitle: { flex: 1, fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
   detectedBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: '#D1FAE5', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20,
+    backgroundColor: '#D1FAE5', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20,
   },
   detectedDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#059669' },
   detectedText: { fontSize: 11, color: '#059669', fontWeight: '700' },
   waitingBadge: {
-    backgroundColor: '#F3F4F6', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20,
+    backgroundColor: '#F3F4F6', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20,
   },
   waitingText: { fontSize: 11, color: Colors.textHint, fontWeight: '600' },
-  resultBody: { padding: 16, minHeight: 90 },
-  resultText: { fontSize: 17, color: Colors.textPrimary, fontWeight: '600', lineHeight: 26 },
+  resultBody: { padding: 18, minHeight: 96 },
+  resultText: { fontSize: 17, color: Colors.textPrimary, fontWeight: '600', lineHeight: 27 },
   copyBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    alignSelf: 'flex-start', marginTop: 12,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    alignSelf: 'flex-start', marginTop: 14,
     backgroundColor: Colors.primaryBg,
-    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8,
+    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10,
   },
-  copyBtnText: { fontSize: 12, color: Colors.primary, fontWeight: '600' },
-  resultEmpty: { alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 10 },
+  copyBtnText: { fontSize: 13, color: Colors.primary, fontWeight: '600' },
+  resultEmpty: { alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 12 },
   resultEmptyText: {
-    fontSize: 13, color: Colors.textHint, textAlign: 'center', lineHeight: 20, maxWidth: 240,
+    fontSize: 13, color: Colors.textHint, textAlign: 'center', lineHeight: 21, maxWidth: 240,
   },
 
   // ── Botón principal ──
   actionBtnWrapper: {
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden',
-    alignSelf: 'center',
+    alignSelf: 'stretch',
     shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 10,
   },
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    paddingVertical: 18,
     paddingHorizontal: 36,
     gap: 10,
-    borderRadius: 16,
+    borderRadius: 20,
   },
-  actionBtnText: { color: '#fff', fontSize: 16, fontWeight: '800', letterSpacing: 0.3 },
+  actionBtnText: { color: '#fff', fontSize: 17, fontWeight: '800', letterSpacing: 0.3 },
 });
