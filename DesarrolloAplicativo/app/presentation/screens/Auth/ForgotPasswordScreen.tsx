@@ -3,6 +3,8 @@ import {
   View, Text, StyleSheet, KeyboardAvoidingView, Platform, Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
 
 import { Input } from '../../components/common/Input';
@@ -30,29 +32,41 @@ export const ForgotPasswordScreen: React.FC = () => {
     >
       {/* Logo */}
       <View style={styles.logoCorner}>
-        <View style={styles.logoBox}>
+        <LinearGradient
+          colors={['#9333EA', '#7C3AED']}
+          style={styles.logoBox}
+        >
           <Text style={styles.logoEmoji}>👌</Text>
-        </View>
+        </LinearGradient>
+        <Text style={styles.brandName}>TraduceSeña</Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.title}>confirma tu correo</Text>
+        {/* Ícono ilustrativo */}
+        <LinearGradient colors={['#E9D5FF', '#DDD6FE']} style={styles.iconCircle}>
+          <Ionicons name="mail-unread-outline" size={32} color={Colors.primary} />
+        </LinearGradient>
+
+        <Text style={styles.title}>Recuperar contraseña</Text>
         <Text style={styles.subtitle}>
-          Proporcionanos tu correo para enviarte el codigo de verificacion y saber que eres tu
+          Ingresa tu correo y te enviaremos un código de verificación
         </Text>
 
         <Input
-          placeholder="ingresa tu correo"
+          label="Correo electrónico"
+          placeholder="correo@ejemplo.com"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
+          leftIcon="mail-outline"
           containerStyle={styles.inputGap}
         />
 
         <Button
-          title="confirmar"
+          title="Enviar código"
           onPress={handleConfirm}
           loading={loading}
+          fullWidth
           style={styles.btn}
         />
       </View>
@@ -61,26 +75,33 @@ export const ForgotPasswordScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.background, padding: 20, paddingTop: 48 },
-  logoCorner: { marginBottom: 24 },
+  root: { flex: 1, backgroundColor: Colors.backgroundGray, padding: 24, paddingTop: 52 },
+  logoCorner: { marginBottom: 28, flexDirection: 'row', alignItems: 'center', gap: 10 },
   logoBox: {
-    width: 44, height: 44, backgroundColor: Colors.primary,
-    borderRadius: 10, alignItems: 'center', justifyContent: 'center',
+    width: 46, height: 46, borderRadius: 13,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 6,
   },
-  logoEmoji: { fontSize: 22 },
+  logoEmoji: { fontSize: 24 },
+  brandName: { fontSize: 20, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.3 },
   card: {
-    backgroundColor: Colors.primaryBg, borderRadius: 20, padding: 28,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1, shadowRadius: 12, elevation: 6,
+    backgroundColor: '#fff', borderRadius: 24, padding: 32, alignItems: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1, shadowRadius: 20, elevation: 8,
+  },
+  iconCircle: {
+    width: 76, height: 76, borderRadius: 38,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 20,
   },
   title: {
-    fontSize: 26, fontWeight: '800', color: Colors.textPrimary,
-    textAlign: 'center', marginBottom: 16,
+    fontSize: 24, fontWeight: '800', color: Colors.textPrimary,
+    textAlign: 'center', marginBottom: 10,
   },
   subtitle: {
     fontSize: 14, color: Colors.textSecondary, textAlign: 'center',
-    lineHeight: 22, marginBottom: 24,
+    lineHeight: 22, marginBottom: 28,
   },
-  inputGap: { marginBottom: 20 },
-  btn: { alignSelf: 'center', paddingHorizontal: 32 },
+  inputGap: { marginBottom: 24, width: '100%' },
+  btn: { width: '100%' },
 });

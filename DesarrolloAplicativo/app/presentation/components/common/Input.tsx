@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
+import { BorderRadius, BorderWidth, ComponentSizes, FontWeight, TextStyles } from '../../../constants/theme';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -20,9 +21,10 @@ interface InputProps extends TextInputProps {
   onRightIconPress?: () => void;
   isPassword?: boolean;
   containerStyle?: ViewStyle;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-export const Input: React.FC<InputProps> = ({
+function InputBase({
   label,
   error,
   hint,
@@ -31,22 +33,43 @@ export const Input: React.FC<InputProps> = ({
   onRightIconPress,
   isPassword = false,
   containerStyle,
+  size = 'md',
   ...props
-}) => {
+}: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const sizeTokens = ComponentSizes.input[size];
 
   return (
     <View style={[styles.container, containerStyle]}>
       {label && <Text style={styles.label}>{label}</Text>}
-      <View style={[styles.inputWrapper, error ? styles.inputError : null]}>
+      <View
+        style={[
+          styles.inputWrapper,
+          { height: sizeTokens.height },
+          focused && styles.inputFocused,
+          error ? styles.inputError : null,
+        ]}
+      >
         {leftIcon && (
-          <Ionicons name={leftIcon} size={18} color={Colors.textSecondary} style={styles.leftIcon} />
+          <Ionicons
+            name={leftIcon}
+            size={18}
+            color={focused ? Colors.primary : Colors.textSecondary}
+            style={styles.leftIcon}
+          />
         )}
         <TextInput
-          style={[styles.input, leftIcon ? styles.inputWithLeft : null]}
+          style={[
+            styles.input,
+            { paddingHorizontal: sizeTokens.paddingHorizontal },
+            leftIcon ? styles.inputWithLeft : null,
+          ]}
           placeholderTextColor={Colors.textHint}
           secureTextEntry={isPassword && !showPassword}
           autoCapitalize="none"
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           {...props}
         />
         {isPassword && (
@@ -54,7 +77,7 @@ export const Input: React.FC<InputProps> = ({
             <Ionicons
               name={showPassword ? 'eye-off-outline' : 'eye-outline'}
               size={20}
-              color={Colors.textSecondary}
+              color={focused ? Colors.primary : Colors.textSecondary}
             />
           </TouchableOpacity>
         )}
@@ -68,38 +91,49 @@ export const Input: React.FC<InputProps> = ({
       {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
-};
+}
+
+export const Input = React.memo(InputBase);
 
 const styles = StyleSheet.create({
   container: {
     marginBottom: 4,
   },
   label: {
-    fontSize: 13,
+    ...TextStyles.label,
     color: Colors.textSecondary,
     marginBottom: 6,
-    fontWeight: '500',
+    textTransform: 'uppercase',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.inputBg,
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    borderWidth: BorderWidth.medium,
     borderColor: 'transparent',
+  },
+  inputFocused: {
+    borderColor: Colors.primary,
+    backgroundColor: '#fff',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 2,
   },
   inputError: {
     borderColor: Colors.error,
+    backgroundColor: '#FFF5F5',
   },
   input: {
     flex: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
+    paddingVertical: 0,
     fontSize: 15,
     color: Colors.textPrimary,
   },
   inputWithLeft: {
-    paddingLeft: 4,
+    paddingLeft: 6,
   },
   leftIcon: {
     marginLeft: 14,
@@ -108,13 +142,14 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   hint: {
-    fontSize: 11,
+    ...TextStyles.caption,
     color: Colors.textHint,
     marginTop: 4,
   },
   errorText: {
-    fontSize: 12,
+    ...TextStyles.caption,
     color: Colors.error,
     marginTop: 4,
+    fontWeight: FontWeight.medium,
   },
 });

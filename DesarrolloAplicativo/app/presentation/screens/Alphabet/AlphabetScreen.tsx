@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Image,
   Modal,
   Dimensions,
+  ListRenderItem,
 } from 'react-native';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
@@ -15,16 +16,49 @@ import { Colors } from '../../../constants/colors';
 const { width } = Dimensions.get('window');
 const COLS = 5;
 const ITEM_SIZE = (width - 32 - (COLS - 1) * 10) / COLS;
+const ITEM_HEIGHT = ITEM_SIZE + 24;
 
-// Alphabet data con URLs de referencia
-const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(letter => ({
+interface AlphabetItem {
+  letter: string;
+  imageUrl: string;
+}
+
+// Datos estáticos fuera del componente para no recrearse en cada render
+const ALPHABET: AlphabetItem[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(letter => ({
   letter,
-  // URLs de imágenes del alfabeto LSC - en producción vendrán del backend/léxico
   imageUrl: `https://www.lifeprint.com/asl101/images-handshapes/${letter.toLowerCase()}.gif`,
 }));
 
+const keyExtractor = (item: AlphabetItem) => item.letter;
+const getItemLayout = (_: unknown, index: number) => ({
+  length: ITEM_HEIGHT,
+  offset: ITEM_HEIGHT * Math.floor(index / COLS),
+  index,
+});
+
 export const AlphabetScreen: React.FC = () => {
-  const [selected, setSelected] = useState<{ letter: string; imageUrl: string } | null>(null);
+  const [selected, setSelected] = useState<AlphabetItem | null>(null);
+
+  const handleSelect = useCallback((item: AlphabetItem) => {
+    setSelected(item);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setSelected(null);
+  }, []);
+
+  const renderItem: ListRenderItem<AlphabetItem> = useCallback(({ item }) => (
+    <TouchableOpacity style={styles.letterCard} onPress={() => handleSelect(item)}>
+      <Image
+        source={{ uri: item.imageUrl }}
+        style={styles.handImage}
+        resizeMode="contain"
+      />
+      <View style={styles.letterBadge}>
+        <Text style={styles.letterText}>{item.letter}</Text>
+      </View>
+    </TouchableOpacity>
+  ), [handleSelect]);
 
   return (
     <View style={styles.root}>
@@ -35,27 +69,21 @@ export const AlphabetScreen: React.FC = () => {
         <FlatList
           data={ALPHABET}
           numColumns={COLS}
-          keyExtractor={item => item.letter}
+          keyExtractor={keyExtractor}
           columnWrapperStyle={styles.row}
           contentContainerStyle={styles.grid}
-          renderItem={({ item }) => (
-            <TouchableOpacity style={styles.letterCard} onPress={() => setSelected(item)}>
-              <Image
-                source={{ uri: item.imageUrl }}
-                style={styles.handImage}
-                resizeMode="contain"
-              />
-              <View style={styles.letterBadge}>
-                <Text style={styles.letterText}>{item.letter}</Text>
-              </View>
-            </TouchableOpacity>
-          )}
+          renderItem={renderItem}
+          getItemLayout={getItemLayout}
+          initialNumToRender={15}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews
         />
       </View>
 
       {/* Modal detalle */}
       <Modal visible={!!selected} transparent animationType="fade">
-        <TouchableOpacity style={styles.modalOverlay} onPress={() => setSelected(null)}>
+        <TouchableOpacity style={styles.modalOverlay} onPress={handleClose}>
           <View style={styles.modalCard}>
             <Text style={styles.modalLetter}>{selected?.letter}</Text>
             <Image
@@ -85,7 +113,7 @@ const styles = StyleSheet.create({
   row: { gap: 10, marginBottom: 10 },
   letterCard: {
     width: ITEM_SIZE,
-    height: ITEM_SIZE + 24,
+    height: ITEM_HEIGHT,
     alignItems: 'center',
   },
   handImage: {
