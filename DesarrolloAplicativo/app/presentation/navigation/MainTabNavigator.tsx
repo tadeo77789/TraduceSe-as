@@ -26,10 +26,11 @@ const isWeb = Platform.OS === 'web';
 
 export const MainTabNavigator: React.FC = () => (
   <Tab.Navigator
-    // En web: barra arriba personalizada. En móvil: tabs abajo estándar.
-    tabBar={isWeb ? (props) => <WebTopBar {...props} /> : undefined}
     screenOptions={({ route }) => ({
-      headerShown: false,
+      // En web: header arriba (WebTopBar), sin barra inferior
+      // En móvil: sin header, barra de tabs abajo
+      headerShown: isWeb,
+      header: isWeb ? (props) => <WebTopBar {...props} /> : undefined,
       tabBarActiveTintColor: Colors.primary,
       tabBarInactiveTintColor: Colors.textSecondary,
       tabBarStyle: isWeb ? styles.hidden : styles.tabBar,
@@ -37,37 +38,31 @@ export const MainTabNavigator: React.FC = () => (
       tabBarIcon: ({ focused, color }) => {
         const icons: Record<string, [string, string]> = {
           Translation: ['language-outline', 'language'],
-          Alarms: ['alarm-outline', 'alarm'],
-          Alphabet: ['hand-left-outline', 'hand-left'],
-          Stats: ['bar-chart-outline', 'bar-chart'],
-          History: ['time-outline', 'time'],
-          Profile: ['person-outline', 'person'],
+          Alarms:      ['alarm-outline',    'alarm'],
+          Alphabet:    ['hand-left-outline','hand-left'],
+          Stats:       ['bar-chart-outline','bar-chart'],
+          History:     ['time-outline',     'time'],
+          Profile:     ['person-outline',   'person'],
         };
         const [inactive, active] = icons[route.name] || ['ellipse-outline', 'ellipse'];
-        return (
-          <Ionicons
-            name={(focused ? active : inactive) as any}
-            size={22}
-            color={color}
-          />
-        );
+        return <Ionicons name={(focused ? active : inactive) as any} size={22} color={color} />;
       },
-      tabBarLabel: {
+      tabBarLabel: ({
         Translation: 'Traducción',
-        Alarms: 'Alarmas',
-        Alphabet: 'Alfabeto',
-        Stats: 'Estadística',
-        History: 'Historial',
-        Profile: 'Perfil',
-      }[route.name] || route.name,
+        Alarms:      'Alarmas',
+        Alphabet:    'Alfabeto',
+        Stats:       'Estadística',
+        History:     'Historial',
+        Profile:     'Perfil',
+      } as Record<string, string>)[route.name] || route.name,
     })}
   >
     <Tab.Screen name="Translation" component={TranslationScreen} />
-    <Tab.Screen name="Alarms" component={AlarmsScreen} />
-    <Tab.Screen name="Alphabet" component={AlphabetScreen} />
-    <Tab.Screen name="Stats" component={StatsScreen} />
-    <Tab.Screen name="History" component={HistoryScreen} />
-    <Tab.Screen name="Profile" component={ProfileScreen} />
+    <Tab.Screen name="Alarms"      component={AlarmsScreen}      />
+    <Tab.Screen name="Alphabet"    component={AlphabetScreen}    />
+    <Tab.Screen name="Stats"       component={StatsScreen}       />
+    <Tab.Screen name="History"     component={HistoryScreen}     />
+    <Tab.Screen name="Profile"     component={ProfileScreen}     />
   </Tab.Navigator>
 );
 
