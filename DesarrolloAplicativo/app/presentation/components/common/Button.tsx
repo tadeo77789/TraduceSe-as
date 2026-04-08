@@ -1,3 +1,20 @@
+/**
+ * @file Button.tsx
+ * @description Componente de botón reutilizable con soporte para múltiples variantes,
+ * tamaños, estado de carga y deshabilitado.
+ *
+ * @prop title - Texto del botón.
+ * @prop onPress - Función a ejecutar al presionar.
+ * @prop variant - Estilo visual: 'primary' (gradiente) | 'secondary' | 'danger' | 'outline' | 'ghost'. Default: 'primary'.
+ * @prop size - Tamaño: 'sm' | 'md' | 'lg'. Default: 'md'.
+ * @prop loading - Muestra un spinner y deshabilita el botón. Default: false.
+ * @prop disabled - Deshabilita el botón. Default: false.
+ * @prop fullWidth - Si true, el botón ocupa el 100% del ancho. Default: false.
+ * @prop style - Estilos adicionales para el contenedor.
+ * @prop textStyle - Estilos adicionales para el texto.
+ *
+ * Se exporta como `React.memo` para evitar renders innecesarios.
+ */
 import React from 'react';
 import {
   TouchableOpacity,

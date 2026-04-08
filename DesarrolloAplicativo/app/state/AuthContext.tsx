@@ -1,3 +1,18 @@
+/**
+ * @file AuthContext.tsx
+ * @description Contexto global de autenticación.
+ *
+ * Provee el estado de autenticación (`user`, `token`, `isAuthenticated`, `isLoading`)
+ * y las acciones `login`, `register` y `logout` a toda la app mediante React Context.
+ *
+ * Al montar, intenta restaurar la sesión guardada en AsyncStorage
+ * (claves `@auth_token` y `@auth_user`).
+ *
+ * @exports AuthProvider - Componente proveedor que envuelve la app.
+ * @exports useAuth - Hook para consumir el contexto desde cualquier componente.
+ *
+ * @todo Reemplazar los datos mock de `login` y `register` con llamadas reales al backend.
+ */
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, AuthState, LoginPayload, RegisterPayload } from '../types';

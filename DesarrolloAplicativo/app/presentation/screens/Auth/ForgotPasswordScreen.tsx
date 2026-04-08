@@ -1,3 +1,13 @@
+/**
+ * @file ForgotPasswordScreen.tsx
+ * @description Pantalla de recuperación de contraseña — paso 1: ingreso de correo.
+ *
+ * El usuario ingresa su correo y presiona "Enviar código". La app simula
+ * el envío y navega a `VerifyCodeScreen`.
+ *
+ * @todo Conectar `handleConfirm` con el endpoint real del backend
+ *       (`ENDPOINTS.forgotPassword`) para enviar el código OTP.
+ */
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, KeyboardAvoidingView, Platform, Alert,

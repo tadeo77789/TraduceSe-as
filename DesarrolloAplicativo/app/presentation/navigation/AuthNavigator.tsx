@@ -1,3 +1,18 @@
+/**
+ * @file AuthNavigator.tsx
+ * @description Stack de navegación del flujo de autenticación.
+ *
+ * Define el tipo `AuthStackParams` con las rutas disponibles y monta
+ * el stack sin headers visibles. Ruta inicial: `Landing`.
+ *
+ * Rutas:
+ * - `Landing` → pantalla de bienvenida con slider y CTA.
+ * - `Login` → inicio de sesión.
+ * - `Register` → creación de cuenta.
+ * - `ForgotPassword` → recuperación de contraseña (ingreso de correo).
+ * - `VerifyCode` → verificación OTP de 6 dígitos.
+ * - `NewPassword` → establecer nueva contraseña.
+ */
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LandingScreen } from '../screens/LandingScreen';

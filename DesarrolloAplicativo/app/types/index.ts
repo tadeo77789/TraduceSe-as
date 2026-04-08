@@ -1,3 +1,15 @@
+/**
+ * @file types/index.ts
+ * @description Tipos e interfaces TypeScript globales de la app.
+ * Define las estructuras de datos principales:
+ * - `User` / `AuthState` / `LoginPayload` / `RegisterPayload`: autenticación.
+ * - `Traduccion` / `TipoTraduccion`: traducciones de señas.
+ * - `LexicoSena` / `RecursoMultimedia` / `TipoLexico`: léxico LSC.
+ * - `Notificacion` / `Alarma`: notificaciones y alarmas.
+ * - `ThemeMode` / `ThemeState`: tema visual.
+ * - `ApiResponse<T>` / `PaginatedResponse<T>`: respuestas genéricas del backend.
+ */
+
 // ─── Usuario ────────────────────────────────────────────────────────────────
 export interface User {
   id_usuario: number;

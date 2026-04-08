@@ -1,3 +1,23 @@
+/**
+ * @file AlarmsScreen.tsx
+ * @description Pantalla de gestión de alarmas de práctica.
+ *
+ * Permite al usuario:
+ * - Ver la lista de alarmas con hora, mensaje, días de repetición y estado (activa/inactiva).
+ * - Activar/desactivar cada alarma con un Switch.
+ * - Eliminar alarmas con confirmación.
+ * - Crear nuevas alarmas seleccionando hora con el componente `ClockPicker`
+ *   y días de la semana.
+ *
+ * Incluye el componente interno `ClockPicker`: reloj analógico visual con
+ * display de hora digital y selector AM/PM.
+ *
+ * Los datos actuales son mock (`MOCK_ALARMS`). En tablet (≥ 768 px) la lista
+ * y el panel de nueva alarma se muestran en fila.
+ *
+ * @todo Conectar con los endpoints de alarmas del backend (`ENDPOINTS.alarms`,
+ *       `ENDPOINTS.createAlarm`, `ENDPOINTS.updateAlarm`, `ENDPOINTS.deleteAlarm`).
+ */
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -8,6 +28,7 @@ import {
   Switch,
   Alert,
   ListRenderItem,
+  useWindowDimensions,
 } from 'react-native';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
@@ -15,15 +36,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Alarma } from '../../../types';
 
-const MOCK_ALARMS: Alarma[] = [
-  { id_alarma: 1, hora: '11:00', mensaje: 'Es hora de traducir', activa: true, id_usuario: 1 },
-  { id_alarma: 2, hora: '05:56', mensaje: 'Es hora de traducir', activa: false, id_usuario: 1 },
-  { id_alarma: 3, hora: '09:12', mensaje: 'Es hora de traducir', activa: true, id_usuario: 1 },
+type AlarmaExtended = Alarma & { dias?: string[] };
+
+const MOCK_ALARMS: AlarmaExtended[] = [
+  { id_alarma: 1, hora: '11:00', mensaje: 'Práctica de señas diaria', activa: true, id_usuario: 1, dias: ['Lun', 'Mié', 'Vie'] },
+  { id_alarma: 2, hora: '05:56', mensaje: 'Repasar el alfabeto LSC', activa: false, id_usuario: 1, dias: ['Mar', 'Jue'] },
+  { id_alarma: 3, hora: '09:12', mensaje: 'Sesión de traducción matutina', activa: true, id_usuario: 1, dias: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'] },
 ];
 
-const keyExtractor = (item: Alarma) => String(item.id_alarma);
+const DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
-// Mini reloj analógico para selección de hora
+const keyExtractor = (item: AlarmaExtended) => String(item.id_alarma);
+
+// ─── Reloj analógico ─────────────────────────────────────────────────────────
 const ClockPicker: React.FC<{
   hour: number;
   minute: number;
@@ -32,7 +57,6 @@ const ClockPicker: React.FC<{
   onMinuteChange: (m: number) => void;
   onAmPmChange: (am: boolean) => void;
 }> = React.memo(function ClockPicker({ hour, minute, isAm, onAmPmChange }) {
-  const radius = 85;
   const hourAngle = ((hour % 12) / 12) * 360 - 90;
   const toRad = (deg: number) => (deg * Math.PI) / 180;
 
@@ -127,11 +151,15 @@ const clock = StyleSheet.create({
   },
 });
 
+// ─── Pantalla principal ───────────────────────────────────────────────────────
 export const AlarmsScreen: React.FC = () => {
-  const [alarms, setAlarms] = useState<Alarma[]>(MOCK_ALARMS);
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const [alarms, setAlarms] = useState<AlarmaExtended[]>(MOCK_ALARMS);
   const [pickerHour, setPickerHour] = useState(7);
-  const [pickerMinute, setPickerMinute] = useState(0);
+  const [pickerMinute] = useState(0);
   const [isAm, setIsAm] = useState(true);
+  const [selectedDias, setSelectedDias] = useState<string[]>(['Lun', 'Mié', 'Vie']);
 
   const toggleAlarm = useCallback((id: number) => {
     setAlarms(prev =>
@@ -140,26 +168,34 @@ export const AlarmsScreen: React.FC = () => {
   }, []);
 
   const deleteAlarm = useCallback((id: number) => {
-    Alert.alert('Eliminar', '¿Eliminar esta alarma?', [
+    Alert.alert('Eliminar alarma', '¿Deseas eliminar esta alarma de práctica?', [
       { text: 'Cancelar', style: 'cancel' },
-      { text: 'Eliminar', style: 'destructive', onPress: () =>
-        setAlarms(prev => prev.filter(a => a.id_alarma !== id))
+      {
+        text: 'Eliminar', style: 'destructive', onPress: () =>
+          setAlarms(prev => prev.filter(a => a.id_alarma !== id))
       },
     ]);
   }, []);
 
+  const toggleDia = useCallback((dia: string) => {
+    setSelectedDias(prev =>
+      prev.includes(dia) ? prev.filter(d => d !== dia) : [...prev, dia]
+    );
+  }, []);
+
   const addAlarm = useCallback(() => {
-    const newAlarm: Alarma = {
+    const newAlarm: AlarmaExtended = {
       id_alarma: Date.now(),
       hora: `${String(pickerHour).padStart(2, '0')}:${String(pickerMinute).padStart(2, '0')}`,
-      mensaje: 'Es hora de traducir',
+      mensaje: 'Práctica de señas',
       activa: true,
       id_usuario: 1,
+      dias: selectedDias,
     };
     setAlarms(prev => [...prev, newAlarm]);
-  }, [pickerHour, pickerMinute]);
+  }, [pickerHour, pickerMinute, selectedDias]);
 
-  const renderItem: ListRenderItem<Alarma> = useCallback(({ item }) => (
+  const renderItem: ListRenderItem<AlarmaExtended> = useCallback(({ item }) => (
     <View style={styles.alarmCard}>
       <LinearGradient
         colors={item.activa ? ['#EDE9FE', '#DDD6FE'] : ['#F9FAFB', '#F3F4F6']}
@@ -171,11 +207,32 @@ export const AlarmsScreen: React.FC = () => {
           color={item.activa ? Colors.primary : Colors.textSecondary}
         />
       </LinearGradient>
+
       <View style={styles.alarmInfo}>
         <Text style={[styles.alarmTime, !item.activa && styles.alarmTimeOff]}>
           {item.hora}
         </Text>
-        <Text style={styles.alarmMsg}>{item.mensaje}</Text>
+        <Text style={styles.alarmMsg} numberOfLines={1}>{item.mensaje}</Text>
+
+        {/* Días */}
+        {item.dias && item.dias.length > 0 && (
+          <View style={styles.diasRow}>
+            {DIAS_SEMANA.map(dia => {
+              const active = item.dias!.includes(dia);
+              return (
+                <View
+                  key={dia}
+                  style={[styles.diaBadge, active && styles.diaBadgeActive]}
+                >
+                  <Text style={[styles.diaText, active && styles.diaTextActive]}>
+                    {dia[0]}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        )}
+
         <View style={styles.alarmActions}>
           <TouchableOpacity
             style={styles.alarmBtnDelete}
@@ -190,6 +247,7 @@ export const AlarmsScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
       </View>
+
       <Switch
         value={item.activa}
         onValueChange={() => toggleAlarm(item.id_alarma)}
@@ -202,31 +260,62 @@ export const AlarmsScreen: React.FC = () => {
   return (
     <View style={styles.root}>
       <AppHeader />
-      <View style={styles.container}>
-        <FlatList
-          data={alarms}
-          keyExtractor={keyExtractor}
-          contentContainerStyle={styles.list}
-          renderItem={renderItem}
-          initialNumToRender={10}
-          maxToRenderPerBatch={10}
-          windowSize={5}
-        />
+      <View style={[styles.container, !isTablet && styles.containerMobile]}>
+        {/* Lista de alarmas */}
+        <View style={styles.listSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Mis alarmas</Text>
+            <View style={styles.countBadge}>
+              <Text style={styles.countText}>{alarms.filter(a => a.activa).length} activas</Text>
+            </View>
+          </View>
+          <FlatList
+            data={alarms}
+            keyExtractor={keyExtractor}
+            contentContainerStyle={styles.list}
+            renderItem={renderItem}
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
 
         {/* Panel selector de hora */}
-        <View style={styles.pickerPanel}>
+        <View style={[styles.pickerPanel, !isTablet && styles.pickerPanelMobile]}>
+          <Text style={styles.pickerTitle}>Nueva alarma</Text>
           <ClockPicker
             hour={pickerHour}
             minute={pickerMinute}
             isAm={isAm}
             onHourChange={setPickerHour}
-            onMinuteChange={setPickerMinute}
+            onMinuteChange={() => {}}
             onAmPmChange={setIsAm}
           />
+
+          {/* Selector de días */}
+          <View style={styles.diasSelector}>
+            <Text style={styles.diasLabel}>Repetir</Text>
+            <View style={styles.diasGrid}>
+              {DIAS_SEMANA.map(dia => (
+                <TouchableOpacity
+                  key={dia}
+                  style={[styles.diaSelectorBtn, selectedDias.includes(dia) && styles.diaSelectorBtnActive]}
+                  onPress={() => toggleDia(dia)}
+                >
+                  <Text style={[styles.diaSelectorText, selectedDias.includes(dia) && styles.diaSelectorTextActive]}>
+                    {dia[0]}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
           <View style={styles.pickerActions}>
             <Ionicons name="keypad-outline" size={20} color={Colors.textSecondary} />
             <TouchableOpacity style={styles.addBtn} onPress={addAlarm}>
               <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.addBtnGrad}>
+                <Ionicons name="add" size={16} color="#fff" />
                 <Text style={styles.addBtnText}>Agregar</Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -239,84 +328,130 @@ export const AlarmsScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.backgroundGray },
-  container: { flex: 1, flexDirection: 'row', padding: 12, gap: 12 },
-  list: { gap: 10 },
+  container: { flex: 1, flexDirection: 'row', padding: 16, gap: 14 },
+  containerMobile: { flexDirection: 'column' },
 
+  // Lista
+  listSection: { flex: 1 },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: Colors.textPrimary },
+  countBadge: {
+    backgroundColor: Colors.primaryBg,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+  },
+  countText: { fontSize: 12, color: Colors.primary, fontWeight: '700' },
+  list: { gap: 12 },
+
+  // Alarm card
   alarmCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 14,
+    borderRadius: 20,
+    padding: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
     gap: 12,
   },
   alarmIconBg: {
-    width: 46, height: 46, borderRadius: 12,
+    width: 48, height: 48, borderRadius: 14,
     alignItems: 'center', justifyContent: 'center',
   },
   alarmInfo: { flex: 1 },
   alarmTime: { fontSize: 24, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.5 },
   alarmTimeOff: { color: Colors.textHint },
   alarmMsg: { fontSize: 12, color: Colors.textSecondary, marginBottom: 8 },
+
+  // Días en card
+  diasRow: { flexDirection: 'row', gap: 4, marginBottom: 10 },
+  diaBadge: {
+    width: 22, height: 22, borderRadius: 11,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#F3F4F6',
+  },
+  diaBadgeActive: { backgroundColor: Colors.primaryBg },
+  diaText: { fontSize: 9, color: Colors.textHint, fontWeight: '700' },
+  diaTextActive: { color: Colors.primary },
+
   alarmActions: { flexDirection: 'row', gap: 8 },
   alarmBtnDelete: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.danger,
-    backgroundColor: '#FFF5F5',
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: 10, paddingVertical: 5,
+    borderRadius: 10, borderWidth: 1,
+    borderColor: Colors.danger, backgroundColor: '#FFF5F5',
   },
-  alarmBtnDeleteText: { color: Colors.danger, fontSize: 12, fontWeight: '600' },
+  alarmBtnDeleteText: { color: Colors.danger, fontSize: 11, fontWeight: '600' },
   alarmBtnEdit: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: '#fff',
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: 10, paddingVertical: 5,
+    borderRadius: 10, borderWidth: 1,
+    borderColor: Colors.border, backgroundColor: '#fff',
   },
-  alarmBtnEditText: { color: Colors.textSecondary, fontSize: 12, fontWeight: '600' },
+  alarmBtnEditText: { color: Colors.textSecondary, fontSize: 11, fontWeight: '600' },
 
+  // Panel picker
+  pickerPanelMobile: { alignSelf: 'stretch', minWidth: undefined },
   pickerPanel: {
     backgroundColor: '#fff',
-    borderRadius: 18,
-    padding: 12,
+    borderRadius: 22,
+    padding: 16,
     borderWidth: 1,
     borderColor: Colors.border,
-    minWidth: 210,
+    minWidth: 220,
     alignSelf: 'flex-start',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 14,
+    elevation: 6,
+    gap: 12,
   },
+  pickerTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+
+  // Selector de días
+  diasSelector: { gap: 8 },
+  diasLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  diasGrid: { flexDirection: 'row', gap: 5, flexWrap: 'wrap' },
+  diaSelectorBtn: {
+    width: 30, height: 30, borderRadius: 15,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#F3F4F6',
+  },
+  diaSelectorBtnActive: { backgroundColor: Colors.primary },
+  diaSelectorText: { fontSize: 10, color: Colors.textSecondary, fontWeight: '700' },
+  diaSelectorTextActive: { color: '#fff' },
+
   pickerActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 14,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', paddingTop: 12,
+    borderTopWidth: 1, borderTopColor: Colors.border,
   },
-  addBtn: { borderRadius: 10, overflow: 'hidden' },
+  addBtn: { borderRadius: 12, overflow: 'hidden' },
   addBtnGrad: {
-    paddingHorizontal: 20,
-    paddingVertical: 9,
-    borderRadius: 10,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 18, paddingVertical: 11, borderRadius: 12,
   },
   addBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
 });

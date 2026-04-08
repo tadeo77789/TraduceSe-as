@@ -8,7 +8,7 @@ Carpeta raíz del desarrollo del sistema **Traduce Señas**. Contiene las tres c
 DesarrolloAplicativo/
 ├── app/        → Aplicación móvil y web (React Native + Expo)
 ├── backend/    → Servidor API REST (Node.js + Express)
-└── BD/         → Scripts y modelo de base de datos (PostgresSQL)
+└── BD/         → Scripts y modelo de base de datos (PostgreSQL)
 ```
 
 ---
@@ -53,6 +53,7 @@ Instala estas herramientas antes de comenzar:
 | **Node.js** (versión 18 o superior) | https://nodejs.org | Ejecutar el servidor y la app |
 | **Git** | https://git-scm.com | Control de versiones |
 | **Visual Studio Code** | https://code.visualstudio.com | Editor de código recomendado |
+| **Docker Desktop** | https://www.docker.com/products/docker-desktop | Base de datos PostgreSQL en contenedor |
 | **Expo Go** (opcional) | App Store / Play Store | Ver la app en tu celular físico |
 
 Verifica que Node.js esté instalado abriendo una terminal y ejecutando:
@@ -85,7 +86,54 @@ Esto descarga todos los paquetes necesarios en la carpeta `node_modules/`. Solo 
 
 ---
 
-### Paso 3 — Ejecutar la app
+### Paso 3 — Levantar la base de datos con Docker
+
+Asegúrate de tener **Docker Desktop** abierto y ejecuta:
+
+```bash
+docker run -d \
+  --name postgres-traducsenas \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=tu_password \
+  -e POSTGRES_DB=traduce_senas \
+  -p 5433:5432 \
+  -v postgres_data:/var/lib/postgresql/data \
+  postgres:16
+```
+
+Para verificar que el contenedor está corriendo:
+```bash
+docker ps
+```
+
+---
+
+### Paso 4 — Configurar variables de entorno del backend
+
+Crea el archivo `backend/.env` con el siguiente contenido (nunca lo subas a GitHub):
+
+```env
+DB_HOST=localhost
+DB_PORT=5433
+DB_USER=postgres
+DB_PASSWORD=tu_password
+DB_NAME=traduce_senas
+JWT_SECRET=tu_clave_secreta
+PORT=3000
+```
+
+---
+
+### Paso 5 — Instalar dependencias del backend
+
+```bash
+cd backend
+npm install
+```
+
+---
+
+### Paso 6 — Ejecutar la app
 
 #### Ver en el navegador web (más rápido para desarrollo)
 
@@ -139,37 +187,6 @@ Instálalas desde el panel de extensiones (**Ctrl + Shift + X**):
 
 ---
 
-### Ejecutar desde Visual Studio Code con un clic (tareas configuradas)
-
-Crea el archivo `.vscode/tasks.json` dentro de la carpeta `app/` con este contenido para ejecutar la app directamente desde VS Code con **Ctrl + Shift + B**:
-
-```json
-{
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "Iniciar app web",
-      "type": "shell",
-      "command": "npx expo start --web --port 8082",
-      "options": { "cwd": "${workspaceFolder}/app" },
-      "group": { "kind": "build", "isDefault": true },
-      "presentation": { "reveal": "always", "panel": "new" }
-    },
-    {
-      "label": "Iniciar app móvil",
-      "type": "shell",
-      "command": "npx expo start",
-      "options": { "cwd": "${workspaceFolder}/app" },
-      "presentation": { "reveal": "always", "panel": "new" }
-    }
-  ]
-}
-```
-
-Con esto, **Ctrl + Shift + B** en VS Code abre directamente la app en el navegador.
-
----
-
 ### Solución de errores comunes al iniciar
 
 | Error | Causa | Solución |
@@ -179,12 +196,61 @@ Con esto, **Ctrl + Shift + B** en VS Code abre directamente la app en el navegad
 | Pantalla en blanco en el navegador | Error de JavaScript en tiempo de ejecución | Abrir **F12 → Console** y revisar el error en rojo |
 | `Cannot find module '...'` | Falta instalar dependencias | Ejecutar `npm install` nuevamente |
 | `node_modules` no existe | Dependencias no instaladas | Ejecutar `npm install` dentro de la carpeta `app/` |
+| Imagen en blanco en el carrusel | Ruta `require()` incorrecta | Verificar que la ruta relativa apunte a `app/assets/images/` |
+
+---
+
+## Diseño responsivo
+
+Todas las pantallas adaptan su layout automáticamente según el ancho de la pantalla usando `useWindowDimensions()`.
+
+| Breakpoint | Ancho | Comportamiento |
+|---|---|---|
+| **Móvil** | < 768px | Layout en columna, una sola columna |
+| **Tablet** | 768px – 1023px | Layout en fila, dos columnas en listas |
+| **Desktop / Web** | ≥ 1024px | Máximo ancho limitado, columnas adicionales |
+
+### Regla de uso
+
+Nunca uses `Dimensions.get('window')` a nivel de módulo — los valores no se actualizan al girar la pantalla o redimensionar la ventana. Siempre usa `useWindowDimensions()` dentro del componente:
+
+```tsx
+const { width } = useWindowDimensions();
+const isTablet = width >= 768;
+const isDesktop = width >= 1024;
+```
+
+---
+
+## Imágenes locales
+
+Las imágenes usadas en la app están almacenadas en `app/assets/images/` para evitar dependencias de URLs externas.
+
+| Archivo | Usado en |
+|---|---|
+| `slide1.jpg` | LandingScreen (slide 1), LoginScreen (panel web), RegisterScreen (panel web) |
+| `slide2.jpg` | LandingScreen (slide 2) |
+| `slide3.jpg` | LandingScreen (slide 3) |
+| `testimonial.jpg` | LandingScreen (sección testimonial) |
+| `camera_placeholder.jpg` | TranslationScreen (área de cámara) |
+
+Para referenciar una imagen local en el código:
+
+```tsx
+// Correcto — imagen local
+<Image source={require('../../assets/images/slide1.jpg')} />
+
+// Incorrecto para imágenes locales — solo para URLs remotas
+<Image source={{ uri: 'https://...' }} />
+```
+
+> **Nota sobre rutas:** la ruta relativa en `require()` depende de dónde esté el archivo que lo usa. Desde `app/presentation/screens/` se usa `../../assets/images/`, desde `app/presentation/screens/Auth/` se usa `../../../assets/images/`.
 
 ---
 
 ## Guía de modificaciones estéticas y de tamaños
 
-Todo el sistema visual de la app está centralizado en dos archivos dentro de `app/constants/`. **No es necesario tocar los componentes ni las pantallas** para cambiar colores, tamaños o textos — solo se modifican estos archivos.
+Todo el sistema visual de la app está centralizado en archivos dentro de `app/constants/`. **No es necesario tocar los componentes ni las pantallas** para cambiar colores, tamaños o textos — solo se modifican estos archivos.
 
 ---
 
@@ -199,7 +265,7 @@ Archivo con toda la paleta del diseño. Para cambiar un color, edita el valor he
 | `primary` | `#7C3AED` | Botones principales, acentos, toggles activos |
 | `primaryLight` | `#A78BFA` | Iconos secundarios, estados hover |
 | `primaryLighter` | `#C4B5FD` | Bordes de toggle, dots de slider, avatar |
-| `primaryBg` | `#EDE9FE` | Fondo de las cards de autenticación (Login, Registro, etc.) |
+| `primaryBg` | `#EDE9FE` | Fondo de las pantallas de autenticación |
 | `primaryHeader` | `#C4B5FD` | Fondo de la barra de navegación superior |
 
 #### Colores de fondo y superficies
@@ -307,30 +373,23 @@ Controla el espaciado, tipografía, radios de borde y dimensiones de componentes
 
 Todos los textos visibles en la app están centralizados aquí. Para cambiar cualquier texto (título, botón, mensaje de error, placeholder), edita este archivo.
 
-#### Ejemplo: cambiar el texto del botón de traducir
-
-```ts
-// En app/constants/strings.ts
-translate: 'Traducir',   // cambia esto por el texto deseado
-```
-
 ---
 
 ### 4. Modificar una pantalla específica
 
-| Si quieres cambiar... | Archivo a editar |
-|---|---|
-| La pantalla de inicio (slider, testimonios) | `app/presentation/screens/LandingScreen.tsx` |
-| El formulario de login | `app/presentation/screens/Auth/LoginScreen.tsx` |
-| El formulario de registro | `app/presentation/screens/Auth/RegisterScreen.tsx` |
-| La pantalla de traducción (cámara/toggle) | `app/presentation/screens/Translation/TranslationScreen.tsx` |
-| La lista de alarmas y el reloj | `app/presentation/screens/Alarms/AlarmsScreen.tsx` |
-| El grid del alfabeto de señas | `app/presentation/screens/Alphabet/AlphabetScreen.tsx` |
-| Las gráficas de estadísticas | `app/presentation/screens/Stats/StatsScreen.tsx` |
-| La lista del historial | `app/presentation/screens/History/HistoryScreen.tsx` |
-| El perfil del usuario | `app/presentation/screens/Profile/ProfileScreen.tsx` |
-| La barra de navegación superior (web) | `app/presentation/components/common/WebTopBar.tsx` |
-| La barra de navegación (móvil/tabs) | `app/presentation/navigation/MainTabNavigator.tsx` |
+| Si quieres cambiar... | Archivo a editar | Notas |
+|---|---|---|
+| La pantalla de inicio (slider, notificación, testimonial) | `app/presentation/screens/LandingScreen.tsx` | Rediseñada — hero, carrusel con flechas/dots, cards de features, testimonial |
+| El formulario de login | `app/presentation/screens/Auth/LoginScreen.tsx` | Fondo lavanda (móvil), split-screen con imagen (web ≥768px) |
+| El formulario de registro | `app/presentation/screens/Auth/RegisterScreen.tsx` | Logo esquina superior izquierda, card lavanda centrada, botón centrado |
+| La pantalla de traducción (cámara/toggle) | `app/presentation/screens/Translation/TranslationScreen.tsx` | Imagen de cámara local (`camera_placeholder.jpg`) |
+| La lista de alarmas y el reloj | `app/presentation/screens/Alarms/AlarmsScreen.tsx` | Columna en móvil, fila en tablet+ |
+| El grid del alfabeto de señas | `app/presentation/screens/Alphabet/AlphabetScreen.tsx` | 5 cols (móvil) / 7 (tablet) / 9 (desktop), columnas dinámicas |
+| Las gráficas de estadísticas | `app/presentation/screens/Stats/StatsScreen.tsx` | KPIs 2-col (móvil) / 4-col (desktop), gráfica de línea con `onLayout` |
+| La lista del historial | `app/presentation/screens/History/HistoryScreen.tsx` | 1 columna (móvil), 2 columnas (tablet+) |
+| El perfil del usuario | `app/presentation/screens/Profile/ProfileScreen.tsx` | Centrado max-width 640px en web, logout compatible web/móvil |
+| La barra de navegación superior (web) | `app/presentation/components/common/WebTopBar.tsx` | Logo 40px, avatar 42px, subrayado activo 2.5px |
+| La barra de navegación (móvil/tabs) | `app/presentation/navigation/MainTabNavigator.tsx` | Altura 74px, sombra superior, labels font-weight 600 |
 
 ---
 
@@ -367,3 +426,92 @@ npx expo start --ios                # Ver en iOS
 ```
 
 Expo recarga automáticamente los cambios al guardar un archivo. No es necesario reiniciar el servidor para cambios de colores, textos o estilos.
+
+---
+
+## Arquitectura del frontend
+
+El frontend sigue una **arquitectura en capas** (Clean Architecture simplificada), donde cada carpeta tiene una responsabilidad clara y separada.
+
+```
+app/
+├── presentation/          ← Capa de presentación (lo visual)
+│   ├── screens/           → Pantallas de la app (una carpeta por módulo)
+│   ├── components/        → Componentes reutilizables (Button, Input, etc.)
+│   └── navigation/        → Navegación entre pantallas
+│
+├── state/                 ← Estado global (AuthContext, ThemeContext)
+├── hooks/                 ← Lógica de formularios extraída de las pantallas
+│
+├── business/              ← Lógica de negocio (pendiente — solo readme)
+├── data/                  ← Acceso a datos / repositorios (pendiente — solo readme)
+├── services/              ← Llamadas a la API y servicios externos (pendiente — solo readme)
+│
+├── config/                ← Configuración (URL del backend, endpoints)
+├── constants/             ← Sistema de diseño (colores, tamaños, strings)
+├── types/                 ← Interfaces y tipos TypeScript globales
+└── utils/                 ← Funciones utilitarias (pendiente — solo readme)
+```
+
+### Qué está implementado
+
+| Capa | Estado | Contenido |
+|---|---|---|
+| `presentation/` | Completa | Todas las pantallas, componentes comunes y navegación |
+| `state/` | Completo | `AuthContext` (sesión) y `ThemeContext` (tema) |
+| `hooks/` | Completo | `useLoginForm` y `useRegisterForm` |
+| `config/` | Completo | URL base, timeout y mapa de todos los endpoints |
+| `constants/` | Completo | Colores, tamaños, strings y tokens del sistema de diseño |
+| `types/` | Completo | Interfaces de User, Auth, Traduccion, Lexico, Alarma, etc. |
+
+### Qué está pendiente (carpetas vacías)
+
+Estas carpetas están creadas con un `readme.md` como placeholder. Se implementarán cuando se conecte el backend real:
+
+| Capa | Propósito |
+|---|---|
+| `services/` | Funciones que llaman a la API (usando `ENDPOINTS` de `api.config.ts`) |
+| `data/` | Repositorios que abstraen el acceso a datos (API o caché local) |
+| `business/` | Reglas de negocio complejas desacopladas de las pantallas |
+| `utils/` | Funciones reutilizables (formateo de fechas, validaciones genéricas, etc.) |
+
+### Flujo de datos previsto (cuando se conecte el backend)
+
+```
+Pantalla → Hook → Service → Data → API backend
+```
+
+Las pantallas no deben llamar directamente a la API. Deben pasar por un **hook**, que usa un **service**, que usa un **repositorio de datos**. Esto facilita el testing y el mantenimiento.
+
+---
+
+## Por qué los estilos están en el mismo archivo que el componente
+
+En React Native es la **convención estándar** definir los estilos con `StyleSheet.create` dentro del mismo archivo que el componente. Esto es diferente a CSS en web.
+
+### Razones
+
+- Los estilos están **acoplados al componente**: si mueves o renombras el componente, los estilos van con él sin riesgo de olvidarlos.
+- `StyleSheet.create` **no es CSS global** — son objetos JavaScript privados al archivo, no hay colisiones de nombres entre componentes.
+- Evita el problema de "¿en qué archivo está el estilo de este componente?".
+- Es el patrón que usa la documentación oficial de React Native y Expo.
+
+### Cuándo sí tiene sentido separar estilos
+
+| Situación | Solución recomendada |
+|---|---|
+| Varios componentes comparten exactamente los mismos estilos | Crear un `sharedStyles.ts` en `constants/` o `presentation/components/` |
+| Un archivo supera ~500 líneas y los estilos ocupan la mitad | Extraer a un archivo `NombreComponente.styles.ts` al lado del componente |
+
+### Lo que ya está separado correctamente en este proyecto
+
+Los valores de diseño global (colores, tamaños, sombras, etc.) ya están extraídos en `constants/`. Los `StyleSheet` por componente usan esos tokens:
+
+```tsx
+// Bien — usa el token en lugar de un número hardcodeado
+backgroundColor: Colors.primaryBg,
+borderRadius: BorderRadius.md,
+fontSize: FontSize.base,
+```
+
+Si en algún momento se necesita cambiar un color o tamaño en toda la app, se edita el archivo de constants y el cambio se propaga automáticamente a todos los componentes.

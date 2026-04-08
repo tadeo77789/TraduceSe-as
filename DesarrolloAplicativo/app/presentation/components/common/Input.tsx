@@ -1,3 +1,22 @@
+/**
+ * @file Input.tsx
+ * @description Componente de campo de texto reutilizable con soporte para
+ * etiqueta, icono izquierdo/derecho, estado de error, hint y visibilidad de contraseña.
+ *
+ * Extiende `TextInputProps` de React Native.
+ *
+ * @prop label - Etiqueta visible encima del campo.
+ * @prop error - Mensaje de error (resalta el borde en rojo y muestra el texto).
+ * @prop hint - Texto de ayuda (solo visible si no hay error).
+ * @prop leftIcon - Nombre de ícono Ionicons a mostrar a la izquierda.
+ * @prop rightIcon - Nombre de ícono Ionicons a mostrar a la derecha.
+ * @prop onRightIconPress - Acción al presionar el ícono derecho.
+ * @prop isPassword - Si true, muestra toggle de visibilidad de contraseña. Default: false.
+ * @prop size - Tamaño del campo: 'sm' | 'md' | 'lg'. Default: 'md'.
+ * @prop containerStyle - Estilos adicionales para el contenedor externo.
+ *
+ * Se exporta como `React.memo` para evitar renders innecesarios.
+ */
 import React, { useState } from 'react';
 import {
   View,

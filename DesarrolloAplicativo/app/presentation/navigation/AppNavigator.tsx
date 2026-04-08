@@ -1,3 +1,13 @@
+/**
+ * @file AppNavigator.tsx
+ * @description Navegador raíz de la aplicación.
+ *
+ * Envuelve toda la navegación en `NavigationContainer` y decide qué stack
+ * mostrar según el estado de autenticación:
+ * - `isLoading = true` → spinner de carga mientras se restaura la sesión.
+ * - `isAuthenticated = true` → `MainTabNavigator` (app principal).
+ * - `isAuthenticated = false` → `AuthNavigator` (flujo de login/registro).
+ */
 import React from 'react';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';

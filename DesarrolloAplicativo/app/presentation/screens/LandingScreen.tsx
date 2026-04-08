@@ -1,3 +1,19 @@
+/**
+ * @file LandingScreen.tsx
+ * @description Pantalla de bienvenida pública (antes de autenticarse).
+ *
+ * Contiene:
+ * - Header con logo y botones "Registrarse" / "Ingresar".
+ * - Tarjeta de notificación push simulada (descartable).
+ * - Sección hero con título, subtítulo y badge LSC.
+ * - Cards de características principales (Traducción, Recordatorios).
+ * - Slider de 3 slides con imágenes, flechas de navegación y dots.
+ * - Testimonio de usuario.
+ * - CTA final con botón de registro y link de login.
+ *
+ * El layout se adapta automáticamente: en pantallas anchas (≥ 768 px) el
+ * contenido centra a un máximo de 960 px de ancho.
+ */
 import React, { useState, useRef } from 'react';
 import {
   View,
@@ -6,179 +22,297 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
-  Dimensions,
   Image,
+  useWindowDimensions,
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-
 import { Colors } from '../../constants/colors';
-
-const { width } = Dimensions.get('window');
 
 const SLIDES = [
   {
     id: '1',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600',
-    caption: '¡Rompe las barreras de la comunicación! Prueba la traducción de lengua de señas.',
+    image: require('../../assets/images/slide1.jpg'),
+    title: 'Traduce en tiempo real',
+    caption: 'Detecta y traduce señas al instante usando la cámara de tu dispositivo.',
   },
   {
     id: '2',
-    image: 'https://images.unsplash.com/photo-1609429019995-8c40f49535a5?w=600',
-    caption: 'Comunícate con facilidad usando la lengua de señas colombiana.',
+    image: require('../../assets/images/slide2.jpg'),
+    title: 'Comunícate sin barreras',
+    caption: 'Conecta con personas sordas usando la Lengua de Señas Colombiana.',
   },
   {
     id: '3',
-    image: 'https://images.unsplash.com/photo-1576267423048-15c0040fec78?w=600',
-    caption: 'Aprende el alfabeto y expande tu vocabulario en LSC.',
+    image: require('../../assets/images/slide3.jpg'),
+    title: 'Aprende el alfabeto LSC',
+    caption: 'Domina el alfabeto y amplía tu vocabulario paso a paso.',
+  },
+];
+
+const FEATURES = [
+  {
+    icon: 'hand-left-outline' as const,
+    label: 'Traducción',
+    desc: 'Seña a texto en tiempo real',
+    color: Colors.primary,
+    bg: '#EDE9FE',
+  },
+{
+    icon: 'alarm-outline' as const,
+    label: 'Recordatorios',
+    desc: 'Alarmas de práctica diaria',
+    color: '#D97706',
+    bg: '#FEF3C7',
   },
 ];
 
 export const LandingScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { width } = useWindowDimensions();
+  const isWide = width >= 768;
+  const sliderRef = useRef<FlatList>(null);
+
   const [activeSlide, setActiveSlide] = useState(0);
   const [showNotif, setShowNotif] = useState(true);
 
+  const SLIDE_WIDTH = isWide ? Math.min(width - 80, 860) : width - 40;
+
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const index = Math.round(e.nativeEvent.contentOffset.x / width);
+    const index = Math.round(e.nativeEvent.contentOffset.x / SLIDE_WIDTH);
     setActiveSlide(index);
   };
 
+  const goToSlide = (dir: 'prev' | 'next') => {
+    const next = dir === 'next'
+      ? Math.min(activeSlide + 1, SLIDES.length - 1)
+      : Math.max(activeSlide - 1, 0);
+    sliderRef.current?.scrollToIndex({ index: next, animated: true });
+    setActiveSlide(next);
+  };
+
   return (
-    <View style={styles.container}>
-      {/* Header con gradiente */}
+    <View style={styles.root}>
+
+      {/* ── Header ───────────────────────────────────────────── */}
       <LinearGradient
         colors={['#9333EA', '#7C3AED']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.header}
       >
-        <View style={styles.logoRow}>
-          <View style={styles.logoBox}>
-            <Text style={styles.logoEmoji}>👌</Text>
+        <View style={[styles.headerInner, isWide && styles.headerInnerWide]}>
+          {/* Logo */}
+          <View style={styles.logoRow}>
+            <View style={styles.logoBox}>
+              <Text style={styles.logoEmoji}>👌</Text>
+            </View>
+            <Text style={styles.appName}>TraduceSeña</Text>
           </View>
-          <Text style={styles.appName}>TraduceSeña</Text>
+
+          {/* Acciones de auth */}
+          <View style={styles.authRow}>
+            <TouchableOpacity
+              style={styles.registerBtn}
+              onPress={() => navigation.navigate('Register' as never)}
+            >
+              <Text style={styles.registerBtnText}>Registrarse</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.loginBtn}
+              onPress={() => navigation.navigate('Login' as never)}
+            >
+              <Ionicons name="log-in-outline" size={18} color={Colors.primary} />
+              <Text style={styles.loginBtnText}>Ingresar</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Login' as never)}
-          style={styles.loginBtn}
-        >
-          <Ionicons name="person-circle-outline" size={32} color="#fff" />
-        </TouchableOpacity>
       </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Notificación emergente */}
-        {showNotif && (
-          <View style={styles.notifCard}>
-            <View style={styles.notifAccent} />
-            <View style={styles.notifContent}>
-              <Text style={styles.notifTitle}>Aviso</Text>
-              <Text style={styles.notifMsg}>Recuerda esta palabra</Text>
-              <TouchableOpacity style={styles.notifAction}>
-                <Text style={styles.notifActionText}>Abrir</Text>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <View style={[styles.innerContent, isWide && styles.innerContentWide]}>
+
+          {/* ── Notificación push ────────────────────────────── */}
+          {showNotif && (
+            <View style={styles.notifCard}>
+              <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.notifIconBg}>
+                <Text style={{ fontSize: 16 }}>👌</Text>
+              </LinearGradient>
+              <View style={styles.notifBody}>
+                <View style={styles.notifTopRow}>
+                  <Text style={styles.notifApp}>TraduceSeña</Text>
+                  <Text style={styles.notifTime}>Ahora</Text>
+                </View>
+                <Text style={styles.notifTitle}>¡Practica hoy tu seña diaria!</Text>
+                <Text style={styles.notifMsg}>Abre la app y traduce al menos una seña nueva hoy.</Text>
+                <View style={styles.notifActions}>
+                  <TouchableOpacity
+                    style={styles.notifActionBtn}
+                    onPress={() => navigation.navigate('Login' as never)}
+                  >
+                    <Text style={styles.notifActionText}>Abrir app</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setShowNotif(false)}>
+                    <Text style={styles.notifDismiss}>Descartar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <TouchableOpacity onPress={() => setShowNotif(false)} style={styles.notifClose}>
+                <Ionicons name="close" size={16} color={Colors.textHint} />
               </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={() => setShowNotif(false)} style={styles.notifClose}>
-              <Ionicons name="close" size={16} color={Colors.textSecondary} />
-            </TouchableOpacity>
-          </View>
-        )}
+          )}
 
-        {/* Slider de imágenes */}
-        <View style={styles.sliderSection}>
-          <View style={styles.sliderTagRow}>
-            <View style={styles.sliderTagDot} />
-            <Text style={styles.sliderTag}>Fomenta una sociedad más inclusiva</Text>
+          {/* ── Hero text ────────────────────────────────────── */}
+          <View style={styles.hero}>
+            <View style={styles.heroBadge}>
+              <View style={styles.heroBadgeDot} />
+              <Text style={styles.heroBadgeText}>Lengua de Señas Colombiana</Text>
+            </View>
+            <Text style={styles.heroTitle}>
+              Comunícate sin{'\n'}barreras
+            </Text>
+            <Text style={styles.heroSubtitle}>
+              Traduce señas a texto en tiempo real y aprende LSC con una app diseñada para la inclusión.
+            </Text>
           </View>
 
-          <View style={styles.sliderWrapper}>
-            <FlatList
-              data={SLIDES}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              onScroll={onScroll}
-              keyExtractor={item => item.id}
-              renderItem={({ item }) => (
-                <View style={styles.slide}>
-                  <Image
-                    source={{ uri: item.image }}
-                    style={styles.slideImage}
-                    resizeMode="cover"
-                  />
-                  {/* Overlay gradient en imagen */}
-                  <LinearGradient
-                    colors={['transparent', 'rgba(0,0,0,0.35)']}
-                    style={styles.slideOverlay}
-                  />
+          {/* ── Feature cards ────────────────────────────────── */}
+          <View style={[styles.featuresRow, isWide && styles.featuresRowWide]}>
+            {FEATURES.map((f, i) => (
+              <View key={i} style={[styles.featureCard, { backgroundColor: f.bg }]}>
+                <View style={[styles.featureIconBox, { backgroundColor: f.color + '25' }]}>
+                  <Ionicons name={f.icon} size={22} color={f.color} />
                 </View>
-              )}
-            />
-            {/* Flechas */}
-            <TouchableOpacity style={[styles.arrow, styles.arrowLeft]}>
-              <Ionicons name="chevron-back" size={20} color="#fff" />
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.arrow, styles.arrowRight]}>
-              <Ionicons name="chevron-forward" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Dots */}
-          <View style={styles.dots}>
-            {SLIDES.map((_, i) => (
-              <View
-                key={i}
-                style={[styles.dot, i === activeSlide ? styles.dotActive : styles.dotInactive]}
-              />
+                <Text style={[styles.featureLabel, { color: f.color }]}>{f.label}</Text>
+                <Text style={styles.featureDesc}>{f.desc}</Text>
+              </View>
             ))}
           </View>
 
-          <Text style={styles.caption}>
-            Fomenta una sociedad más inclusiva, apoyando la educación, la salud y la vida laboral.
-          </Text>
-        </View>
+          {/* ── Slider ───────────────────────────────────────── */}
+          <View style={styles.sliderSection}>
+            <Text style={styles.sliderHeading}>¿Por qué TraduceSeña?</Text>
 
-        {/* Testimonio */}
-        <View style={styles.testimonialCard}>
-          <View style={styles.testimonialInner}>
-            <Image
-              source={{ uri: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=300' }}
-              style={styles.testimonialImage}
-            />
-            <View style={styles.testimonialText}>
-              <Ionicons name="chatbubble-ellipses" size={18} color={Colors.primaryLighter} style={{ marginBottom: 6 }} />
-              <Text style={styles.testimonialQuote}>
-                "La app ha facilitado mi comunicación con mis compañeros en clase. Es increíble cómo
-                una app puede cambiar tanto."
-              </Text>
-              <Text style={styles.testimonialName}>— Juan, estudiante</Text>
+            <View style={styles.sliderWrapper}>
+              <FlatList
+                ref={sliderRef}
+                data={SLIDES}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={onScroll}
+                scrollEventThrottle={16}
+                keyExtractor={item => item.id}
+                getItemLayout={(_, index) => ({
+                  length: SLIDE_WIDTH,
+                  offset: SLIDE_WIDTH * index,
+                  index,
+                })}
+                renderItem={({ item }) => (
+                  <View style={[styles.slide, { width: SLIDE_WIDTH }]}>
+                    <Image
+                      source={item.image}
+                      style={styles.slideImage}
+                      resizeMode="cover"
+                    />
+                    <LinearGradient
+                      colors={['transparent', 'rgba(0,0,0,0.65)']}
+                      style={styles.slideOverlay}
+                    />
+                    <View style={styles.slideTextBox}>
+                      <Text style={styles.slideTitle}>{item.title}</Text>
+                      <Text style={styles.slideCaption}>{item.caption}</Text>
+                    </View>
+                  </View>
+                )}
+              />
+
+              {/* Flechas */}
+              <TouchableOpacity
+                style={[styles.arrow, styles.arrowLeft]}
+                onPress={() => goToSlide('prev')}
+              >
+                <Ionicons name="chevron-back" size={20} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.arrow, styles.arrowRight]}
+                onPress={() => goToSlide('next')}
+              >
+                <Ionicons name="chevron-forward" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Dots */}
+            <View style={styles.dots}>
+              {SLIDES.map((_, i) => (
+                <TouchableOpacity
+                  key={i}
+                  onPress={() => {
+                    sliderRef.current?.scrollToIndex({ index: i, animated: true });
+                    setActiveSlide(i);
+                  }}
+                >
+                  <View style={[styles.dot, i === activeSlide ? styles.dotActive : styles.dotInactive]} />
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
-        </View>
 
-        {/* CTA */}
-        <View style={styles.cta}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Register' as never)}
-            activeOpacity={0.85}
-          >
-            <LinearGradient
-              colors={['#9333EA', '#7C3AED', '#6D28D9']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.ctaBtn}
-            >
-              <Text style={styles.ctaBtnText}>Comenzar ahora</Text>
-              <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 8 }} />
+          {/* ── Testimonio ───────────────────────────────────── */}
+          <View style={styles.testimonialCard}>
+            <LinearGradient colors={['#EDE9FE', '#F5F3FF']} style={styles.testimonialGradient}>
+              <Ionicons name="chatbubble-ellipses" size={28} color={Colors.primaryLighter} style={styles.quoteIcon} />
+              <Text style={styles.testimonialQuote}>
+                "La app ha facilitado mi comunicación con mis compañeros en clase. Es increíble cómo
+                una app puede cambiar tanto la vida de una persona."
+              </Text>
+              <View style={styles.testimonialAuthor}>
+                <Image
+                  source={require('../../assets/images/testimonial.jpg')}
+                  style={styles.testimonialAvatar}
+                />
+                <View>
+                  <Text style={styles.testimonialName}>Juan Pérez</Text>
+                  <Text style={styles.testimonialRole}>Estudiante universitario</Text>
+                </View>
+              </View>
             </LinearGradient>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('Login' as never)}>
-            <Text style={styles.ctaLink}>Ya tengo cuenta</Text>
-          </TouchableOpacity>
+          </View>
+
+          {/* ── CTA final ────────────────────────────────────── */}
+          <View style={styles.cta}>
+            <Text style={styles.ctaTitle}>¿Listo para comenzar?</Text>
+            <Text style={styles.ctaSubtitle}>Únete y rompe las barreras de la comunicación</Text>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Register' as never)}
+              activeOpacity={0.85}
+              style={styles.ctaBtnWrapper}
+            >
+              <LinearGradient
+                colors={['#9333EA', '#7C3AED', '#6D28D9']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.ctaBtn}
+              >
+                <Text style={styles.ctaBtnText}>Crear cuenta gratis</Text>
+                <Ionicons name="arrow-forward" size={18} color="#fff" />
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.ctaSecondary}
+              onPress={() => navigation.navigate('Login' as never)}
+            >
+              <Text style={styles.ctaSecondaryText}>Ya tengo cuenta — </Text>
+              <Text style={styles.ctaSecondaryLink}>Iniciar sesión</Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
       </ScrollView>
     </View>
@@ -186,181 +320,234 @@ export const LandingScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.backgroundGray,
-  },
+  root: { flex: 1, backgroundColor: Colors.backgroundGray },
+
+  // ── Header ──
   header: {
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  headerInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 14,
     paddingTop: 50,
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 8,
+    paddingBottom: 14,
   },
-  logoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
+  headerInnerWide: {
+    maxWidth: 960,
+    alignSelf: 'center',
+    width: '100%',
+    paddingHorizontal: 32,
   },
+  logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   logoBox: {
-    width: 38,
-    height: 38,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.4)',
+    width: 40, height: 40,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 12,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)',
   },
   logoEmoji: { fontSize: 20 },
-  appName: {
-    fontSize: 19,
-    fontWeight: '800',
-    color: '#fff',
-    letterSpacing: 0.3,
+  appName: { fontSize: 20, fontWeight: '800', color: '#fff', letterSpacing: 0.2 },
+  authRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  registerBtn: {
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.6)',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 7,
   },
-  loginBtn: { padding: 4 },
-  // Notificación
+  registerBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  loginBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+  },
+  loginBtnText: { color: Colors.primary, fontSize: 13, fontWeight: '700' },
+
+  // ── Scroll ──
+  scrollContent: { paddingBottom: 40 },
+  innerContent: { paddingHorizontal: 20, paddingTop: 20, gap: 28 },
+  innerContentWide: { maxWidth: 960, alignSelf: 'center', width: '100%', paddingHorizontal: 40 },
+
+  // ── Notificación ──
   notifCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    margin: 16,
-    marginBottom: 8,
-    borderRadius: 14,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-    alignSelf: 'flex-end',
-    maxWidth: 230,
-    overflow: 'hidden',
-  },
-  notifAccent: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 4,
-    backgroundColor: Colors.primary,
-    borderTopLeftRadius: 14,
-    borderBottomLeftRadius: 14,
-  },
-  notifContent: { flex: 1, paddingLeft: 8 },
-  notifTitle: { fontSize: 13, fontWeight: '700', color: Colors.textPrimary },
-  notifMsg: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
-  notifAction: {
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    marginTop: 6,
-    alignSelf: 'flex-start',
-  },
-  notifActionText: { color: '#fff', fontSize: 12, fontWeight: '600' },
-  notifClose: { padding: 4 },
-  // Slider
-  sliderSection: { padding: 16, paddingTop: 12 },
-  sliderTagRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
-  sliderTagDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primary },
-  sliderTag: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    fontWeight: '500',
-  },
-  sliderWrapper: {
-    position: 'relative',
     borderRadius: 18,
-    overflow: 'hidden',
-    shadowColor: '#000',
+    padding: 14,
+    gap: 12,
+    shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.12,
-    shadowRadius: 14,
+    shadowRadius: 16,
     elevation: 6,
+    borderWidth: 1,
+    borderColor: Colors.primaryLighter,
   },
-  slide: { width: width - 32, height: 210 },
+  notifIconBg: {
+    width: 44, height: 44, borderRadius: 12,
+    alignItems: 'center', justifyContent: 'center',
+    flexShrink: 0,
+  },
+  notifBody: { flex: 1 },
+  notifTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 },
+  notifApp: { fontSize: 12, fontWeight: '700', color: Colors.primary },
+  notifTime: { fontSize: 11, color: Colors.textHint },
+  notifTitle: { fontSize: 14, fontWeight: '700', color: Colors.textPrimary, marginBottom: 3 },
+  notifMsg: { fontSize: 12, color: Colors.textSecondary, lineHeight: 18 },
+  notifActions: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 10 },
+  notifActionBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },
+  notifActionText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  notifDismiss: { fontSize: 12, color: Colors.textHint, fontWeight: '600' },
+  notifClose: { padding: 2, alignSelf: 'flex-start' },
+
+  // ── Hero ──
+  hero: { gap: 14 },
+  heroBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.primaryBg,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  heroBadgeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primary },
+  heroBadgeText: { fontSize: 13, color: Colors.primary, fontWeight: '600' },
+  heroTitle: {
+    fontSize: 36,
+    fontWeight: '900',
+    color: Colors.textPrimary,
+    lineHeight: 44,
+    letterSpacing: -0.5,
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    color: Colors.textSecondary,
+    lineHeight: 26,
+    maxWidth: 420,
+  },
+
+  // ── Features ──
+  featuresRow: { flexDirection: 'row', gap: 12 },
+  featuresRowWide: { gap: 16 },
+  featureCard: {
+    flex: 1,
+    borderRadius: 18,
+    padding: 16,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  featureIconBox: {
+    width: 40, height: 40, borderRadius: 12,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  featureLabel: { fontSize: 13, fontWeight: '800' },
+  featureDesc: { fontSize: 11, color: Colors.textSecondary, lineHeight: 16 },
+
+  // ── Slider ──
+  sliderSection: { gap: 14 },
+  sliderHeading: { fontSize: 20, fontWeight: '800', color: Colors.textPrimary },
+  sliderWrapper: {
+    borderRadius: 22,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.14,
+    shadowRadius: 18,
+    elevation: 8,
+    position: 'relative',
+  },
+  slide: { height: 240 },
   slideImage: { width: '100%', height: '100%' },
-  slideOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 80,
-  },
+  slideOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 140 },
+  slideTextBox: { position: 'absolute', bottom: 20, left: 20, right: 20 },
+  slideTitle: { fontSize: 20, fontWeight: '800', color: '#fff', marginBottom: 6 },
+  slideCaption: { fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 19 },
   arrow: {
     position: 'absolute',
     top: '50%',
-    backgroundColor: 'rgba(124,58,237,0.7)',
-    borderRadius: 20,
-    padding: 7,
-    transform: [{ translateY: -17 }],
+    backgroundColor: 'rgba(124,58,237,0.75)',
+    borderRadius: 22,
+    padding: 8,
+    transform: [{ translateY: -18 }],
   },
-  arrowLeft: { left: 10 },
-  arrowRight: { right: 10 },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 12 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  dotActive: { backgroundColor: Colors.primary, width: 22 },
-  dotInactive: { backgroundColor: Colors.primaryLighter },
-  caption: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    marginTop: 12,
-    lineHeight: 22,
-  },
-  // Testimonio
+  arrowLeft: { left: 12 },
+  arrowRight: { right: 12 },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 7 },
+  dot: { height: 8, borderRadius: 4 },
+  dotActive: { backgroundColor: Colors.primary, width: 24 },
+  dotInactive: { backgroundColor: Colors.primaryLighter, width: 8 },
+
+  // ── Testimonio ──
   testimonialCard: {
-    marginHorizontal: 16,
-    marginBottom: 8,
-    backgroundColor: '#fff',
-    borderRadius: 18,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
+    borderRadius: 22,
+    overflow: 'hidden',
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 14,
     elevation: 4,
   },
-  testimonialInner: {
-    flexDirection: 'row',
-    gap: 14,
-    alignItems: 'flex-start',
-  },
-  testimonialImage: { width: 86, height: 110, borderRadius: 14 },
-  testimonialText: { flex: 1 },
+  testimonialGradient: { padding: 24, gap: 16 },
+  quoteIcon: { alignSelf: 'flex-start' },
   testimonialQuote: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    lineHeight: 21,
+    fontSize: 15,
+    color: Colors.textPrimary,
+    lineHeight: 26,
     fontStyle: 'italic',
+    fontWeight: '500',
   },
-  testimonialName: {
-    marginTop: 8,
-    fontSize: 12,
-    color: Colors.primary,
-    fontWeight: '700',
+  testimonialAuthor: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  testimonialAvatar: { width: 44, height: 44, borderRadius: 22 },
+  testimonialName: { fontSize: 14, fontWeight: '800', color: Colors.textPrimary },
+  testimonialRole: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
+
+  // ── CTA ──
+  cta: { alignItems: 'center', gap: 16, paddingTop: 8 },
+  ctaTitle: { fontSize: 24, fontWeight: '900', color: Colors.textPrimary, textAlign: 'center' },
+  ctaSubtitle: { fontSize: 14, color: Colors.textSecondary, textAlign: 'center', lineHeight: 22 },
+  ctaBtnWrapper: {
+    width: '100%',
+    borderRadius: 18,
+    overflow: 'hidden',
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 10,
   },
-  // CTA
-  cta: { alignItems: 'center', padding: 28, gap: 16 },
   ctaBtn: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 18,
     paddingHorizontal: 44,
-    paddingVertical: 16,
-    borderRadius: 16,
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 8,
+    borderRadius: 18,
   },
   ctaBtnText: { color: '#fff', fontSize: 17, fontWeight: '800', letterSpacing: 0.3 },
-  ctaLink: { color: Colors.primary, fontSize: 14, fontWeight: '600' },
+  ctaSecondary: { flexDirection: 'row', alignItems: 'center' },
+  ctaSecondaryText: { fontSize: 14, color: Colors.textSecondary },
+  ctaSecondaryLink: { fontSize: 14, color: Colors.primary, fontWeight: '700' },
 });
