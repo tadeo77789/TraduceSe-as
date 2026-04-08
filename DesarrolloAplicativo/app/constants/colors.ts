@@ -1,3 +1,12 @@
+/**
+ * @file colors.ts
+ * @description Paleta de colores del sistema de diseño de TraduceSeña.
+ * - `PrimaryScale`: escala completa del color primario púrpura (#7C3AED).
+ * - `NeutralScale`: escala de grises del sistema.
+ * - `Colors`: tokens semánticos (primario, fondos, texto, estados, sombras, etc.)
+ *   listos para usar en componentes y estilos.
+ */
+
 // ─── Design System — Generado desde brand color #7C3AED (Púrpura) ────────────
 
 // Escala completa del primario (generada por design_token_generator.py)

@@ -1,3 +1,14 @@
+/**
+ * @file VerifyCodeScreen.tsx
+ * @description Pantalla de verificación OTP — paso 2 del flujo de recuperación de contraseña.
+ *
+ * Muestra 6 campos individuales de un dígito. El foco avanza automáticamente
+ * al siguiente campo al ingresar un dígito, y retrocede con Backspace.
+ * Al confirmar el código completo, navega a `NewPasswordScreen`.
+ *
+ * @todo Conectar `handleConfirm` con `ENDPOINTS.verifyCode` para validar
+ *       el código OTP contra el backend.
+ */
 import React, { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity, Alert,

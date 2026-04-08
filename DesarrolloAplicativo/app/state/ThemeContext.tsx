@@ -1,3 +1,16 @@
+/**
+ * @file ThemeContext.tsx
+ * @description Contexto global de tema visual (claro / oscuro).
+ *
+ * Provee `mode` ('light' | 'dark'), `isDark` (boolean) y `toggleTheme`
+ * para alternar entre temas desde cualquier pantalla.
+ *
+ * @exports ThemeProvider - Proveedor que debe envolver la app junto a `AuthProvider`.
+ * @exports useTheme - Hook para consumir el contexto de tema.
+ *
+ * @note El modo oscuro está disponible en estado pero aún no se aplica
+ *       a las pantallas individuales.
+ */
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { ThemeMode } from '../types';
 

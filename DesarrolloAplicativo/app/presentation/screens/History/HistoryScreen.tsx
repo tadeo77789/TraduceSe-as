@@ -1,3 +1,20 @@
+/**
+ * @file HistoryScreen.tsx
+ * @description Pantalla del historial de traducciones del usuario.
+ *
+ * Muestra las traducciones guardadas en tarjetas con:
+ * - Badge de tipo de traducción (`sena_texto`, `texto_sena`, `voz_sena`) con color diferenciado.
+ * - Texto de entrada, fecha y hora.
+ * - Acciones: "Reusar" (confirmación con Alert) y "Eliminar" (confirmación con Alert).
+ *
+ * Cuando la lista está vacía muestra un estado vacío con mensaje descriptivo.
+ * En tablet (≥ 768 px) la grilla usa 2 columnas.
+ *
+ * Los datos actuales son mock (`MOCK_HISTORY`).
+ *
+ * @todo Conectar con `ENDPOINTS.history` para cargar el historial real del usuario.
+ * @todo Conectar `handleDelete` con `ENDPOINTS.deleteTranslation`.
+ */
 import React, { useState, useCallback } from 'react';
 import {
   View,

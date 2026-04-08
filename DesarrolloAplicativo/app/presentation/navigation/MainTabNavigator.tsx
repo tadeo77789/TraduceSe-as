@@ -1,3 +1,13 @@
+/**
+ * @file MainTabNavigator.tsx
+ * @description Navegador de pestañas principal (pantallas autenticadas).
+ *
+ * En **móvil**: muestra una barra de tabs inferior con íconos Ionicons.
+ * En **web**: oculta la barra inferior y usa `WebTopBar` como header superior.
+ *
+ * Tabs disponibles: Translation, Alarms, Alphabet, Stats, History, Profile.
+ * El tipo `MainTabParams` define los nombres de ruta para tipado estricto.
+ */
 import React from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';

@@ -1,3 +1,19 @@
+/**
+ * @file LandingScreen.tsx
+ * @description Pantalla de bienvenida pública (antes de autenticarse).
+ *
+ * Contiene:
+ * - Header con logo y botones "Registrarse" / "Ingresar".
+ * - Tarjeta de notificación push simulada (descartable).
+ * - Sección hero con título, subtítulo y badge LSC.
+ * - Cards de características principales (Traducción, Recordatorios).
+ * - Slider de 3 slides con imágenes, flechas de navegación y dots.
+ * - Testimonio de usuario.
+ * - CTA final con botón de registro y link de login.
+ *
+ * El layout se adapta automáticamente: en pantallas anchas (≥ 768 px) el
+ * contenido centra a un máximo de 960 px de ancho.
+ */
 import React, { useState, useRef } from 'react';
 import {
   View,

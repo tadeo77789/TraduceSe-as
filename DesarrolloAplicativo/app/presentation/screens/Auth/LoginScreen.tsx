@@ -1,3 +1,16 @@
+/**
+ * @file LoginScreen.tsx
+ * @description Pantalla de inicio de sesión.
+ *
+ * Usa `useLoginForm` para manejar el estado, la validación y el submit.
+ * Soporta dos layouts:
+ * - **Web (≥ 768 px)**: panel imagen a la izquierda + formulario a la derecha.
+ * - **Móvil**: formulario a pantalla completa con fondo lavanda.
+ *
+ * Incluye campos de correo y contraseña, link a "Olvidé mi contraseña",
+ * botones de acceso social (Google y Facebook — pendiente integración) y
+ * link de navegación a la pantalla de registro.
+ */
 import React from 'react';
 import {
   View,

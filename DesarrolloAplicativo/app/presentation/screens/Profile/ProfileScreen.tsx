@@ -1,3 +1,23 @@
+/**
+ * @file ProfileScreen.tsx
+ * @description Pantalla de perfil del usuario autenticado.
+ *
+ * Muestra:
+ * - Avatar con degradado, nombre (extraído del email), email y badge de nivel.
+ * - Mini-estadísticas: traducciones, señas aprendidas, alarmas activas.
+ * - Sección "Cuenta": correo y contraseña (solo lectura) + link de cambio de contraseña.
+ * - Sección "Preferencias": toggle de tema claro/oscuro, toggle de notificaciones
+ *   y selector de idioma de la app (Español, Inglés, Francés, Português).
+ * - Sección "Acerca de": versión, términos y condiciones, política de privacidad.
+ * - Botones de "Cerrar sesión" y "Eliminar cuenta" con confirmación.
+ *
+ * Usa `useAuth` para obtener el usuario y ejecutar `logout`, y `useTheme` para
+ * el toggle de tema. La confirmación de acciones críticas usa `Alert` en móvil
+ * y `confirm()` en web.
+ *
+ * @todo Conectar los campos de cuenta con `ENDPOINTS.updateProfile`.
+ * @todo Implementar cambio de contraseña real.
+ */
 import React, { useState } from 'react';
 import {
   View,
@@ -82,14 +102,7 @@ export const ProfileScreen: React.FC = () => {
           </LinearGradient>
           <Text style={styles.userName}>{displayName}</Text>
           <Text style={styles.userEmail}>{displayEmail}</Text>
-
-          {/* Badge de nivel */}
-          <LinearGradient colors={['#FEF3C7', '#FDE68A']} style={styles.levelBadge}>
-            <Ionicons name="ribbon-outline" size={13} color="#D97706" />
-            <Text style={styles.levelText}>Nivel Intermedio</Text>
-          </LinearGradient>
         </View>
-
         {/* Estadísticas del usuario */}
         <View style={styles.statsRow}>
           {USER_STATS.map((stat, i) => (

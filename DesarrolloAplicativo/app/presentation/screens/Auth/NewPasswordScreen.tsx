@@ -1,3 +1,14 @@
+/**
+ * @file NewPasswordScreen.tsx
+ * @description Pantalla para establecer una nueva contraseña — paso 3 del flujo
+ * de recuperación.
+ *
+ * Valida que la contraseña tenga mínimo 8 caracteres y que ambos campos coincidan.
+ * Al confirmar navega de regreso a `LoginScreen`.
+ *
+ * @todo Conectar `handleConfirm` con `ENDPOINTS.resetPassword` para actualizar
+ *       la contraseña en el backend.
+ */
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, KeyboardAvoidingView, Platform, Alert,

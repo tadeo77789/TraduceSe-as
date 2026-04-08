@@ -1,3 +1,21 @@
+/**
+ * @file AlphabetScreen.tsx
+ * @description Pantalla del alfabeto de la Lengua de Señas Colombiana (LSC).
+ *
+ * Muestra las 26 letras del alfabeto en una grilla responsive con imágenes
+ * animadas (GIFs) obtenidas de lifeprint.com. Cada letra tiene un color de
+ * acento que rota en un ciclo de 5 colores.
+ *
+ * Al presionar una letra se abre un `Modal` con:
+ * - Badge de la letra con color de acento.
+ * - Imagen ampliada de la seña.
+ * - Tip descriptivo de cómo realizar la seña.
+ *
+ * El número de columnas se adapta al ancho de pantalla:
+ * - Desktop (≥ 1024 px): 9 columnas.
+ * - Tablet (≥ 768 px): 7 columnas.
+ * - Móvil: 5 columnas.
+ */
 import React, { useState, useCallback } from 'react';
 import {
   View,

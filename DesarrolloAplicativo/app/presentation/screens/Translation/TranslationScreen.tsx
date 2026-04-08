@@ -1,3 +1,21 @@
+/**
+ * @file TranslationScreen.tsx
+ * @description Pantalla principal de traducción de señas.
+ *
+ * Permite alternar entre dos modos:
+ * - **Seña → Texto** (`sena_texto`): activa la cámara para detectar señas en tiempo real.
+ *   Muestra un marco de detección y badge "EN VIVO".
+ * - **Texto → Seña** (`texto_sena`): campo de texto donde el usuario escribe y
+ *   obtiene la traducción correspondiente.
+ *
+ * La cámara usa una imagen placeholder (`camera_placeholder.jpg`) hasta que se integre
+ * el módulo real de IA. La traducción también es simulada con un `setTimeout`.
+ *
+ * El layout se adapta a tablet (≥ 768 px) y desktop (≥ 1024 px) con ancho máximo de 760 px.
+ *
+ * @todo Integrar la cámara real con el módulo de reconocimiento de señas por IA.
+ * @todo Conectar con `ENDPOINTS.translate` para traducciones reales.
+ */
 import React, { useState, useCallback } from 'react';
 import {
   View,

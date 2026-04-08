@@ -1,3 +1,17 @@
+/**
+ * @file RegisterScreen.tsx
+ * @description Pantalla de creación de cuenta.
+ *
+ * Usa `useRegisterForm` para manejar el estado y la validación del formulario.
+ * Campos: nombre, correo, contraseña y checkbox de aceptación de términos.
+ *
+ * Soporta dos layouts:
+ * - **Web (≥ 768 px)**: formulario centrado con ancho máximo de 480 px.
+ * - **Móvil**: formulario a pantalla completa con fondo lavanda.
+ *
+ * El logo aparece en la esquina superior izquierda en ambos layouts.
+ * Incluye link de navegación a la pantalla de login.
+ */
 import React from 'react';
 import {
   View,

@@ -426,3 +426,92 @@ npx expo start --ios                # Ver en iOS
 ```
 
 Expo recarga automáticamente los cambios al guardar un archivo. No es necesario reiniciar el servidor para cambios de colores, textos o estilos.
+
+---
+
+## Arquitectura del frontend
+
+El frontend sigue una **arquitectura en capas** (Clean Architecture simplificada), donde cada carpeta tiene una responsabilidad clara y separada.
+
+```
+app/
+├── presentation/          ← Capa de presentación (lo visual)
+│   ├── screens/           → Pantallas de la app (una carpeta por módulo)
+│   ├── components/        → Componentes reutilizables (Button, Input, etc.)
+│   └── navigation/        → Navegación entre pantallas
+│
+├── state/                 ← Estado global (AuthContext, ThemeContext)
+├── hooks/                 ← Lógica de formularios extraída de las pantallas
+│
+├── business/              ← Lógica de negocio (pendiente — solo readme)
+├── data/                  ← Acceso a datos / repositorios (pendiente — solo readme)
+├── services/              ← Llamadas a la API y servicios externos (pendiente — solo readme)
+│
+├── config/                ← Configuración (URL del backend, endpoints)
+├── constants/             ← Sistema de diseño (colores, tamaños, strings)
+├── types/                 ← Interfaces y tipos TypeScript globales
+└── utils/                 ← Funciones utilitarias (pendiente — solo readme)
+```
+
+### Qué está implementado
+
+| Capa | Estado | Contenido |
+|---|---|---|
+| `presentation/` | Completa | Todas las pantallas, componentes comunes y navegación |
+| `state/` | Completo | `AuthContext` (sesión) y `ThemeContext` (tema) |
+| `hooks/` | Completo | `useLoginForm` y `useRegisterForm` |
+| `config/` | Completo | URL base, timeout y mapa de todos los endpoints |
+| `constants/` | Completo | Colores, tamaños, strings y tokens del sistema de diseño |
+| `types/` | Completo | Interfaces de User, Auth, Traduccion, Lexico, Alarma, etc. |
+
+### Qué está pendiente (carpetas vacías)
+
+Estas carpetas están creadas con un `readme.md` como placeholder. Se implementarán cuando se conecte el backend real:
+
+| Capa | Propósito |
+|---|---|
+| `services/` | Funciones que llaman a la API (usando `ENDPOINTS` de `api.config.ts`) |
+| `data/` | Repositorios que abstraen el acceso a datos (API o caché local) |
+| `business/` | Reglas de negocio complejas desacopladas de las pantallas |
+| `utils/` | Funciones reutilizables (formateo de fechas, validaciones genéricas, etc.) |
+
+### Flujo de datos previsto (cuando se conecte el backend)
+
+```
+Pantalla → Hook → Service → Data → API backend
+```
+
+Las pantallas no deben llamar directamente a la API. Deben pasar por un **hook**, que usa un **service**, que usa un **repositorio de datos**. Esto facilita el testing y el mantenimiento.
+
+---
+
+## Por qué los estilos están en el mismo archivo que el componente
+
+En React Native es la **convención estándar** definir los estilos con `StyleSheet.create` dentro del mismo archivo que el componente. Esto es diferente a CSS en web.
+
+### Razones
+
+- Los estilos están **acoplados al componente**: si mueves o renombras el componente, los estilos van con él sin riesgo de olvidarlos.
+- `StyleSheet.create` **no es CSS global** — son objetos JavaScript privados al archivo, no hay colisiones de nombres entre componentes.
+- Evita el problema de "¿en qué archivo está el estilo de este componente?".
+- Es el patrón que usa la documentación oficial de React Native y Expo.
+
+### Cuándo sí tiene sentido separar estilos
+
+| Situación | Solución recomendada |
+|---|---|
+| Varios componentes comparten exactamente los mismos estilos | Crear un `sharedStyles.ts` en `constants/` o `presentation/components/` |
+| Un archivo supera ~500 líneas y los estilos ocupan la mitad | Extraer a un archivo `NombreComponente.styles.ts` al lado del componente |
+
+### Lo que ya está separado correctamente en este proyecto
+
+Los valores de diseño global (colores, tamaños, sombras, etc.) ya están extraídos en `constants/`. Los `StyleSheet` por componente usan esos tokens:
+
+```tsx
+// Bien — usa el token en lugar de un número hardcodeado
+backgroundColor: Colors.primaryBg,
+borderRadius: BorderRadius.md,
+fontSize: FontSize.base,
+```
+
+Si en algún momento se necesita cambiar un color o tamaño en toda la app, se edita el archivo de constants y el cambio se propaga automáticamente a todos los componentes.

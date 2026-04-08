@@ -1,3 +1,17 @@
+/**
+ * @file WebTopBar.tsx
+ * @description Barra de navegación superior para la versión web de la app.
+ *
+ * Reemplaza la barra de tabs inferior en plataformas web (`Platform.OS === 'web'`).
+ * Muestra el logo, los links de navegación con ícono + etiqueta y el botón de perfil.
+ * El tab activo se resalta con fondo lavanda y línea inferior púrpura.
+ *
+ * Recibe `BottomTabHeaderProps` de React Navigation y usa `navigation.navigate`
+ * para cambiar entre tabs.
+ *
+ * Nota: El tab `Profile` se muestra como botón de avatar circular a la derecha,
+ * no dentro de los links centrales.
+ */
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { BottomTabHeaderProps } from '@react-navigation/bottom-tabs';

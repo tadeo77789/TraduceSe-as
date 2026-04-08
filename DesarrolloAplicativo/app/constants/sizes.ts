@@ -1,3 +1,11 @@
+/**
+ * @file sizes.ts
+ * @description Tokens de tamaño globales de la app.
+ * Define espaciado, tamaños de fuente, radios de borde,
+ * alturas de componentes e iconos. Usar estos valores en lugar
+ * de números hardcodeados para mantener consistencia visual.
+ */
+
 export const Sizes = {
   // Espaciado
   xs: 4,

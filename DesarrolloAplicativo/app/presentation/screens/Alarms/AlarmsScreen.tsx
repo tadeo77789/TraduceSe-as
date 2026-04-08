@@ -1,3 +1,23 @@
+/**
+ * @file AlarmsScreen.tsx
+ * @description Pantalla de gestión de alarmas de práctica.
+ *
+ * Permite al usuario:
+ * - Ver la lista de alarmas con hora, mensaje, días de repetición y estado (activa/inactiva).
+ * - Activar/desactivar cada alarma con un Switch.
+ * - Eliminar alarmas con confirmación.
+ * - Crear nuevas alarmas seleccionando hora con el componente `ClockPicker`
+ *   y días de la semana.
+ *
+ * Incluye el componente interno `ClockPicker`: reloj analógico visual con
+ * display de hora digital y selector AM/PM.
+ *
+ * Los datos actuales son mock (`MOCK_ALARMS`). En tablet (≥ 768 px) la lista
+ * y el panel de nueva alarma se muestran en fila.
+ *
+ * @todo Conectar con los endpoints de alarmas del backend (`ENDPOINTS.alarms`,
+ *       `ENDPOINTS.createAlarm`, `ENDPOINTS.updateAlarm`, `ENDPOINTS.deleteAlarm`).
+ */
 import React, { useState, useCallback } from 'react';
 import {
   View,

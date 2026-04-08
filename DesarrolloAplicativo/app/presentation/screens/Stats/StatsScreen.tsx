@@ -1,3 +1,19 @@
+/**
+ * @file StatsScreen.tsx
+ * @description Pantalla de estadísticas de uso de la app.
+ *
+ * Muestra:
+ * - 4 tarjetas KPI: Traducciones, Usuarios activos, Horas aprendidas, Señas aprendidas.
+ * - `BarChart`: gráfica de barras con degradado (actividad semanal y volumen por semana).
+ * - `LineChart`: gráfica de líneas con puntos conectados (crecimiento mensual de usuarios).
+ * - `PieChart`: leyenda con barras de progreso por sección de uso.
+ * - `StatCard`: contenedor reutilizable con título, línea de acento de color y descripción.
+ *
+ * Todos los datos son mock (`WEEKLY_DATA`, `MONTHLY_LINE`, `SECTION_PIE`, `KPI_CARDS`).
+ * El layout se adapta a tablet (≥ 768 px) y desktop (≥ 1024 px).
+ *
+ * @todo Conectar con `ENDPOINTS.stats` para cargar estadísticas reales del usuario.
+ */
 import React, { useState } from 'react';
 import {
   View,
