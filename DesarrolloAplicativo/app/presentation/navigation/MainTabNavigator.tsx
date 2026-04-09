@@ -9,7 +9,7 @@
  * El tipo `MainTabParams` define los nombres de ruta para tipado estricto.
  */
 import React from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, useWindowDimensions } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { TranslationScreen } from '../screens/Translation/TranslationScreen';
@@ -17,7 +17,7 @@ import { AlarmsScreen } from '../screens/Alarms/AlarmsScreen';
 import { AlphabetScreen } from '../screens/Alphabet/AlphabetScreen';
 import { StatsScreen } from '../screens/Stats/StatsScreen';
 import { HistoryScreen } from '../screens/History/HistoryScreen';
-import { ProfileScreen } from '../screens/Profile/ProfileScreen';
+import { ProfileStackNavigator } from './ProfileStackNavigator';
 import { WebTopBar } from '../components/common/WebTopBar';
 import { Colors } from '../../constants/colors';
 
@@ -32,18 +32,23 @@ export type MainTabParams = {
 
 const Tab = createBottomTabNavigator<MainTabParams>();
 
-const isWeb = Platform.OS === 'web';
+export const MainTabNavigator: React.FC = () => {
+  const { width } = useWindowDimensions();
+  // Muestra la barra superior solo en web con viewport ancho (≥ 1024 px)
+  // En móvil real y en web con viewport estrecho usa la barra de tabs inferior
+  const isWide = Platform.OS === 'web' && width >= 1024;
+  // En pantallas muy estrechas (< 480 px) oculta las etiquetas de los tabs
+  const hideLabels = width < 480;
 
-export const MainTabNavigator: React.FC = () => (
+  return (
   <Tab.Navigator
     screenOptions={({ route }) => ({
-      // En web: header arriba (WebTopBar), sin barra inferior
-      // En móvil: sin header, barra de tabs abajo
-      headerShown: isWeb,
-      header: isWeb ? (props) => <WebTopBar {...props} /> : undefined,
+      headerShown: isWide,
+      header: isWide ? (props) => <WebTopBar {...props} /> : undefined,
       tabBarActiveTintColor: Colors.primary,
       tabBarInactiveTintColor: Colors.textSecondary,
-      tabBarStyle: isWeb ? styles.hidden : styles.tabBar,
+      tabBarStyle: isWide ? styles.hidden : (hideLabels ? styles.tabBarCompact : styles.tabBar),
+      tabBarShowLabel: !hideLabels,
       tabBarLabelStyle: styles.tabLabel,
       tabBarIcon: ({ focused, color }) => {
         const icons: Record<string, [string, string]> = {
@@ -72,9 +77,10 @@ export const MainTabNavigator: React.FC = () => (
     <Tab.Screen name="Alphabet"    component={AlphabetScreen}    />
     <Tab.Screen name="Stats"       component={StatsScreen}       />
     <Tab.Screen name="History"     component={HistoryScreen}     />
-    <Tab.Screen name="Profile"     component={ProfileScreen}     />
+    <Tab.Screen name="Profile"     component={ProfileStackNavigator} />
   </Tab.Navigator>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   tabBar: {
@@ -84,6 +90,19 @@ const styles = StyleSheet.create({
     height: 74,
     paddingBottom: 12,
     paddingTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.07,
+    shadowRadius: 16,
+    elevation: 16,
+  },
+  tabBarCompact: {
+    backgroundColor: Colors.surface,
+    borderTopColor: Colors.border,
+    borderTopWidth: 1,
+    height: 56,
+    paddingBottom: 6,
+    paddingTop: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.07,

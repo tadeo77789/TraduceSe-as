@@ -131,7 +131,7 @@ export const TranslationScreen: React.FC = () => {
             {isActive && (
               <View style={styles.liveBadge}>
                 <View style={styles.liveDot} />
-                <Text style={styles.liveText}>EN VIVO</Text>
+                <Text style={styles.liveText}>En vivo</Text>
               </View>
             )}
 

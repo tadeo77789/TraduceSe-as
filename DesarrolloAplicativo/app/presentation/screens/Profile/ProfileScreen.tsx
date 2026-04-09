@@ -36,6 +36,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../../state/AuthContext';
 import { useTheme } from '../../../state/ThemeContext';
 
@@ -48,6 +49,7 @@ const USER_STATS = [
 ];
 
 export const ProfileScreen: React.FC = () => {
+  const navigation = useNavigation();
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
   const { user, logout } = useAuth();
@@ -132,7 +134,10 @@ export const ProfileScreen: React.FC = () => {
               editable={false}
               containerStyle={styles.inputStyle}
             />
-            <TouchableOpacity style={styles.forgotRow}>
+            <TouchableOpacity
+              style={styles.forgotRow}
+              onPress={() => navigation.navigate('ForgotPassword' as never)}
+            >
               <Ionicons name="key-outline" size={14} color={Colors.primary} />
               <Text style={styles.forgotLink}>Cambiar contraseña</Text>
             </TouchableOpacity>
@@ -281,7 +286,7 @@ const styles = StyleSheet.create({
   section: { marginBottom: 22 },
   sectionTitle: {
     fontSize: 12, fontWeight: '700', color: Colors.textSecondary,
-    textTransform: 'uppercase', letterSpacing: 1,
+    letterSpacing: 0.5,
     marginBottom: 10, marginLeft: 4,
   },
   sectionCard: {
@@ -302,7 +307,7 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: Colors.border, marginVertical: 14 },
   idiomaLabel: {
     fontSize: 12, fontWeight: '700', color: Colors.textSecondary,
-    textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12,
+    letterSpacing: 0.4, marginBottom: 12,
   },
   idiomaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   idiomaChip: {

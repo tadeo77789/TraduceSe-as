@@ -122,7 +122,6 @@ const styles = StyleSheet.create({
     ...TextStyles.label,
     color: Colors.textSecondary,
     marginBottom: 6,
-    textTransform: 'uppercase',
   },
   inputWrapper: {
     flexDirection: 'row',

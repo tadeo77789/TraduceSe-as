@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     paddingHorizontal: 28,
     paddingVertical: 14,
-    gap: 36,
+    gap: 16,
   },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   logoBox: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },

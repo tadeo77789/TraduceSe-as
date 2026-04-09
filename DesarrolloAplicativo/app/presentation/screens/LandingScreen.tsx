@@ -23,6 +23,7 @@ import {
   ScrollView,
   FlatList,
   Image,
+  Platform,
   useWindowDimensions,
   NativeSyntheticEvent,
   NativeScrollEvent,
@@ -74,6 +75,7 @@ export const LandingScreen: React.FC = () => {
   const navigation = useNavigation();
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
+  const isNarrow = width < 430;
   const sliderRef = useRef<FlatList>(null);
 
   const [activeSlide, setActiveSlide] = useState(0);
@@ -110,23 +112,23 @@ export const LandingScreen: React.FC = () => {
             <View style={styles.logoBox}>
               <Text style={styles.logoEmoji}>👌</Text>
             </View>
-            <Text style={styles.appName}>TraduceSeña</Text>
+            <Text style={[styles.appName, isNarrow && styles.appNameNarrow]}>TraduceSeña</Text>
           </View>
 
           {/* Acciones de auth */}
           <View style={styles.authRow}>
             <TouchableOpacity
-              style={styles.registerBtn}
+              style={[styles.registerBtn, isNarrow && styles.btnNarrow]}
               onPress={() => navigation.navigate('Register' as never)}
             >
-              <Text style={styles.registerBtnText}>Registrarse</Text>
+              <Text style={[styles.registerBtnText, isNarrow && styles.btnTextNarrow]}>Registrarse</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.loginBtn}
+              style={[styles.loginBtn, isNarrow && styles.btnNarrow]}
               onPress={() => navigation.navigate('Login' as never)}
             >
-              <Ionicons name="log-in-outline" size={18} color={Colors.primary} />
-              <Text style={styles.loginBtnText}>Ingresar</Text>
+              <Ionicons name="log-in-outline" size={isNarrow ? 16 : 18} color={Colors.primary} />
+              <Text style={[styles.loginBtnText, isNarrow && styles.btnTextNarrow]}>Ingresar</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -334,8 +336,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 50,
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'web' ? 16 : 50,
     paddingBottom: 14,
   },
   headerInnerWide: {
@@ -354,7 +356,10 @@ const styles = StyleSheet.create({
   },
   logoEmoji: { fontSize: 20 },
   appName: { fontSize: 20, fontWeight: '800', color: '#fff', letterSpacing: 0.2 },
-  authRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  appNameNarrow: { fontSize: 15 },
+  authRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  btnNarrow: { paddingHorizontal: 10, paddingVertical: 6 },
+  btnTextNarrow: { fontSize: 12 },
   registerBtn: {
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.6)',

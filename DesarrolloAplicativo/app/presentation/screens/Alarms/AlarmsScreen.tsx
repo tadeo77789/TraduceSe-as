@@ -430,7 +430,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: Colors.textSecondary,
-    textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
   diasGrid: { flexDirection: 'row', gap: 5, flexWrap: 'wrap' },

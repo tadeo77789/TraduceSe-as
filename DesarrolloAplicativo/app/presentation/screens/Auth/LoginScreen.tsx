@@ -29,11 +29,27 @@ import { Colors } from '../../../constants/colors';
 import { Input } from '../../components/common/Input';
 import { useLoginForm } from '../../../hooks/useLoginForm';
 
+// Logo oficial de Google (SVG multicolor) como data URI — sólo funciona en web
+const GOOGLE_LOGO_URI = `data:image/svg+xml;utf8,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">' +
+  '<path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>' +
+  '<path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>' +
+  '<path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>' +
+  '<path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>' +
+  '</svg>'
+)}` ;
+
 export const LoginScreen: React.FC = () => {
   const navigation = useNavigation();
   const { email, setEmail, password, setPassword, loading, errors, handleLogin } = useLoginForm();
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
+
+  const BackButton = (
+    <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+      <Ionicons name="chevron-back" size={22} color={Colors.primary} />
+    </TouchableOpacity>
+  );
 
   const FormPanel = (
     <ScrollView
@@ -72,7 +88,7 @@ export const LoginScreen: React.FC = () => {
         onPress={() => navigation.navigate('ForgotPassword' as never)}
         style={styles.forgotRow}
       >
-        <Text style={styles.forgotText}>Has olvidado tu contraseña</Text>
+        <Text style={styles.forgotText}>¿Has olvidado tu contraseña?</Text>
       </TouchableOpacity>
 
       {/* Registrarse / Ingresar */}
@@ -95,14 +111,16 @@ export const LoginScreen: React.FC = () => {
 
       {/* Google */}
       <TouchableOpacity style={styles.googleBtn}>
-        <Ionicons name="logo-google" size={20} color="#DB4437" />
-        <Text style={styles.googleText}>google</Text>
+        {Platform.OS === 'web'
+          ? <Image source={{ uri: GOOGLE_LOGO_URI }} style={styles.googleLogoImg} />
+          : <Ionicons name="logo-google" size={20} color="#4285F4" />}
+        <Text style={styles.googleText}>Continuar con Google</Text>
       </TouchableOpacity>
 
       {/* Facebook */}
       <TouchableOpacity style={styles.facebookBtn}>
         <Ionicons name="logo-facebook" size={20} color="#fff" />
-        <Text style={styles.facebookText}>facebook</Text>
+        <Text style={styles.facebookText}>Continuar con Facebook</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -127,6 +145,7 @@ export const LoginScreen: React.FC = () => {
 
         {/* Panel formulario */}
         <View style={styles.formPanel}>
+          {BackButton}
           {FormPanel}
         </View>
       </View>
@@ -139,6 +158,7 @@ export const LoginScreen: React.FC = () => {
       style={styles.mobileRoot}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      {BackButton}
       {FormPanel}
     </KeyboardAvoidingView>
   );
@@ -245,6 +265,25 @@ const styles = StyleSheet.create({
   },
   btnDisabled: { opacity: 0.6 },
 
+  // Botón volver
+  backBtn: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+
   // Social
   googleBtn: {
     flexDirection: 'row',
@@ -261,6 +300,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
+  googleLogoImg: { width: 20, height: 20 },
   googleText: {
     fontSize: 16,
     fontWeight: '700',
