@@ -29,6 +29,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
+import { useColors } from '../../../state/ThemeContext';
 import { BorderRadius, BorderWidth, ComponentSizes, FontWeight, TextStyles } from '../../../constants/theme';
 
 interface InputProps extends TextInputProps {
@@ -57,16 +58,17 @@ function InputBase({
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(false);
+  const C = useColors();
   const sizeTokens = ComponentSizes.input[size];
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && <Text style={[styles.label, { color: C.textSecondary }]}>{label}</Text>}
       <View
         style={[
           styles.inputWrapper,
-          { height: sizeTokens.height },
-          focused && styles.inputFocused,
+          { height: sizeTokens.height, backgroundColor: C.inputBg },
+          focused && [styles.inputFocused, { backgroundColor: C.surface }],
           error ? styles.inputError : null,
         ]}
       >
@@ -74,19 +76,21 @@ function InputBase({
           <Ionicons
             name={leftIcon}
             size={18}
-            color={focused ? Colors.primary : Colors.textSecondary}
+            color={focused ? Colors.primary : C.textSecondary}
             style={styles.leftIcon}
           />
         )}
         <TextInput
           style={[
             styles.input,
-            { paddingHorizontal: sizeTokens.paddingHorizontal },
+            { paddingHorizontal: sizeTokens.paddingHorizontal, color: C.textPrimary },
             leftIcon ? styles.inputWithLeft : null,
           ]}
-          placeholderTextColor={Colors.textHint}
+          placeholderTextColor={C.textHint}
           secureTextEntry={isPassword && !showPassword}
           autoCapitalize="none"
+          textAlignVertical="center"
+          includeFontPadding={false}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           {...props}
@@ -96,13 +100,13 @@ function InputBase({
             <Ionicons
               name={showPassword ? 'eye-off-outline' : 'eye-outline'}
               size={20}
-              color={focused ? Colors.primary : Colors.textSecondary}
+              color={focused ? Colors.primary : C.textSecondary}
             />
           </TouchableOpacity>
         )}
         {rightIcon && !isPassword && (
           <TouchableOpacity onPress={onRightIconPress} style={styles.rightIcon}>
-            <Ionicons name={rightIcon} size={20} color={Colors.textSecondary} />
+            <Ionicons name={rightIcon} size={20} color={C.textSecondary} />
           </TouchableOpacity>
         )}
       </View>
@@ -125,11 +129,12 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     backgroundColor: Colors.inputBg,
     borderRadius: BorderRadius.md,
     borderWidth: BorderWidth.medium,
     borderColor: 'transparent',
+    overflow: 'hidden',
   },
   inputFocused: {
     borderColor: Colors.primary,
@@ -146,6 +151,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    alignSelf: 'stretch',
     paddingVertical: 0,
     fontSize: 15,
     color: Colors.textPrimary,
@@ -155,9 +161,12 @@ const styles = StyleSheet.create({
   },
   leftIcon: {
     marginLeft: 14,
+    alignSelf: 'center',
   },
   rightIcon: {
-    padding: 12,
+    paddingHorizontal: 12,
+    alignSelf: 'center',
+    justifyContent: 'center',
   },
   hint: {
     ...TextStyles.caption,

@@ -11,18 +11,26 @@ import {
   ScrollView, KeyboardAvoidingView, Platform,
   Alert, useWindowDimensions,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
 import { Input } from '../../components/common/Input';
+import { useColors, useTheme } from '../../../state/ThemeContext';
 
 export const ForgotPasswordScreen: React.FC = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const fromProfile = (route.params as any)?.fromProfile ?? false;
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const isWide = width >= 768;
+  const C = useColors();
+  const { isDark } = useTheme();
+  const rootBg = isDark ? '#0F0B1A' : '#EDE9FE';
 
   const handleConfirm = async () => {
     if (!email) { Alert.alert('Error', 'Ingresa tu correo'); return; }
@@ -36,14 +44,14 @@ export const ForgotPasswordScreen: React.FC = () => {
 
   const Logo = (
     <>
-      <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
         <Ionicons name="chevron-back" size={22} color={Colors.primary} />
       </TouchableOpacity>
       <View style={styles.logoCorner}>
         <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.logoBox}>
           <Text style={styles.logoEmoji}>👌</Text>
         </LinearGradient>
-        <Text style={styles.brandName}>TraduceSeña</Text>
+        <Text style={[styles.brandName, { color: C.textPrimary }]}>TraduceSeña</Text>
       </View>
     </>
   );
@@ -51,13 +59,20 @@ export const ForgotPasswordScreen: React.FC = () => {
   const FormPanel = (
     <ScrollView
       contentContainerStyle={styles.formScroll}
-      keyboardShouldPersistTaps="handled"
+      keyboardShouldPersistTaps="always"
       showsVerticalScrollIndicator={false}
+      overScrollMode="never"
+      bounces={false}
     >
-      <View style={styles.card}>
-        <Text style={styles.title}>Recuperar contraseña</Text>
-        <Text style={styles.subtitle}>
-          Ingresa tu correo y te enviaremos un código de verificación
+      <View style={styles.formInner}>
+      <View style={[styles.card, { backgroundColor: C.surface }]}>
+        <Text style={[styles.title, { color: C.textPrimary }]}>
+          {fromProfile ? 'Cambiar contraseña' : 'Recuperar contraseña'}
+        </Text>
+        <Text style={[styles.subtitle, { color: C.textSecondary }]}>
+          {fromProfile
+            ? 'Ingresa tu correo y te enviaremos un código para verificar tu identidad'
+            : 'Ingresa tu correo y te enviaremos un código de verificación'}
         </Text>
 
         <Input
@@ -83,21 +98,24 @@ export const ForgotPasswordScreen: React.FC = () => {
         </View>
       </View>
 
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.linkRow}
-      >
-        <Text style={styles.linkText}>
-          ¿Recordaste tu contraseña?{' '}
-          <Text style={styles.linkAccent}>Inicia sesión</Text>
-        </Text>
-      </TouchableOpacity>
+      {!fromProfile && (
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.linkRow}
+        >
+          <Text style={[styles.linkText, { color: C.textSecondary }]}>
+            ¿Recordaste tu contraseña?{' '}
+            <Text style={styles.linkAccent}>Inicia sesión</Text>
+          </Text>
+        </TouchableOpacity>
+      )}
+      </View>
     </ScrollView>
   );
 
   if (isWide) {
     return (
-      <View style={styles.wideRoot}>
+      <View style={[styles.wideRoot, { backgroundColor: rootBg }]}>
         {Logo}
         <View style={styles.formPanel}>
           {FormPanel}
@@ -108,7 +126,7 @@ export const ForgotPasswordScreen: React.FC = () => {
 
   return (
     <KeyboardAvoidingView
-      style={styles.mobileRoot}
+      style={[styles.mobileRoot, { backgroundColor: rootBg }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {Logo}
@@ -128,10 +146,11 @@ const styles = StyleSheet.create({
   // ── Formulario ──
   formScroll: {
     flexGrow: 1,
-    justifyContent: 'center',
     paddingHorizontal: 16,
     paddingVertical: 48,
+    justifyContent: 'center',
   },
+  formInner: {},
 
   // Botón volver
   backBtn: {

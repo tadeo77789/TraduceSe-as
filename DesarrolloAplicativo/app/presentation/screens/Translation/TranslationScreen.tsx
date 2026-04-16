@@ -32,6 +32,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
+import { useColors } from '../../../state/ThemeContext';
 
 type Mode = 'sena_texto' | 'texto_sena';
 
@@ -45,6 +46,7 @@ export const TranslationScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const isDesktop = width >= 1024;
+  const C = useColors();
 
   const [mode, setMode] = useState<Mode>('sena_texto');
   const [text, setText] = useState('');
@@ -74,7 +76,7 @@ export const TranslationScreen: React.FC = () => {
   }, []);
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>
       <AppHeader />
       <ScrollView
         style={styles.scroll}
@@ -84,7 +86,7 @@ export const TranslationScreen: React.FC = () => {
         <View style={[styles.innerWrapper, isTablet && styles.innerWrapperWide]}>
 
         {/* ── Toggle de modo ── */}
-        <View style={styles.modeToggle}>
+        <View style={[styles.modeToggle, { backgroundColor: C.surface, borderColor: C.border }]}>
           <TouchableOpacity
             style={[styles.modeBtn, mode === 'sena_texto' && styles.modeBtnActive]}
             onPress={() => switchMode('sena_texto')}
@@ -98,7 +100,7 @@ export const TranslationScreen: React.FC = () => {
                 end={{ x: 1, y: 0 }}
               />
             )}
-            <Ionicons name="hand-left-outline" size={18} color={mode === 'sena_texto' ? '#fff' : Colors.textSecondary} />
+            <Ionicons name="hand-left-outline" size={18} color={mode === 'sena_texto' ? '#fff' : C.textSecondary} />
             <Text style={[styles.modeBtnText, mode === 'sena_texto' && styles.modeBtnTextActive]}>
               Seña → Texto
             </Text>
@@ -117,7 +119,7 @@ export const TranslationScreen: React.FC = () => {
                 end={{ x: 1, y: 0 }}
               />
             )}
-            <Ionicons name="text-outline" size={18} color={mode === 'texto_sena' ? '#fff' : Colors.textSecondary} />
+            <Ionicons name="text-outline" size={18} color={mode === 'texto_sena' ? '#fff' : C.textSecondary} />
             <Text style={[styles.modeBtnText, mode === 'texto_sena' && styles.modeBtnTextActive]}>
               Texto → Seña
             </Text>
@@ -165,22 +167,22 @@ export const TranslationScreen: React.FC = () => {
             </View>
           </View>
         ) : (
-          <View style={styles.inputCard}>
+          <View style={[styles.inputCard, { backgroundColor: C.surface }]}>
             <View style={styles.inputCardHeader}>
               <Ionicons name="create-outline" size={16} color={Colors.primary} />
-              <Text style={styles.inputCardTitle}>Escribe el texto a traducir</Text>
+              <Text style={[styles.inputCardTitle, { color: C.textPrimary }]}>Escribe el texto a traducir</Text>
             </View>
             <TextInput
-              style={styles.textArea}
+              style={[styles.textArea, { color: C.textPrimary, backgroundColor: C.backgroundGray, borderColor: C.border }]}
               value={text}
               onChangeText={setText}
               placeholder="Ej: Hola, ¿cómo estás?"
-              placeholderTextColor={Colors.textHint}
+              placeholderTextColor={C.textHint}
               multiline
               textAlignVertical="top"
             />
             <View style={styles.charCount}>
-              <Text style={styles.charCountText}>{text.length} caracteres</Text>
+              <Text style={[styles.charCountText, { color: C.textHint }]}>{text.length} caracteres</Text>
             </View>
           </View>
         )}
@@ -189,7 +191,7 @@ export const TranslationScreen: React.FC = () => {
         {mode === 'sena_texto' && (
           <View style={styles.tipsRow}>
             {TIPS.map((tip, i) => (
-              <View key={i} style={styles.tipChip}>
+              <View key={i} style={[styles.tipChip, { backgroundColor: C.primaryBg }]}>
                 <Ionicons name={tip.icon} size={13} color={Colors.primary} />
                 <Text style={styles.tipText}>{tip.text}</Text>
               </View>
@@ -198,21 +200,21 @@ export const TranslationScreen: React.FC = () => {
         )}
 
         {/* ── Resultado ── */}
-        <View style={styles.resultCard}>
+        <View style={[styles.resultCard, { backgroundColor: C.surface, borderColor: C.border }]}>
           {/* Header del resultado */}
-          <View style={styles.resultHeader}>
-            <LinearGradient colors={['#EDE9FE', '#DDD6FE']} style={styles.resultIconBg}>
+          <View style={[styles.resultHeader, { borderBottomColor: C.border }]}>
+            <LinearGradient colors={[C.primaryBg, C.primaryBg]} style={styles.resultIconBg}>
               <Ionicons name="chatbubble-ellipses-outline" size={16} color={Colors.primary} />
             </LinearGradient>
-            <Text style={styles.resultTitle}>Traducción</Text>
+            <Text style={[styles.resultTitle, { color: C.textPrimary }]}>Traducción</Text>
             {result ? (
               <View style={styles.detectedBadge}>
                 <View style={styles.detectedDot} />
                 <Text style={styles.detectedText}>Listo</Text>
               </View>
             ) : (
-              <View style={styles.waitingBadge}>
-                <Text style={styles.waitingText}>En espera</Text>
+              <View style={[styles.waitingBadge, { backgroundColor: C.inputBg }]}>
+                <Text style={[styles.waitingText, { color: C.textHint }]}>En espera</Text>
               </View>
             )}
           </View>
@@ -221,9 +223,9 @@ export const TranslationScreen: React.FC = () => {
           <View style={styles.resultBody}>
             {result ? (
               <>
-                <Text style={styles.resultText}>{result}</Text>
+                <Text style={[styles.resultText, { color: C.textPrimary }]}>{result}</Text>
                 <TouchableOpacity
-                  style={styles.copyBtn}
+                  style={[styles.copyBtn, { backgroundColor: C.primaryBg }]}
                   onPress={() => Alert.alert('Copiado', 'Texto copiado al portapapeles')}
                 >
                   <Ionicons name="copy-outline" size={14} color={Colors.primary} />
@@ -233,7 +235,7 @@ export const TranslationScreen: React.FC = () => {
             ) : (
               <View style={styles.resultEmpty}>
                 <Ionicons name="scan-outline" size={32} color={Colors.primaryLighter} />
-                <Text style={styles.resultEmptyText}>
+                <Text style={[styles.resultEmptyText, { color: C.textHint }]}>
                   {mode === 'sena_texto'
                     ? 'La traducción aparecerá aquí al detectar una seña'
                     : 'Escribe un texto y toca Traducir'}

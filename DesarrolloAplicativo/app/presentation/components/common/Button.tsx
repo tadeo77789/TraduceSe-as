@@ -15,12 +15,13 @@
  *
  * Se exporta como `React.memo` para evitar renders innecesarios.
  */
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 import {
   TouchableOpacity,
   Text,
   StyleSheet,
   ActivityIndicator,
+  Animated,
   ViewStyle,
   TextStyle,
 } from 'react-native';
@@ -53,56 +54,83 @@ function ButtonBase({
 }: ButtonProps) {
   const isDisabled = disabled || loading;
   const sizeTokens = ComponentSizes.button[size];
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = useCallback(() => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.97,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 0,
+    }).start();
+  }, [scaleAnim]);
+
+  const handlePressOut = useCallback(() => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 30,
+      bounciness: 4,
+    }).start();
+  }, [scaleAnim]);
 
   if (variant === 'primary') {
     return (
-      <TouchableOpacity
-        onPress={onPress}
-        disabled={isDisabled}
-        activeOpacity={0.82}
-        style={[fullWidth && styles.fullWidth, isDisabled && styles.disabled, style]}
-      >
-        <LinearGradient
-          colors={Colors.gradientPrimaryDeep}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[
-            styles.gradientBase,
-            { height: sizeTokens.height, paddingHorizontal: sizeTokens.paddingHorizontal },
-          ]}
+      <Animated.View style={[fullWidth && styles.fullWidth, { transform: [{ scale: scaleAnim }] }]}>
+        <TouchableOpacity
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          disabled={isDisabled}
+          activeOpacity={0.9}
+          style={[isDisabled && styles.disabled, style]}
         >
-          {loading ? (
-            <ActivityIndicator color="#fff" size="small" />
-          ) : (
-            <Text style={[styles.text, styles.primaryText, textStyle]}>{title}</Text>
-          )}
-        </LinearGradient>
-      </TouchableOpacity>
+          <LinearGradient
+            colors={Colors.gradientPrimaryDeep}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[
+              styles.gradientBase,
+              { height: sizeTokens.height, paddingHorizontal: sizeTokens.paddingHorizontal },
+            ]}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={[styles.text, styles.primaryText, textStyle]}>{title}</Text>
+            )}
+          </LinearGradient>
+        </TouchableOpacity>
+      </Animated.View>
     );
   }
 
   return (
-    <TouchableOpacity
-      style={[
-        styles.base,
-        styles[variant],
-        { height: sizeTokens.height, paddingHorizontal: sizeTokens.paddingHorizontal },
-        fullWidth && styles.fullWidth,
-        isDisabled && styles.disabled,
-        style,
-      ]}
-      onPress={onPress}
-      disabled={isDisabled}
-      activeOpacity={0.8}
-    >
-      {loading ? (
-        <ActivityIndicator color={Colors.primary} size="small" />
-      ) : (
-        <Text style={[styles.text, styles[`${variant}Text` as keyof typeof styles], textStyle]}>
-          {title}
-        </Text>
-      )}
-    </TouchableOpacity>
+    <Animated.View style={[fullWidth && styles.fullWidth, { transform: [{ scale: scaleAnim }] }]}>
+      <TouchableOpacity
+        style={[
+          styles.base,
+          styles[variant],
+          { height: sizeTokens.height, paddingHorizontal: sizeTokens.paddingHorizontal },
+          fullWidth && styles.fullWidth,
+          isDisabled && styles.disabled,
+          style,
+        ]}
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        disabled={isDisabled}
+        activeOpacity={0.9}
+      >
+        {loading ? (
+          <ActivityIndicator color={Colors.primary} size="small" />
+        ) : (
+          <Text style={[styles.text, styles[`${variant}Text` as keyof typeof styles], textStyle]}>
+            {title}
+          </Text>
+        )}
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
 

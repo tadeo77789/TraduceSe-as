@@ -16,9 +16,11 @@ import {
   Alert, useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
+import { useColors, useTheme } from '../../../state/ThemeContext';
 
 const CODE_LENGTH = 6;
 
@@ -28,7 +30,11 @@ export const VerifyCodeScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const inputs = useRef<TextInput[]>([]);
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const isWide = width >= 768;
+  const C = useColors();
+  const { isDark } = useTheme();
+  const rootBg = isDark ? '#0F0B1A' : '#EDE9FE';
 
   const handleChange = (text: string, index: number) => {
     const newCode = [...code];
@@ -60,14 +66,14 @@ export const VerifyCodeScreen: React.FC = () => {
 
   const Logo = (
     <>
-      <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
         <Ionicons name="chevron-back" size={22} color={Colors.primary} />
       </TouchableOpacity>
       <View style={styles.logoCorner}>
         <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.logoBox}>
           <Text style={styles.logoEmoji}>👌</Text>
         </LinearGradient>
-        <Text style={styles.brandName}>TraduceSeña</Text>
+        <Text style={[styles.brandName, { color: C.textPrimary }]}>TraduceSeña</Text>
       </View>
     </>
   );
@@ -75,13 +81,16 @@ export const VerifyCodeScreen: React.FC = () => {
   const FormPanel = (
     <ScrollView
       contentContainerStyle={styles.formScroll}
-      keyboardShouldPersistTaps="handled"
+      keyboardShouldPersistTaps="always"
       showsVerticalScrollIndicator={false}
+      overScrollMode="never"
+      bounces={false}
     >
-      <View style={styles.card}>
-        <Text style={styles.title}>Confirma tu cuenta</Text>
-        <Text style={styles.subtitle}>
-          Te hemos enviado un código de verificación a tu correo electrónico. Ingrésalo para continuar.
+      <View style={styles.formInner}>
+      <View style={[styles.card, { backgroundColor: C.surface }]}>
+        <Text style={[styles.title, { color: C.textPrimary }]}>Verifica tu identidad</Text>
+        <Text style={[styles.subtitle, { color: C.textSecondary }]}>
+          Te enviamos un código de 6 dígitos a tu correo electrónico. Ingrésalo para continuar.
         </Text>
 
         {/* OTP inputs */}
@@ -90,7 +99,11 @@ export const VerifyCodeScreen: React.FC = () => {
             <TextInput
               key={i}
               ref={el => { if (el) inputs.current[i] = el; }}
-              style={[styles.otpInput, digit ? styles.otpFilled : null]}
+              style={[
+                styles.otpInput,
+                { backgroundColor: C.inputBg, borderColor: C.border, color: C.textPrimary },
+                digit ? { borderColor: Colors.primary, backgroundColor: isDark ? '#1E183A' : '#EDE9FE' } : null,
+              ]}
               value={digit}
               onChangeText={text => handleChange(text.slice(-1), i)}
               onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, i)}
@@ -118,17 +131,18 @@ export const VerifyCodeScreen: React.FC = () => {
         onPress={() => navigation.goBack()}
         style={styles.linkRow}
       >
-        <Text style={styles.linkText}>
+        <Text style={[styles.linkText, { color: C.textSecondary }]}>
           ¿No recibiste el código?{' '}
           <Text style={styles.linkAccent}>Reenviar</Text>
         </Text>
       </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 
   if (isWide) {
     return (
-      <View style={styles.wideRoot}>
+      <View style={[styles.wideRoot, { backgroundColor: rootBg }]}>
         {Logo}
         <View style={styles.formPanel}>
           {FormPanel}
@@ -139,7 +153,7 @@ export const VerifyCodeScreen: React.FC = () => {
 
   return (
     <KeyboardAvoidingView
-      style={styles.mobileRoot}
+      style={[styles.mobileRoot, { backgroundColor: rootBg }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {Logo}
@@ -159,10 +173,11 @@ const styles = StyleSheet.create({
   // ── Formulario ──
   formScroll: {
     flexGrow: 1,
-    justifyContent: 'center',
     paddingHorizontal: 16,
     paddingVertical: 48,
+    justifyContent: 'center',
   },
+  formInner: {},
 
   // Botón volver
   backBtn: {

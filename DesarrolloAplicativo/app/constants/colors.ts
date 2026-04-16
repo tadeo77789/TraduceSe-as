@@ -93,3 +93,20 @@ export const Colors = {
   shadow:  'rgba(0, 0, 0, 0.08)',
   overlay: 'rgba(0, 0, 0, 0.5)',
 } as const;
+
+// ─── Paleta oscura ────────────────────────────────────────────────────────────
+export const DarkColors = {
+  ...Colors,
+  background:     '#111118',
+  backgroundGray: '#111118',
+  surface:        '#1E1E2A',
+  inputBg:        '#252534',
+  textPrimary:    '#EEEEF5',
+  textSecondary:  '#9898B0',
+  textHint:       '#5E5E78',
+  border:         '#2D2D3E',
+  primaryBg:      '#1E183A',
+  primaryHeader:  '#1E183A',
+  shadow:         'rgba(0,0,0,0.3)',
+  modeInactive:   '#1E1E2A',
+};

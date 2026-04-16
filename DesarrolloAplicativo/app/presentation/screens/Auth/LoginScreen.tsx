@@ -24,6 +24,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
 import { Input } from '../../components/common/Input';
@@ -43,10 +44,11 @@ export const LoginScreen: React.FC = () => {
   const navigation = useNavigation();
   const { email, setEmail, password, setPassword, loading, errors, handleLogin } = useLoginForm();
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const isWide = width >= 768;
 
   const BackButton = (
-    <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+    <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
       <Ionicons name="chevron-back" size={22} color={Colors.primary} />
     </TouchableOpacity>
   );
@@ -54,74 +56,80 @@ export const LoginScreen: React.FC = () => {
   const FormPanel = (
     <ScrollView
       contentContainerStyle={styles.formScroll}
-      keyboardShouldPersistTaps="handled"
+      keyboardShouldPersistTaps="always"
       showsVerticalScrollIndicator={false}
+      overScrollMode="never"
+      bounces={false}
     >
-      {/* Avatar */}
-      <View style={styles.avatarCircle}>
-        <Ionicons name="person" size={38} color={Colors.primary} />
-      </View>
+      {/* Wrapper con justifyContent aquí para evitar el bug de Android
+          donde justifyContent en contentContainerStyle desalinea los toques */}
+      <View style={styles.formInner}>
+        {/* Avatar */}
+        <View style={styles.avatarCircle}>
+          <Ionicons name="person" size={38} color={Colors.primary} />
+        </View>
 
-      {/* Inputs */}
-      <Input
-        placeholder="Correo electrónico"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        leftIcon="mail-outline"
-        error={errors.email}
-        containerStyle={styles.inputSpacing}
-      />
+        {/* Inputs */}
+        <Input
+          placeholder="Correo electrónico"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          leftIcon="mail-outline"
+          error={errors.email}
+          containerStyle={styles.inputSpacing}
+        />
 
-      <Input
-        placeholder="Contraseña"
-        value={password}
-        onChangeText={setPassword}
-        isPassword
-        leftIcon="lock-closed-outline"
-        error={errors.password}
-        containerStyle={styles.inputSpacing}
-      />
+        <Input
+          placeholder="Contraseña"
+          value={password}
+          onChangeText={setPassword}
+          isPassword
+          leftIcon="lock-closed-outline"
+          error={errors.password}
+          containerStyle={styles.inputSpacing}
+        />
 
-      {/* Olvidé contraseña */}
-      <TouchableOpacity
-        onPress={() => navigation.navigate('ForgotPassword' as never)}
-        style={styles.forgotRow}
-      >
-        <Text style={styles.forgotText}>¿Has olvidado tu contraseña?</Text>
-      </TouchableOpacity>
-
-      {/* Registrarse / Ingresar */}
-      <View style={styles.authRow}>
+        {/* Olvidé contraseña */}
         <TouchableOpacity
-          style={styles.registerBtn}
-          onPress={() => navigation.navigate('Register' as never)}
+          onPress={() => navigation.navigate('ForgotPassword' as never)}
+          style={styles.forgotRow}
         >
-          <Text style={styles.registerBtnText}>Registrarse</Text>
+          <Text style={styles.forgotText}>¿Has olvidado tu contraseña?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.loginBtn, loading && styles.btnDisabled]}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          <Text style={styles.loginBtnText}>{loading ? 'Ingresando...' : 'Ingresar'}</Text>
+        {/* Registrarse / Ingresar */}
+        <View style={styles.authRow}>
+          <TouchableOpacity
+            style={styles.registerBtn}
+            onPress={() => navigation.navigate('Register' as never)}
+          >
+            <Text style={styles.registerBtnText}>Registrarse</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.loginBtn, loading && styles.btnDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            <Text style={styles.loginBtnText}>{loading ? 'Ingresando...' : 'Ingresar'}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Google */}
+        <TouchableOpacity style={styles.googleBtn}>
+          {Platform.OS === 'web'
+            ? <Image source={{ uri: GOOGLE_LOGO_URI }} style={styles.googleLogoImg} />
+            : <Ionicons name="logo-google" size={20} color="#4285F4" />}
+          <Text style={styles.googleText}>Continuar con Google</Text>
+        </TouchableOpacity>
+
+        {/* Facebook */}
+        <TouchableOpacity style={styles.facebookBtn}>
+          <Ionicons name="logo-facebook" size={20} color="#fff" />
+          <Text style={styles.facebookText}>Continuar con Facebook</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Google */}
-      <TouchableOpacity style={styles.googleBtn}>
-        {Platform.OS === 'web'
-          ? <Image source={{ uri: GOOGLE_LOGO_URI }} style={styles.googleLogoImg} />
-          : <Ionicons name="logo-google" size={20} color="#4285F4" />}
-        <Text style={styles.googleText}>Continuar con Google</Text>
-      </TouchableOpacity>
-
-      {/* Facebook */}
-      <TouchableOpacity style={styles.facebookBtn}>
-        <Ionicons name="logo-facebook" size={20} color="#fff" />
-        <Text style={styles.facebookText}>Continuar con Facebook</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 
@@ -202,11 +210,11 @@ const styles = StyleSheet.create({
   // ── Formulario (compartido) ──
   formScroll: {
     flexGrow: 1,
-    justifyContent: 'center',
     paddingHorizontal: 32,
     paddingVertical: 48,
-    gap: 0,
+    justifyContent: 'center',
   },
+  formInner: {},
 
   // Avatar
   avatarCircle: {

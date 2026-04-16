@@ -25,6 +25,7 @@ import {
 } from 'react-native';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
+import { useColors, useTheme } from '../../../state/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -34,6 +35,7 @@ const BarChart: React.FC<{
   colors: [string, string];
   maxValue?: number;
 }> = ({ data, colors, maxValue }) => {
+  const C = useColors();
   const max = maxValue || Math.max(...data.map(d => d.value));
   const chartHeight = 100;
 
@@ -42,7 +44,7 @@ const BarChart: React.FC<{
       <View style={bar.chart}>
         {data.map((item, i) => (
           <View key={i} style={bar.barGroup}>
-            <Text style={bar.valueLabel}>{item.value}</Text>
+            <Text style={[bar.valueLabel, { color: C.textHint }]}>{item.value}</Text>
             <View style={[bar.barWrap, { height: (item.value / max) * chartHeight }]}>
               <LinearGradient
                 colors={colors}
@@ -51,7 +53,7 @@ const BarChart: React.FC<{
                 style={bar.bar}
               />
             </View>
-            <Text style={bar.barLabel}>{item.label}</Text>
+            <Text style={[bar.barLabel, { color: C.textHint }]}>{item.label}</Text>
           </View>
         ))}
       </View>
@@ -123,22 +125,25 @@ const LineChart: React.FC<{ data: number[]; color: string }> = ({ data, color })
 // ─── Leyenda de torta ────────────────────────────────────────────────────────
 const PieChart: React.FC<{
   data: { label: string; value: number; color: string }[];
-}> = ({ data }) => (
-  <View style={pie.container}>
-    <View style={pie.legend}>
-      {data.map((item, i) => (
-        <View key={i} style={pie.legendRow}>
-          <View style={[pie.dot, { backgroundColor: item.color }]} />
-          <Text style={pie.legendLabel}>{item.label}</Text>
-          <View style={pie.barTrack}>
-            <View style={[pie.barFill, { width: `${item.value}%` as any, backgroundColor: item.color }]} />
+}> = ({ data }) => {
+  const C = useColors();
+  return (
+    <View style={pie.container}>
+      <View style={pie.legend}>
+        {data.map((item, i) => (
+          <View key={i} style={pie.legendRow}>
+            <View style={[pie.dot, { backgroundColor: item.color }]} />
+            <Text style={[pie.legendLabel, { color: C.textSecondary }]}>{item.label}</Text>
+            <View style={[pie.barTrack, { backgroundColor: C.border }]}>
+              <View style={[pie.barFill, { width: `${item.value}%` as any, backgroundColor: item.color }]} />
+            </View>
+            <Text style={[pie.legendValue, { color: item.color }]}>{item.value}%</Text>
           </View>
-          <Text style={[pie.legendValue, { color: item.color }]}>{item.value}%</Text>
-        </View>
-      ))}
+        ))}
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 // ─── Estilos de gráficas ──────────────────────────────────────────────────────
 const bar = StyleSheet.create({
@@ -205,10 +210,10 @@ const SECTION_PIE = [
 ];
 
 const KPI_CARDS = [
-  { label: 'Traducciones', value: '1,248', icon: 'swap-horizontal-outline' as const, gradient: ['#EDE9FE', '#DDD6FE'] as [string, string], color: Colors.primary },
-  { label: 'Usuarios activos', value: '342', icon: 'people-outline' as const, gradient: ['#DBEAFE', '#BFDBFE'] as [string, string], color: '#2563EB' },
-  { label: 'Horas aprendidas', value: '89h', icon: 'school-outline' as const, gradient: ['#D1FAE5', '#A7F3D0'] as [string, string], color: '#059669' },
-  { label: 'Señas aprendidas', value: '84', icon: 'hand-left-outline' as const, gradient: ['#FEF3C7', '#FDE68A'] as [string, string], color: '#D97706' },
+  { label: 'Traducciones',    value: '1,248', icon: 'swap-horizontal-outline' as const, gradient: ['#EDE9FE', '#DDD6FE'] as [string, string], darkGradient: ['#2D1F4E', '#1E183A'] as [string, string], color: Colors.primary },
+  { label: 'Usuarios activos', value: '342',  icon: 'people-outline' as const,          gradient: ['#DBEAFE', '#BFDBFE'] as [string, string], darkGradient: ['#1A2744', '#111B35'] as [string, string], color: '#2563EB' },
+  { label: 'Horas aprendidas', value: '89h',  icon: 'school-outline' as const,          gradient: ['#D1FAE5', '#A7F3D0'] as [string, string], darkGradient: ['#0F2920', '#0A1E16'] as [string, string], color: '#059669' },
+  { label: 'Señas aprendidas', value: '84',   icon: 'hand-left-outline' as const,       gradient: ['#FEF3C7', '#FDE68A'] as [string, string], darkGradient: ['#2A1E0A', '#1C1508'] as [string, string], color: '#D97706' },
 ];
 
 // ─── StatCard ─────────────────────────────────────────────────────────────────
@@ -219,25 +224,30 @@ interface StatCardProps {
   children: React.ReactNode;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, description, accentColor, children }) => (
-  <View style={styles.card}>
-    <View style={styles.cardHeader}>
-      <View style={[styles.cardAccent, { backgroundColor: accentColor }]} />
-      <Text style={styles.cardTitle}>{title}</Text>
+const StatCard: React.FC<StatCardProps> = ({ title, description, accentColor, children }) => {
+  const C = useColors();
+  return (
+    <View style={[styles.card, { backgroundColor: C.surface }]}>
+      <View style={styles.cardHeader}>
+        <View style={[styles.cardAccent, { backgroundColor: accentColor }]} />
+        <Text style={[styles.cardTitle, { color: C.textPrimary }]}>{title}</Text>
+      </View>
+      {children}
+      <Text style={[styles.cardDesc, { color: C.textSecondary }]}>{description}</Text>
     </View>
-    {children}
-    <Text style={styles.cardDesc}>{description}</Text>
-  </View>
-);
+  );
+};
 
 // ─── Pantalla principal ───────────────────────────────────────────────────────
 export const StatsScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const isDesktop = width >= 1024;
+  const C = useColors();
+  const { isDark } = useTheme();
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>
       <AppHeader />
       <ScrollView
         style={styles.scroll}
@@ -249,10 +259,10 @@ export const StatsScreen: React.FC = () => {
           {/* KPI Cards — 4 cols en desktop, 2 en tablet/mobile */}
           <View style={[styles.kpiGrid, isDesktop && styles.kpiGridDesktop]}>
             {KPI_CARDS.map((kpi, i) => (
-              <LinearGradient key={i} colors={kpi.gradient} style={[styles.kpiCard, isDesktop && styles.kpiCardDesktop]}>
+              <LinearGradient key={i} colors={isDark ? kpi.darkGradient : kpi.gradient} style={[styles.kpiCard, isDesktop && styles.kpiCardDesktop]}>
                 <Ionicons name={kpi.icon} size={20} color={kpi.color} />
                 <Text style={[styles.kpiValue, { color: kpi.color }]}>{kpi.value}</Text>
-                <Text style={styles.kpiLabel}>{kpi.label}</Text>
+                <Text style={[styles.kpiLabel, { color: C.textSecondary }]}>{kpi.label}</Text>
               </LinearGradient>
             ))}
           </View>

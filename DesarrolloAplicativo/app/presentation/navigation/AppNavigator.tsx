@@ -13,7 +13,7 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAuth } from '../../state/AuthContext';
 import { AuthNavigator } from './AuthNavigator';
-import { MainTabNavigator } from './MainTabNavigator';
+import { MainStackNavigator } from './MainStackNavigator';
 import { Colors } from '../../constants/colors';
 
 export const AppNavigator: React.FC = () => {
@@ -29,7 +29,7 @@ export const AppNavigator: React.FC = () => {
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? <MainTabNavigator /> : <AuthNavigator />}
+      {isAuthenticated ? <MainStackNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 };

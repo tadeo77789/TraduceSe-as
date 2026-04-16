@@ -20,6 +20,7 @@ import { HistoryScreen } from '../screens/History/HistoryScreen';
 import { ProfileStackNavigator } from './ProfileStackNavigator';
 import { WebTopBar } from '../components/common/WebTopBar';
 import { Colors } from '../../constants/colors';
+import { useColors } from '../../state/ThemeContext';
 
 export type MainTabParams = {
   Translation: undefined;
@@ -34,11 +35,17 @@ const Tab = createBottomTabNavigator<MainTabParams>();
 
 export const MainTabNavigator: React.FC = () => {
   const { width } = useWindowDimensions();
+  const C = useColors();
   // Muestra la barra superior solo en web con viewport ancho (≥ 1024 px)
   // En móvil real y en web con viewport estrecho usa la barra de tabs inferior
   const isWide = Platform.OS === 'web' && width >= 1024;
   // En pantallas muy estrechas (< 480 px) oculta las etiquetas de los tabs
   const hideLabels = width < 480;
+
+  const tabBarTheme = {
+    backgroundColor: C.surface,
+    borderTopColor: C.border,
+  };
 
   return (
   <Tab.Navigator
@@ -46,8 +53,10 @@ export const MainTabNavigator: React.FC = () => {
       headerShown: isWide,
       header: isWide ? (props) => <WebTopBar {...props} /> : undefined,
       tabBarActiveTintColor: Colors.primary,
-      tabBarInactiveTintColor: Colors.textSecondary,
-      tabBarStyle: isWide ? styles.hidden : (hideLabels ? styles.tabBarCompact : styles.tabBar),
+      tabBarInactiveTintColor: C.textSecondary,
+      tabBarStyle: isWide ? styles.hidden : (hideLabels
+        ? { ...styles.tabBarCompact, ...tabBarTheme }
+        : { ...styles.tabBar, ...tabBarTheme }),
       tabBarShowLabel: !hideLabels,
       tabBarLabelStyle: styles.tabLabel,
       tabBarIcon: ({ focused, color }) => {

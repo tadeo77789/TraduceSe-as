@@ -13,10 +13,12 @@ import {
   Alert, useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
 import { Input } from '../../components/common/Input';
+import { useColors, useTheme } from '../../../state/ThemeContext';
 
 export const NewPasswordScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -24,7 +26,11 @@ export const NewPasswordScreen: React.FC = () => {
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const isWide = width >= 768;
+  const C = useColors();
+  const { isDark } = useTheme();
+  const rootBg = isDark ? '#0F0B1A' : '#EDE9FE';
 
   const handleConfirm = () => {
     if (!password || password.length < 8) {
@@ -48,14 +54,14 @@ export const NewPasswordScreen: React.FC = () => {
 
   const Logo = (
     <>
-      <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
         <Ionicons name="chevron-back" size={22} color={Colors.primary} />
       </TouchableOpacity>
       <View style={styles.logoCorner}>
         <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.logoBox}>
           <Text style={styles.logoEmoji}>👌</Text>
         </LinearGradient>
-        <Text style={styles.brandName}>TraduceSeña</Text>
+        <Text style={[styles.brandName, { color: C.textPrimary }]}>TraduceSeña</Text>
       </View>
     </>
   );
@@ -63,11 +69,14 @@ export const NewPasswordScreen: React.FC = () => {
   const FormPanel = (
     <ScrollView
       contentContainerStyle={styles.formScroll}
-      keyboardShouldPersistTaps="handled"
+      keyboardShouldPersistTaps="always"
       showsVerticalScrollIndicator={false}
+      overScrollMode="never"
+      bounces={false}
     >
-      <View style={styles.card}>
-        <Text style={styles.title}>Nueva contraseña</Text>
+      <View style={styles.formInner}>
+      <View style={[styles.card, { backgroundColor: C.surface }]}>
+        <Text style={[styles.title, { color: C.textPrimary }]}>Nueva contraseña</Text>
 
         <Input
           label="Nueva contraseña"
@@ -97,17 +106,18 @@ export const NewPasswordScreen: React.FC = () => {
             disabled={loading}
           >
             <Text style={styles.submitBtnText}>
-              {loading ? 'Guardando...' : 'Confirmar'}
+              {loading ? 'Guardando...' : 'Guardar contraseña'}
             </Text>
           </TouchableOpacity>
         </View>
+      </View>
       </View>
     </ScrollView>
   );
 
   if (isWide) {
     return (
-      <View style={styles.wideRoot}>
+      <View style={[styles.wideRoot, { backgroundColor: rootBg }]}>
         {Logo}
         <View style={styles.formPanel}>
           {FormPanel}
@@ -118,7 +128,7 @@ export const NewPasswordScreen: React.FC = () => {
 
   return (
     <KeyboardAvoidingView
-      style={styles.mobileRoot}
+      style={[styles.mobileRoot, { backgroundColor: rootBg }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {Logo}
@@ -138,10 +148,11 @@ const styles = StyleSheet.create({
   // ── Formulario ──
   formScroll: {
     flexGrow: 1,
-    justifyContent: 'center',
     paddingHorizontal: 16,
     paddingVertical: 48,
+    justifyContent: 'center',
   },
+  formInner: {},
 
   // Botón volver
   backBtn: {

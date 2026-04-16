@@ -24,6 +24,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
@@ -34,14 +35,18 @@ export const RegisterScreen: React.FC = () => {
   const navigation = useNavigation();
   const { form, setField, loading, errors, handleRegister } = useRegisterForm();
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const isWide = width >= 768;
 
   const FormPanel = (
     <ScrollView
       contentContainerStyle={styles.formScroll}
-      keyboardShouldPersistTaps="handled"
+      keyboardShouldPersistTaps="always"
       showsVerticalScrollIndicator={false}
+      overScrollMode="never"
+      bounces={false}
     >
+      <View style={styles.formInner}>
       {/* Card formulario */}
       <View style={styles.card}>
         {/* Título */}
@@ -119,12 +124,13 @@ export const RegisterScreen: React.FC = () => {
           <Text style={styles.loginLink}>Inicia sesión</Text>
         </Text>
       </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 
   const Logo = (
     <>
-      <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
         <Ionicons name="chevron-back" size={22} color={Colors.primary} />
       </TouchableOpacity>
       <View style={styles.logoCorner}>
@@ -171,10 +177,11 @@ const styles = StyleSheet.create({
   // ── Formulario ──
   formScroll: {
     flexGrow: 1,
-    justifyContent: 'center',
     paddingHorizontal: 16,
     paddingVertical: 48,
+    justifyContent: 'center',
   },
+  formInner: {},
 
   // Botón volver
   backBtn: {
