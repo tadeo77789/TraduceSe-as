@@ -35,12 +35,12 @@ export type AuthStackParams = { // Define y exporta el tipo TypeScript que mapea
 const Stack = createNativeStackNavigator<AuthStackParams>(); // Crea la instancia del stack navigator tipada con AuthStackParams; expone Stack.Navigator y Stack.Screen
 
 export const AuthNavigator: React.FC = () => ( // Define y exporta el componente funcional AuthNavigator; usa sintaxis de retorno implícito con paréntesis
-  <Stack.Navigator screenOptions={{ headerShown: false }}> {/* Monta el stack de auth; headerShown: false oculta la barra de encabezado en todas las pantallas del flujo */}
-    <Stack.Screen name="Landing" component={LandingScreen} /> {/* Registra la pantalla de bienvenida como pantalla inicial del stack; navegable con navigation.navigate('Landing') */}
-    <Stack.Screen name="Login" component={LoginScreen} /> {/* Registra la pantalla de inicio de sesión en el stack; navegable con navigation.navigate('Login') */}
-    <Stack.Screen name="Register" component={RegisterScreen} /> {/* Registra la pantalla de registro de cuenta nueva; navegable con navigation.navigate('Register') */}
-    <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} /> {/* Registra la pantalla de recuperación de contraseña; navegable con navigation.navigate('ForgotPassword') */}
-    <Stack.Screen name="VerifyCode" component={VerifyCodeScreen} /> {/* Registra la pantalla de verificación OTP; navegable con navigation.navigate('VerifyCode') */}
-    <Stack.Screen name="NewPassword" component={NewPasswordScreen} /> {/* Registra la pantalla para establecer nueva contraseña; navegable con navigation.navigate('NewPassword') */}
-  </Stack.Navigator> // Cierra el Stack.Navigator del flujo de autenticación
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Landing" component={LandingScreen} />
+    <Stack.Screen name="Login" component={LoginScreen} />
+    <Stack.Screen name="Register" component={RegisterScreen} />
+    <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+    <Stack.Screen name="VerifyCode" component={VerifyCodeScreen} />
+    <Stack.Screen name="NewPassword" component={NewPasswordScreen} />
+  </Stack.Navigator>
 ); // Cierra el retorno implícito y la definición del componente AuthNavigator
