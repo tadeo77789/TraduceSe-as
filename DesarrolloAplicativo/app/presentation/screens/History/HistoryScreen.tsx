@@ -28,6 +28,7 @@ import {
 } from 'react-native';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
+import { useColors, useTheme } from '../../../state/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Traduccion } from '../../../types';
@@ -54,27 +55,35 @@ type TipoConfig = {
   label: string;
   icon: keyof typeof import('@expo/vector-icons/build/Ionicons').glyphMap;
   gradient: [string, string];
+  darkGradient: [string, string];
   textColor: string;
+  darkTextColor: string;
 };
 
 const TIPO_CONFIG: Record<string, TipoConfig> = {
   sena_texto: {
     label: 'Seña → Texto',
     icon: 'hand-left-outline',
-    gradient: ['#EDE9FE', '#DDD6FE'],
-    textColor: Colors.primary,
+    gradient:     ['#EDE9FE', '#DDD6FE'],
+    darkGradient: ['#2D1F4E', '#1E183A'],
+    textColor:     Colors.primary,
+    darkTextColor: '#9F71ED',
   },
   texto_sena: {
     label: 'Texto → Seña',
     icon: 'text-outline',
-    gradient: ['#DBEAFE', '#BFDBFE'],
-    textColor: '#2563EB',
+    gradient:     ['#DBEAFE', '#BFDBFE'],
+    darkGradient: ['#162644', '#111B35'],
+    textColor:     '#2563EB',
+    darkTextColor: '#60A5FA',
   },
   voz_sena: {
     label: 'Voz → Seña',
     icon: 'mic-outline',
-    gradient: ['#D1FAE5', '#A7F3D0'],
-    textColor: '#059669',
+    gradient:     ['#D1FAE5', '#A7F3D0'],
+    darkGradient: ['#0D2B1E', '#0A1E16'],
+    textColor:     '#059669',
+    darkTextColor: '#34D399',
   },
 };
 
@@ -84,6 +93,8 @@ export const HistoryScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const numCols = isTablet ? 2 : 1;
+  const C = useColors();
+  const { isDark } = useTheme();
   const [items, setItems] = useState<Traduccion[]>(MOCK_HISTORY);
 
   const handleDelete = useCallback((id: number) => {
@@ -102,31 +113,32 @@ export const HistoryScreen: React.FC = () => {
 
   const renderItem: ListRenderItem<Traduccion> = useCallback(({ item }) => {
     const config = TIPO_CONFIG[item.tipo] ?? TIPO_CONFIG['texto_sena'];
+    const badgeColor = isDark ? config.darkTextColor : config.textColor;
     return (
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: C.surface }]}>
         {/* Badge de tipo */}
-        <LinearGradient colors={config.gradient} style={styles.typeBadge}>
-          <Ionicons name={config.icon} size={13} color={config.textColor} />
-          <Text style={[styles.typeBadgeText, { color: config.textColor }]}>{config.label}</Text>
+        <LinearGradient colors={isDark ? config.darkGradient : config.gradient} style={styles.typeBadge}>
+          <Ionicons name={config.icon} size={13} color={badgeColor} />
+          <Text style={[styles.typeBadgeText, { color: badgeColor }]}>{config.label}</Text>
         </LinearGradient>
 
         {/* Contenido */}
-        <Text style={styles.cardText} numberOfLines={2}>{item.texto_entrada}</Text>
+        <Text style={[styles.cardText, { color: C.textPrimary }]} numberOfLines={2}>{item.texto_entrada}</Text>
 
         {/* Footer */}
-        <View style={styles.cardFooter}>
+        <View style={[styles.cardFooter, { borderTopColor: C.border }]}>
           <View style={styles.cardMeta}>
-            <Ionicons name="calendar-outline" size={12} color={Colors.textHint} />
-            <Text style={styles.cardMetaText}>{item.fecha_traduccion}</Text>
-            <Ionicons name="time-outline" size={12} color={Colors.textHint} style={{ marginLeft: 8 }} />
-            <Text style={styles.cardMetaText}>{MOCK_TIMES[item.id_traduccion]}</Text>
+            <Ionicons name="calendar-outline" size={12} color={C.textHint} />
+            <Text style={[styles.cardMetaText, { color: C.textHint }]}>{item.fecha_traduccion}</Text>
+            <Ionicons name="time-outline" size={12} color={C.textHint} style={{ marginLeft: 8 }} />
+            <Text style={[styles.cardMetaText, { color: C.textHint }]}>{MOCK_TIMES[item.id_traduccion]}</Text>
           </View>
           <View style={styles.cardActions}>
-            <TouchableOpacity style={styles.actionBtn} onPress={() => handleReuse(item)}>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: C.primaryBg }]} onPress={() => handleReuse(item)}>
               <Ionicons name="refresh-outline" size={15} color={Colors.primary} />
               <Text style={[styles.actionText, { color: Colors.primary }]}>Reusar</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.actionBtn, styles.actionBtnDanger]} onPress={() => handleDelete(item.id_traduccion)}>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: 'rgba(239,68,68,0.12)' }]} onPress={() => handleDelete(item.id_traduccion)}>
               <Ionicons name="trash-outline" size={15} color={Colors.danger} />
               <Text style={[styles.actionText, { color: Colors.danger }]}>Eliminar</Text>
             </TouchableOpacity>
@@ -134,26 +146,26 @@ export const HistoryScreen: React.FC = () => {
         </View>
       </View>
     );
-  }, [handleDelete, handleReuse]);
+  }, [handleDelete, handleReuse, C, isDark]);
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>
       <AppHeader />
       <View style={styles.container}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>Historial</Text>
-          <View style={styles.countBadge}>
+          <Text style={[styles.title, { color: C.textPrimary }]}>Historial</Text>
+          <View style={[styles.countBadge, { backgroundColor: C.primaryBg }]}>
             <Text style={styles.countText}>{items.length} registros</Text>
           </View>
         </View>
 
         {items.length === 0 ? (
           <View style={styles.empty}>
-            <View style={styles.emptyIcon}>
+            <View style={[styles.emptyIcon, { backgroundColor: C.primaryBg }]}>
               <Ionicons name="time-outline" size={40} color={Colors.primary} />
             </View>
-            <Text style={styles.emptyTitle}>Sin traducciones</Text>
-            <Text style={styles.emptyText}>Las traducciones que realices aparecerán aquí</Text>
+            <Text style={[styles.emptyTitle, { color: C.textPrimary }]}>Sin traducciones</Text>
+            <Text style={[styles.emptyText, { color: C.textSecondary }]}>Las traducciones que realices aparecerán aquí</Text>
           </View>
         ) : (
           <FlatList

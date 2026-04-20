@@ -18,6 +18,7 @@ import { BottomTabHeaderProps } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
+import { useColors } from '../../../state/ThemeContext';
 
 const TAB_ITEMS: { name: string; label: string; icon: string; iconActive: string }[] = [
   { name: 'Translation', label: 'Traducción',  icon: 'language-outline',  iconActive: 'language'  },
@@ -29,11 +30,12 @@ const TAB_ITEMS: { name: string; label: string; icon: string; iconActive: string
 
 export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route }) => {
   const currentTab = route.name;
+  const C = useColors();
 
   const goTo = (name: string) => navigation.navigate(name);
 
   return (
-    <View style={styles.bar}>
+    <View style={[styles.bar, { backgroundColor: C.primaryHeader, borderBottomColor: C.border }]}>
       <View style={styles.inner}>
 
         {/* Logo */}
@@ -41,7 +43,7 @@ export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route })
           <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.logoBox}>
             <Text style={styles.logoEmoji}>👌</Text>
           </LinearGradient>
-          <Text style={styles.appName}>TraduceSeña</Text>
+          <Text style={[styles.appName, { color: C.textPrimary }]}>TraduceSeña</Text>
         </TouchableOpacity>
 
         {/* Links de navegación */}
@@ -51,15 +53,15 @@ export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route })
             return (
               <TouchableOpacity
                 key={tab.name}
-                style={[styles.link, focused && styles.linkActive]}
+                style={[styles.link, focused && [styles.linkActive, { backgroundColor: C.primaryBg }]]}
                 onPress={() => goTo(tab.name)}
               >
                 <Ionicons
                   name={(focused ? tab.iconActive : tab.icon) as any}
                   size={15}
-                  color={focused ? Colors.primary : Colors.textSecondary}
+                  color={focused ? Colors.primary : C.textSecondary}
                 />
-                <Text style={[styles.linkText, focused && styles.linkTextActive]}>
+                <Text style={[styles.linkText, { color: C.textSecondary }, focused && styles.linkTextActive]}>
                   {tab.label}
                 </Text>
                 {focused && <View style={styles.underline} />}
@@ -70,7 +72,7 @@ export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route })
 
         {/* Perfil */}
         <TouchableOpacity
-          style={[styles.avatarCircle, currentTab === 'Profile' && styles.avatarActive]}
+          style={[styles.avatarCircle, { backgroundColor: C.primaryBg }, currentTab === 'Profile' && styles.avatarActive]}
           onPress={() => goTo('Profile')}
         >
           <Ionicons
@@ -104,7 +106,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     paddingHorizontal: 28,
     paddingVertical: 14,
-    gap: 36,
+    gap: 16,
   },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   logoBox: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },

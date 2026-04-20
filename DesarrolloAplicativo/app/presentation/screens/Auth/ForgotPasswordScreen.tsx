@@ -2,28 +2,35 @@
  * @file ForgotPasswordScreen.tsx
  * @description Pantalla de recuperación de contraseña — paso 1: ingreso de correo.
  *
- * El usuario ingresa su correo y presiona "Enviar código". La app simula
- * el envío y navega a `VerifyCodeScreen`.
- *
  * @todo Conectar `handleConfirm` con el endpoint real del backend
  *       (`ENDPOINTS.forgotPassword`) para enviar el código OTP.
  */
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, KeyboardAvoidingView, Platform, Alert,
+  View, Text, StyleSheet, TouchableOpacity,
+  ScrollView, KeyboardAvoidingView, Platform,
+  Alert, useWindowDimensions,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
-
 import { Input } from '../../components/common/Input';
-import { Button } from '../../components/common/Button';
+import { useColors, useTheme } from '../../../state/ThemeContext';
 
 export const ForgotPasswordScreen: React.FC = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const fromProfile = (route.params as any)?.fromProfile ?? false;
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const isWide = width >= 768;
+  const C = useColors();
+  const { isDark } = useTheme();
+  const rootBg = isDark ? '#0F0B1A' : '#EDE9FE';
 
   const handleConfirm = async () => {
     if (!email) { Alert.alert('Error', 'Ingresa tu correo'); return; }
@@ -35,31 +42,37 @@ export const ForgotPasswordScreen: React.FC = () => {
     }, 1000);
   };
 
-  return (
-    <KeyboardAvoidingView
-      style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      {/* Logo */}
+  const Logo = (
+    <>
+      <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
+        <Ionicons name="chevron-back" size={22} color={Colors.primary} />
+      </TouchableOpacity>
       <View style={styles.logoCorner}>
-        <LinearGradient
-          colors={['#9333EA', '#7C3AED']}
-          style={styles.logoBox}
-        >
+        <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.logoBox}>
           <Text style={styles.logoEmoji}>👌</Text>
         </LinearGradient>
-        <Text style={styles.brandName}>TraduceSeña</Text>
+        <Text style={[styles.brandName, { color: C.textPrimary }]}>TraduceSeña</Text>
       </View>
+    </>
+  );
 
-      <View style={styles.card}>
-        {/* Ícono ilustrativo */}
-        <LinearGradient colors={['#E9D5FF', '#DDD6FE']} style={styles.iconCircle}>
-          <Ionicons name="mail-unread-outline" size={32} color={Colors.primary} />
-        </LinearGradient>
-
-        <Text style={styles.title}>Recuperar contraseña</Text>
-        <Text style={styles.subtitle}>
-          Ingresa tu correo y te enviaremos un código de verificación
+  const FormPanel = (
+    <ScrollView
+      contentContainerStyle={styles.formScroll}
+      keyboardShouldPersistTaps="always"
+      showsVerticalScrollIndicator={false}
+      overScrollMode="never"
+      bounces={false}
+    >
+      <View style={styles.formInner}>
+      <View style={[styles.card, { backgroundColor: C.surface }]}>
+        <Text style={[styles.title, { color: C.textPrimary }]}>
+          {fromProfile ? 'Cambiar contraseña' : 'Recuperar contraseña'}
+        </Text>
+        <Text style={[styles.subtitle, { color: C.textSecondary }]}>
+          {fromProfile
+            ? 'Ingresa tu correo y te enviaremos un código para verificar tu identidad'
+            : 'Ingresa tu correo y te enviaremos un código de verificación'}
         </Text>
 
         <Input
@@ -69,49 +82,160 @@ export const ForgotPasswordScreen: React.FC = () => {
           onChangeText={setEmail}
           keyboardType="email-address"
           leftIcon="mail-outline"
-          containerStyle={styles.inputGap}
+          containerStyle={styles.inputSpacing}
         />
 
-        <Button
-          title="Enviar código"
-          onPress={handleConfirm}
-          loading={loading}
-          fullWidth
-          style={styles.btn}
-        />
+        <View style={styles.btnWrapper}>
+          <TouchableOpacity
+            style={[styles.submitBtn, loading && styles.btnDisabled]}
+            onPress={handleConfirm}
+            disabled={loading}
+          >
+            <Text style={styles.submitBtnText}>
+              {loading ? 'Enviando...' : 'Enviar código'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
+
+      {!fromProfile && (
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.linkRow}
+        >
+          <Text style={[styles.linkText, { color: C.textSecondary }]}>
+            ¿Recordaste tu contraseña?{' '}
+            <Text style={styles.linkAccent}>Inicia sesión</Text>
+          </Text>
+        </TouchableOpacity>
+      )}
+      </View>
+    </ScrollView>
+  );
+
+  if (isWide) {
+    return (
+      <View style={[styles.wideRoot, { backgroundColor: rootBg }]}>
+        {Logo}
+        <View style={styles.formPanel}>
+          {FormPanel}
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      style={[styles.mobileRoot, { backgroundColor: rootBg }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      {Logo}
+      {FormPanel}
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.backgroundGray, padding: 24, paddingTop: 52 },
-  logoCorner: { marginBottom: 28, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  // ── Web ──
+  wideRoot: { flex: 1, backgroundColor: '#EDE9FE', alignItems: 'center', justifyContent: 'center' },
+  formPanel: { width: 480 },
+
+  // ── Móvil ──
+  mobileRoot: { flex: 1, backgroundColor: '#EDE9FE' },
+
+  // ── Formulario ──
+  formScroll: {
+    flexGrow: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 48,
+    justifyContent: 'center',
+  },
+  formInner: {},
+
+  // Botón volver
+  backBtn: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+
+  // Logo
+  logoCorner: {
+    position: 'absolute',
+    top: 20,
+    left: 68,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    zIndex: 10,
+  },
   logoBox: {
-    width: 46, height: 46, borderRadius: 13,
-    alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3, shadowRadius: 8, elevation: 6,
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  logoEmoji: { fontSize: 24 },
-  brandName: { fontSize: 20, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.3 },
+  logoEmoji: { fontSize: 22 },
+  brandName: { fontSize: 17, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.2 },
+
+  // Card
   card: {
-    backgroundColor: '#fff', borderRadius: 24, padding: 32, alignItems: 'center',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1, shadowRadius: 20, elevation: 8,
+    backgroundColor: '#DDD6FE',
+    borderRadius: 20,
+    padding: 28,
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 5,
   },
-  iconCircle: {
-    width: 76, height: 76, borderRadius: 38,
-    alignItems: 'center', justifyContent: 'center', marginBottom: 20,
-  },
+
   title: {
-    fontSize: 24, fontWeight: '800', color: Colors.textPrimary,
-    textAlign: 'center', marginBottom: 10,
+    fontSize: 28,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    marginBottom: 10,
   },
   subtitle: {
-    fontSize: 14, color: Colors.textSecondary, textAlign: 'center',
-    lineHeight: 22, marginBottom: 28,
+    fontSize: 13,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+    marginBottom: 22,
   },
-  inputGap: { marginBottom: 24, width: '100%' },
-  btn: { width: '100%' },
+
+  inputSpacing: { marginBottom: 14 },
+
+  // Botón enviar
+  btnWrapper: { alignItems: 'center', marginTop: 20 },
+  submitBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingVertical: 13,
+    paddingHorizontal: 48,
+  },
+  submitBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  btnDisabled: { opacity: 0.6 },
+
+  // Link inferior
+  linkRow: { alignItems: 'center', marginTop: 22 },
+  linkText: { fontSize: 13, color: Colors.textSecondary },
+  linkAccent: { color: Colors.primary, fontWeight: '700' },
 });

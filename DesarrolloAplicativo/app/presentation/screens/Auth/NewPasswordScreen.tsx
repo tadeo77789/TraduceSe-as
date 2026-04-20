@@ -3,27 +3,34 @@
  * @description Pantalla para establecer una nueva contraseña — paso 3 del flujo
  * de recuperación.
  *
- * Valida que la contraseña tenga mínimo 8 caracteres y que ambos campos coincidan.
- * Al confirmar navega de regreso a `LoginScreen`.
- *
  * @todo Conectar `handleConfirm` con `ENDPOINTS.resetPassword` para actualizar
  *       la contraseña en el backend.
  */
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, KeyboardAvoidingView, Platform, Alert,
+  View, Text, StyleSheet, TouchableOpacity,
+  ScrollView, KeyboardAvoidingView, Platform,
+  Alert, useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
-
 import { Input } from '../../components/common/Input';
-import { Button } from '../../components/common/Button';
+import { useColors, useTheme } from '../../../state/ThemeContext';
 
 export const NewPasswordScreen: React.FC = () => {
   const navigation = useNavigation();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
+  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const isWide = width >= 768;
+  const C = useColors();
+  const { isDark } = useTheme();
+  const rootBg = isDark ? '#0F0B1A' : '#EDE9FE';
 
   const handleConfirm = () => {
     if (!password || password.length < 8) {
@@ -38,72 +45,188 @@ export const NewPasswordScreen: React.FC = () => {
     // TODO: llamar al backend
     setTimeout(() => {
       setLoading(false);
-      navigation.navigate('Login' as never);
+      // popToTop vuelve al primer screen del stack actual:
+      // en el flujo de perfil → ProfileScreen
+      // en el flujo de auth   → LandingScreen
+      (navigation as any).popToTop();
     }, 1000);
   };
 
-  return (
-    <KeyboardAvoidingView
-      style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+  const Logo = (
+    <>
+      <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
+        <Ionicons name="chevron-back" size={22} color={Colors.primary} />
+      </TouchableOpacity>
       <View style={styles.logoCorner}>
-        <View style={styles.logoBox}>
+        <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.logoBox}>
           <Text style={styles.logoEmoji}>👌</Text>
-        </View>
+        </LinearGradient>
+        <Text style={[styles.brandName, { color: C.textPrimary }]}>TraduceSeña</Text>
       </View>
+    </>
+  );
 
-      <View style={styles.card}>
-        <Text style={styles.title}>Nueva contraseña</Text>
+  const FormPanel = (
+    <ScrollView
+      contentContainerStyle={styles.formScroll}
+      keyboardShouldPersistTaps="always"
+      showsVerticalScrollIndicator={false}
+      overScrollMode="never"
+      bounces={false}
+    >
+      <View style={styles.formInner}>
+      <View style={[styles.card, { backgroundColor: C.surface }]}>
+        <Text style={[styles.title, { color: C.textPrimary }]}>Nueva contraseña</Text>
 
-        <Text style={styles.label}>ingresa tu nueva contraseña</Text>
         <Input
-          placeholder="contraseña"
+          label="Nueva contraseña"
+          placeholder="Nueva contraseña"
           value={password}
           onChangeText={setPassword}
           isPassword
-          hint="mínimo 8 caracteres"
-          containerStyle={styles.inputGap}
+          leftIcon="lock-closed-outline"
+          hint="Mínimo 8 caracteres"
+          containerStyle={styles.inputSpacing}
         />
 
-        <Text style={styles.label}>confirmar contraseña</Text>
         <Input
-          placeholder="contraseña"
+          label="Confirmar contraseña"
+          placeholder="Repite tu contraseña"
           value={confirm}
           onChangeText={setConfirm}
           isPassword
-          containerStyle={styles.inputGap}
+          leftIcon="lock-closed-outline"
+          containerStyle={styles.inputSpacing}
         />
 
-        <Button
-          title="confirmar"
-          onPress={handleConfirm}
-          loading={loading}
-          style={styles.btn}
-        />
+        <View style={styles.btnWrapper}>
+          <TouchableOpacity
+            style={[styles.submitBtn, loading && styles.btnDisabled]}
+            onPress={handleConfirm}
+            disabled={loading}
+          >
+            <Text style={styles.submitBtnText}>
+              {loading ? 'Guardando...' : 'Guardar contraseña'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
+      </View>
+    </ScrollView>
+  );
+
+  if (isWide) {
+    return (
+      <View style={[styles.wideRoot, { backgroundColor: rootBg }]}>
+        {Logo}
+        <View style={styles.formPanel}>
+          {FormPanel}
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      style={[styles.mobileRoot, { backgroundColor: rootBg }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      {Logo}
+      {FormPanel}
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.background, padding: 20, paddingTop: 48 },
-  logoCorner: { marginBottom: 24 },
+  // ── Web ──
+  wideRoot: { flex: 1, backgroundColor: '#EDE9FE', alignItems: 'center', justifyContent: 'center' },
+  formPanel: { width: 480 },
+
+  // ── Móvil ──
+  mobileRoot: { flex: 1, backgroundColor: '#EDE9FE' },
+
+  // ── Formulario ──
+  formScroll: {
+    flexGrow: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 48,
+    justifyContent: 'center',
+  },
+  formInner: {},
+
+  // Botón volver
+  backBtn: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+
+  // Logo
+  logoCorner: {
+    position: 'absolute',
+    top: 20,
+    left: 68,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    zIndex: 10,
+  },
   logoBox: {
-    width: 44, height: 44, backgroundColor: Colors.primary,
-    borderRadius: 10, alignItems: 'center', justifyContent: 'center',
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   logoEmoji: { fontSize: 22 },
+  brandName: { fontSize: 17, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.2 },
+
+  // Card
   card: {
-    backgroundColor: Colors.primaryBg, borderRadius: 20, padding: 28,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1, shadowRadius: 12, elevation: 6,
+    backgroundColor: '#DDD6FE',
+    borderRadius: 20,
+    padding: 28,
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 5,
   },
+
   title: {
-    fontSize: 26, fontWeight: '800', color: Colors.textPrimary,
-    textAlign: 'center', marginBottom: 24,
+    fontSize: 28,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    marginBottom: 24,
   },
-  label: { fontSize: 13, color: Colors.textSecondary, marginBottom: 6 },
-  inputGap: { marginBottom: 16 },
-  btn: { alignSelf: 'center', marginTop: 8, paddingHorizontal: 40 },
+
+  inputSpacing: { marginBottom: 14 },
+
+  // Botón confirmar
+  btnWrapper: { alignItems: 'center', marginTop: 20 },
+  submitBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingVertical: 13,
+    paddingHorizontal: 48,
+  },
+  submitBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  btnDisabled: { opacity: 0.6 },
 });

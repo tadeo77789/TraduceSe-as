@@ -36,8 +36,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../../state/AuthContext';
-import { useTheme } from '../../../state/ThemeContext';
+import { useTheme, useColors } from '../../../state/ThemeContext';
 
 const IDIOMAS = ['Español', 'Inglés', 'Francés', 'Português'];
 
@@ -48,10 +49,12 @@ const USER_STATS = [
 ];
 
 export const ProfileScreen: React.FC = () => {
+  const navigation = useNavigation();
   const { width } = useWindowDimensions();
   const isWide = width >= 768;
   const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme, resetTheme } = useTheme();
+  const C = useColors();
   const [selectedIdioma, setSelectedIdioma] = useState('Español');
 
   const displayName = user?.email?.split('@')[0] ?? 'Usuario';
@@ -61,12 +64,13 @@ export const ProfileScreen: React.FC = () => {
     if (Platform.OS === 'web') {
       // eslint-disable-next-line no-restricted-globals
       if (confirm('¿Deseas cerrar sesión?')) {
+        resetTheme();
         await logout();
       }
     } else {
       Alert.alert('Cerrar sesión', '¿Deseas cerrar sesión?', [
         { text: 'Cancelar', style: 'cancel' },
-        { text: 'Cerrar sesión', style: 'destructive', onPress: () => logout() },
+        { text: 'Cerrar sesión', style: 'destructive', onPress: async () => { resetTheme(); await logout(); } },
       ]);
     }
   };
@@ -90,7 +94,7 @@ export const ProfileScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>
       <AppHeader />
       <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, isWide && styles.contentWide]} showsVerticalScrollIndicator={false}>
         <View style={[styles.innerWrapper, isWide && styles.innerWrapperWide]}>
@@ -100,24 +104,24 @@ export const ProfileScreen: React.FC = () => {
           <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.avatarCircle}>
             <Ionicons name="person" size={44} color="#fff" />
           </LinearGradient>
-          <Text style={styles.userName}>{displayName}</Text>
-          <Text style={styles.userEmail}>{displayEmail}</Text>
+          <Text style={[styles.userName, { color: C.textPrimary }]}>{displayName}</Text>
+          <Text style={[styles.userEmail, { color: C.textSecondary }]}>{displayEmail}</Text>
         </View>
         {/* Estadísticas del usuario */}
         <View style={styles.statsRow}>
           {USER_STATS.map((stat, i) => (
-            <View key={i} style={styles.statCard}>
+            <View key={i} style={[styles.statCard, { backgroundColor: C.surface }]}>
               <Ionicons name={stat.icon} size={18} color={stat.color} />
               <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
+              <Text style={[styles.statLabel, { color: C.textSecondary }]}>{stat.label}</Text>
             </View>
           ))}
         </View>
 
         {/* Sección de cuenta */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Cuenta</Text>
-          <View style={styles.sectionCard}>
+          <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>Cuenta</Text>
+          <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
             <Input
               label="Correo electrónico"
               value={displayEmail}
@@ -132,7 +136,10 @@ export const ProfileScreen: React.FC = () => {
               editable={false}
               containerStyle={styles.inputStyle}
             />
-            <TouchableOpacity style={styles.forgotRow}>
+            <TouchableOpacity
+              style={styles.forgotRow}
+              onPress={() => navigation.navigate('ForgotPassword' as never, { fromProfile: true } as never)}
+            >
               <Ionicons name="key-outline" size={14} color={Colors.primary} />
               <Text style={styles.forgotLink}>Cambiar contraseña</Text>
             </TouchableOpacity>
@@ -141,15 +148,15 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Preferencias */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferencias</Text>
-          <View style={styles.sectionCard}>
+          <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>Preferencias</Text>
+          <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
             {/* Tema */}
             <View style={styles.prefRow}>
               <View style={styles.prefLeft}>
-                <View style={[styles.prefIcon, { backgroundColor: '#EDE9FE' }]}>
+                <View style={[styles.prefIcon, { backgroundColor: C.primaryBg }]}>
                   <Ionicons name={isDark ? 'moon' : 'sunny'} size={18} color={Colors.primary} />
                 </View>
-                <Text style={styles.themeLabel}>Tema {isDark ? 'Oscuro' : 'Claro'}</Text>
+                <Text style={[styles.themeLabel, { color: C.textPrimary }]}>Tema {isDark ? 'Oscuro' : 'Claro'}</Text>
               </View>
               <Switch
                 value={isDark}
@@ -159,15 +166,15 @@ export const ProfileScreen: React.FC = () => {
               />
             </View>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: C.border }]} />
 
             {/* Notificaciones */}
             <View style={styles.prefRow}>
               <View style={styles.prefLeft}>
-                <View style={[styles.prefIcon, { backgroundColor: '#D1FAE5' }]}>
+                <View style={[styles.prefIcon, { backgroundColor: isDark ? 'rgba(16,185,129,0.18)' : '#D1FAE5' }]}>
                   <Ionicons name="notifications-outline" size={18} color="#059669" />
                 </View>
-                <Text style={styles.themeLabel}>Notificaciones</Text>
+                <Text style={[styles.themeLabel, { color: C.textPrimary }]}>Notificaciones</Text>
               </View>
               <Switch
                 value={true}
@@ -176,18 +183,22 @@ export const ProfileScreen: React.FC = () => {
               />
             </View>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: C.border }]} />
 
             {/* Idioma */}
-            <Text style={styles.idiomaLabel}>Idioma de la app</Text>
+            <Text style={[styles.idiomaLabel, { color: C.textSecondary }]}>Idioma de la app</Text>
             <View style={styles.idiomaRow}>
               {IDIOMAS.map(lang => (
                 <TouchableOpacity
                   key={lang}
                   onPress={() => setSelectedIdioma(lang)}
-                  style={[styles.idiomaChip, selectedIdioma === lang && styles.idiomaChipActive]}
+                  style={[
+                    styles.idiomaChip,
+                    { backgroundColor: C.surface, borderColor: C.border },
+                    selectedIdioma === lang && [styles.idiomaChipActive, { backgroundColor: C.primaryBg }],
+                  ]}
                 >
-                  <Text style={[styles.idiomaText, selectedIdioma === lang && styles.idiomaTextActive]}>
+                  <Text style={[styles.idiomaText, { color: C.textSecondary }, selectedIdioma === lang && styles.idiomaTextActive]}>
                     {lang}
                   </Text>
                 </TouchableOpacity>
@@ -198,20 +209,20 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Información de la app */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Acerca de</Text>
-          <View style={styles.sectionCard}>
+          <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>Acerca de</Text>
+          <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
             {[
               { icon: 'information-circle-outline', label: 'Versión de la app', value: '1.0.0' },
               { icon: 'document-text-outline', label: 'Términos y condiciones', value: '' },
               { icon: 'shield-checkmark-outline', label: 'Política de privacidad', value: '' },
             ].map((item, i) => (
               <View key={i}>
-                {i > 0 && <View style={styles.divider} />}
+                {i > 0 && <View style={[styles.divider, { backgroundColor: C.border }]} />}
                 <TouchableOpacity style={styles.infoRow}>
-                  <Ionicons name={item.icon as any} size={18} color={Colors.textSecondary} />
-                  <Text style={styles.infoLabel}>{item.label}</Text>
-                  <Text style={styles.infoValue}>{item.value}</Text>
-                  {!item.value && <Ionicons name="chevron-forward" size={16} color={Colors.textHint} />}
+                  <Ionicons name={item.icon as any} size={18} color={C.textSecondary} />
+                  <Text style={[styles.infoLabel, { color: C.textPrimary }]}>{item.label}</Text>
+                  <Text style={[styles.infoValue, { color: C.textSecondary }]}>{item.value}</Text>
+                  {!item.value && <Ionicons name="chevron-forward" size={16} color={C.textHint} />}
                 </TouchableOpacity>
               </View>
             ))}
@@ -281,7 +292,7 @@ const styles = StyleSheet.create({
   section: { marginBottom: 22 },
   sectionTitle: {
     fontSize: 12, fontWeight: '700', color: Colors.textSecondary,
-    textTransform: 'uppercase', letterSpacing: 1,
+    letterSpacing: 0.5,
     marginBottom: 10, marginLeft: 4,
   },
   sectionCard: {
@@ -302,7 +313,7 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: Colors.border, marginVertical: 14 },
   idiomaLabel: {
     fontSize: 12, fontWeight: '700', color: Colors.textSecondary,
-    textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 12,
+    letterSpacing: 0.4, marginBottom: 12,
   },
   idiomaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   idiomaChip: {
