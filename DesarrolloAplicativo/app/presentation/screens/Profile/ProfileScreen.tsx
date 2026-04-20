@@ -138,7 +138,7 @@ export const ProfileScreen: React.FC = () => {
             />
             <TouchableOpacity
               style={styles.forgotRow}
-              onPress={() => navigation.navigate('ForgotPassword' as never, { fromProfile: true } as never)}
+              onPress={() => (navigation.navigate as any)('ForgotPassword', { fromProfile: true })}
             >
               <Ionicons name="key-outline" size={14} color={Colors.primary} />
               <Text style={styles.forgotLink}>Cambiar contraseña</Text>

@@ -81,14 +81,14 @@ export const MainTabNavigator: React.FC = () => { // Define y exporta el compone
         Profile:     'Perfil', // Etiqueta en español para el tab Profile
       } as Record<string, string>)[route.name] || route.name, // Accede al mapa con el nombre de ruta actual; si no se encuentra usa el nombre de ruta original como fallback
     })} // Cierra el objeto retornado por screenOptions y la prop screenOptions
-  > // Cierra la apertura de Tab.Navigator
-    <Tab.Screen name="Translation" component={TranslationScreen} /> {/* Registra el tab de traducción; navegable con navigation.navigate('Translation') */}
-    <Tab.Screen name="Alarms"      component={AlarmsScreen}      /> {/* Registra el tab de alarmas; navegable con navigation.navigate('Alarms') */}
-    <Tab.Screen name="Alphabet"    component={AlphabetScreen}    /> {/* Registra el tab de alfabeto de señas; navegable con navigation.navigate('Alphabet') */}
-    <Tab.Screen name="Stats"       component={StatsScreen}       /> {/* Registra el tab de estadísticas; navegable con navigation.navigate('Stats') */}
-    <Tab.Screen name="History"     component={HistoryScreen}     /> {/* Registra el tab de historial de traducciones; navegable con navigation.navigate('History') */}
-    <Tab.Screen name="Profile"     component={ProfileStackNavigator} /> {/* Registra el tab de perfil usando un stack anidado (ProfileStackNavigator) para permitir sub-navegación interna */}
-  </Tab.Navigator> // Cierra el Tab.Navigator con todos sus tabs registrados
+  >
+    <Tab.Screen name="Translation" component={TranslationScreen} />
+    <Tab.Screen name="Alarms"      component={AlarmsScreen}      />
+    <Tab.Screen name="Alphabet"    component={AlphabetScreen}    />
+    <Tab.Screen name="Stats"       component={StatsScreen}       />
+    <Tab.Screen name="History"     component={HistoryScreen}     />
+    <Tab.Screen name="Profile"     component={ProfileStackNavigator} />
+  </Tab.Navigator>
   ); // Cierra el return del componente MainTabNavigator
 }; // Cierra la definición del componente MainTabNavigator
 

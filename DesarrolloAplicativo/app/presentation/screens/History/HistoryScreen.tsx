@@ -53,7 +53,7 @@ const MOCK_TIMES: Record<number, string> = {
 
 type TipoConfig = {
   label: string;
-  icon: keyof typeof import('@expo/vector-icons/build/Ionicons').glyphMap;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
   gradient: [string, string];
   darkGradient: [string, string];
   textColor: string;
