@@ -316,17 +316,53 @@ const VIEWER_H = height < 640 ? 200 : width >= 768 ? Math.round(height * 0.40) :
 
 ---
 
+## Configuración web (`app/web/`)
+
+### Título de pestaña del navegador
+
+El título se controla en dos niveles:
+
+1. **Estático** — `app/web/index.html` define `<title>Traduce Señas</title>` como valor inicial.
+2. **Dinámico** — `AppNavigator.tsx` usa la prop `documentTitle` de `NavigationContainer` para mantener siempre el mismo título al navegar:
+
+```tsx
+<NavigationContainer documentTitle={{ formatter: () => 'Traduce Señas' }}>
+```
+
+Si en el futuro se necesita mostrar el nombre de la pantalla (p. ej. `"Traducción | Traduce Señas"`), basta cambiar el formatter en `app/presentation/navigation/AppNavigator.tsx`.
+
+### Ícono de la app en web (favicon)
+
+El `index.html` ya incluye:
+
+```html
+<link rel="icon" type="image/png" href="/images/icono.png" />
+<link rel="apple-touch-icon" href="/images/icono.png" />
+```
+
+El ícono vive en dos lugares con roles distintos:
+
+| Archivo | Ruta | Para qué |
+|---|---|---|
+| Ícono en la app (código React Native) | `app/images/icono.png` | Referenciado con `require()` en pantallas |
+| Favicon del navegador web | `app/web/images/icono.png` | Servido estáticamente en `/images/icono.png` |
+
+> **Por qué dos copias:** Expo con Metro procesa y hashea los archivos de `app/assets/` — no son accesibles como rutas URL simples. Solo los archivos dentro de `app/web/` se sirven estáticamente. Si actualizas el ícono, cópialo en ambas ubicaciones.
+
+---
+
 ## Assets locales
 
-| Archivo | Usado en |
-|---|---|
-| `slide1.jpg` | LandingScreen, LoginScreen (web), RegisterScreen (web) |
-| `slide2.jpg` | LandingScreen |
-| `slide3.jpg` | LandingScreen |
-| `testimonial.jpg` | LandingScreen |
-| `camera_placeholder.jpg` | TranslationScreen |
-| `signia_model.glb` | AlphabetScreen (modelo 3D del personaje) |
-| `model_viewer.html` | AlphabetScreen (visor Three.js cargado en WebView) |
+| Archivo | Ubicación | Usado en |
+|---|---|---|
+| `slide1.jpg` | `app/assets/images/` | LandingScreen, LoginScreen (web), RegisterScreen (web) |
+| `slide2.jpg` | `app/assets/images/` | LandingScreen |
+| `slide3.jpg` | `app/assets/images/` | LandingScreen |
+| `testimonial.jpg` | `app/assets/images/` | LandingScreen |
+| `camera_placeholder.jpg` | `app/assets/images/` | TranslationScreen |
+| `signia_model.glb` | `app/assets/` | AlphabetScreen (modelo 3D del personaje) |
+| `model_viewer.html` | `app/assets/` | AlphabetScreen (visor Three.js cargado en WebView) |
+| `icono.png` | `app/assets/images/` | Favicon y apple-touch-icon en web |
 
 ---
 

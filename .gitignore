@@ -44,11 +44,11 @@ desktop.ini
 # .agents/ contiene skills descargadas localmente.
 # skills-lock.json registra hashes de skills instaladas.
 # Ninguno es parte del proyecto compartido.
-# CLAUDE.md sí se sube: contiene instrucciones de arquitectura
-# compartidas por todo el equipo.
+# CLAUDE.md contiene instrucciones del agente — no es parte del proyecto compartido.
 .claude/
 .agents/
 skills-lock.json
+CLAUDE.md
 
 # ─────────────────────────────────────────────
 # IMÁGENES / ARCHIVOS GENERADOS LOCALMENTE
