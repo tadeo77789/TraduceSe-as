@@ -25,7 +25,8 @@
       "shortName": "TraduceSeña",
       "description": "Traduce Lengua de Señas Colombiana a texto en tiempo real.",
       "themeColor": "#7C3AED",
-      "backgroundColor": "#EDE9FE"
+      "backgroundColor": "#EDE9FE",
+      "favicon": "./assets/images/icono.png"
     },
     "plugins": ["expo-camera"]
   }

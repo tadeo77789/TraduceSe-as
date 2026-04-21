@@ -29,7 +29,9 @@ export const AppNavigator: React.FC = () => { // Define y exporta el componente 
   } // Cierra el bloque condicional de carga
 
   return ( // Retorna el árbol de navegación principal una vez que se conoce el estado de autenticación
-    <NavigationContainer> {/* Contenedor raíz obligatorio de React Navigation; gestiona el estado de la pila de navegación */}
+    <NavigationContainer // Contenedor raíz obligatorio de React Navigation; gestiona el estado de la pila de navegación
+      documentTitle={{ formatter: () => 'Traduce Señas' }}
+    >
       {isAuthenticated ? <MainStackNavigator /> : <AuthNavigator />} {/* Condicional: si hay sesión activa muestra la app principal (MainStackNavigator), si no muestra el flujo de auth (AuthNavigator) */}
     </NavigationContainer> // Cierra el NavigationContainer raíz
   ); // Cierra el return principal del componente
