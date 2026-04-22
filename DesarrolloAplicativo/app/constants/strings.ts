@@ -1,3 +1,11 @@
+/**
+ * @file strings.ts
+ * @description Textos de la interfaz de usuario centralizados.
+ * Contiene todos los strings visibles al usuario organizados por sección
+ * (auth, tabs, traducción, léxico, historial, perfil, notificaciones, errores, acciones).
+ * Estructura preparada para internacionalización (i18n).
+ */
+
 export const Strings = {
   appName: 'Traduce Señas',
   appTagline: 'Lengua de Señas Colombiana',

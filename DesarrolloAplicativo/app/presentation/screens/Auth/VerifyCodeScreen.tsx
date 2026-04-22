@@ -1,11 +1,26 @@
+/**
+ * @file VerifyCodeScreen.tsx
+ * @description Pantalla de verificación OTP — paso 2 del flujo de recuperación de contraseña.
+ *
+ * Muestra 6 campos individuales de un dígito. El foco avanza automáticamente
+ * al siguiente campo al ingresar un dígito, y retrocede con Backspace.
+ * Al confirmar el código completo, navega a `NewPasswordScreen`.
+ *
+ * @todo Conectar `handleConfirm` con `ENDPOINTS.verifyCode` para validar
+ *       el código OTP contra el backend.
+ */
 import React, { useState, useRef } from 'react';
 import {
-  View, Text, StyleSheet, TextInput, TouchableOpacity, Alert,
+  View, Text, StyleSheet, TextInput, TouchableOpacity,
+  ScrollView, KeyboardAvoidingView, Platform,
+  Alert, useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
-
-import { Button } from '../../components/common/Button';
+import { useColors, useTheme } from '../../../state/ThemeContext';
 
 const CODE_LENGTH = 6;
 
@@ -14,6 +29,12 @@ export const VerifyCodeScreen: React.FC = () => {
   const [code, setCode] = useState(Array(CODE_LENGTH).fill(''));
   const [loading, setLoading] = useState(false);
   const inputs = useRef<TextInput[]>([]);
+  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const isWide = width >= 768;
+  const C = useColors();
+  const { isDark } = useTheme();
+  const rootBg = isDark ? '#0F0B1A' : '#EDE9FE';
 
   const handleChange = (text: string, index: number) => {
     const newCode = [...code];
@@ -43,20 +64,33 @@ export const VerifyCodeScreen: React.FC = () => {
     }, 1000);
   };
 
-  return (
-    <View style={styles.root}>
-      {/* Logo */}
+  const Logo = (
+    <>
+      <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
+        <Ionicons name="chevron-back" size={22} color={Colors.primary} />
+      </TouchableOpacity>
       <View style={styles.logoCorner}>
-        <View style={styles.logoBox}>
+        <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.logoBox}>
           <Text style={styles.logoEmoji}>👌</Text>
-        </View>
+        </LinearGradient>
+        <Text style={[styles.brandName, { color: C.textPrimary }]}>TraduceSeña</Text>
       </View>
+    </>
+  );
 
-      <View style={styles.card}>
-        <Text style={styles.title}>confirma tu cuenta</Text>
-        <Text style={styles.subtitle}>
-          Te hemos enviado un código de verificación a tu correo electrónico. Ingresa ese código en
-          el campo correspondiente para continuar con el proceso y establecer una nueva contraseña.
+  const FormPanel = (
+    <ScrollView
+      contentContainerStyle={styles.formScroll}
+      keyboardShouldPersistTaps="always"
+      showsVerticalScrollIndicator={false}
+      overScrollMode="never"
+      bounces={false}
+    >
+      <View style={styles.formInner}>
+      <View style={[styles.card, { backgroundColor: C.surface }]}>
+        <Text style={[styles.title, { color: C.textPrimary }]}>Verifica tu identidad</Text>
+        <Text style={[styles.subtitle, { color: C.textSecondary }]}>
+          Te enviamos un código de 6 dígitos a tu correo electrónico. Ingrésalo para continuar.
         </Text>
 
         {/* OTP inputs */}
@@ -65,7 +99,11 @@ export const VerifyCodeScreen: React.FC = () => {
             <TextInput
               key={i}
               ref={el => { if (el) inputs.current[i] = el; }}
-              style={[styles.otpInput, digit ? styles.otpFilled : null]}
+              style={[
+                styles.otpInput,
+                { backgroundColor: C.inputBg, borderColor: C.border, color: C.textPrimary },
+                digit ? { borderColor: Colors.primary, backgroundColor: isDark ? '#1E183A' : '#EDE9FE' } : null,
+              ]}
               value={digit}
               onChangeText={text => handleChange(text.slice(-1), i)}
               onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, i)}
@@ -76,47 +114,174 @@ export const VerifyCodeScreen: React.FC = () => {
           ))}
         </View>
 
-        <Button
-          title="confirmar"
-          onPress={handleConfirm}
-          loading={loading}
-          style={styles.btn}
-        />
+        <View style={styles.btnWrapper}>
+          <TouchableOpacity
+            style={[styles.submitBtn, loading && styles.btnDisabled]}
+            onPress={handleConfirm}
+            disabled={loading}
+          >
+            <Text style={styles.submitBtnText}>
+              {loading ? 'Verificando...' : 'Confirmar'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={styles.linkRow}
+      >
+        <Text style={[styles.linkText, { color: C.textSecondary }]}>
+          ¿No recibiste el código?{' '}
+          <Text style={styles.linkAccent}>Reenviar</Text>
+        </Text>
+      </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+
+  if (isWide) {
+    return (
+      <View style={[styles.wideRoot, { backgroundColor: rootBg }]}>
+        {Logo}
+        <View style={styles.formPanel}>
+          {FormPanel}
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      style={[styles.mobileRoot, { backgroundColor: rootBg }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      {Logo}
+      {FormPanel}
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.background, padding: 20, paddingTop: 48 },
-  logoCorner: { marginBottom: 24 },
+  // ── Web ──
+  wideRoot: { flex: 1, backgroundColor: '#EDE9FE', alignItems: 'center', justifyContent: 'center' },
+  formPanel: { width: 480 },
+
+  // ── Móvil ──
+  mobileRoot: { flex: 1, backgroundColor: '#EDE9FE' },
+
+  // ── Formulario ──
+  formScroll: {
+    flexGrow: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 48,
+    justifyContent: 'center',
+  },
+  formInner: {},
+
+  // Botón volver
+  backBtn: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+
+  // Logo
+  logoCorner: {
+    position: 'absolute',
+    top: 20,
+    left: 68,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    zIndex: 10,
+  },
   logoBox: {
-    width: 44, height: 44, backgroundColor: Colors.primary,
-    borderRadius: 10, alignItems: 'center', justifyContent: 'center',
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   logoEmoji: { fontSize: 22 },
+  brandName: { fontSize: 17, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.2 },
+
+  // Card
   card: {
-    backgroundColor: Colors.primaryBg, borderRadius: 20, padding: 28,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1, shadowRadius: 12, elevation: 6, alignItems: 'center',
+    backgroundColor: '#DDD6FE',
+    borderRadius: 20,
+    padding: 28,
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 5,
+    alignItems: 'center',
   },
+
   title: {
-    fontSize: 24, fontWeight: '800', color: Colors.textPrimary,
-    textAlign: 'center', marginBottom: 16,
+    fontSize: 28,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    marginBottom: 10,
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 13, color: Colors.textSecondary, textAlign: 'center',
-    lineHeight: 20, marginBottom: 28,
+    fontSize: 13,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 28,
   },
+
+  // OTP
   otpRow: { flexDirection: 'row', gap: 10, marginBottom: 28 },
   otpInput: {
-    width: 44, height: 52, backgroundColor: Colors.background,
-    borderRadius: 10, fontSize: 20, fontWeight: '700',
-    color: Colors.textPrimary, borderWidth: 1, borderColor: Colors.border,
+    width: 44,
+    height: 52,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   otpFilled: {
     borderColor: Colors.primary,
-    backgroundColor: Colors.primaryBg,
+    backgroundColor: '#EDE9FE',
   },
-  btn: { paddingHorizontal: 40 },
+
+  // Botón confirmar
+  btnWrapper: { alignItems: 'center', marginTop: 4 },
+  submitBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingVertical: 13,
+    paddingHorizontal: 48,
+  },
+  submitBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  btnDisabled: { opacity: 0.6 },
+
+  // Link inferior
+  linkRow: { alignItems: 'center', marginTop: 22 },
+  linkText: { fontSize: 13, color: Colors.textSecondary },
+  linkAccent: { color: Colors.primary, fontWeight: '700' },
 });

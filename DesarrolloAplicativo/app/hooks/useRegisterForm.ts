@@ -1,3 +1,14 @@
+/**
+ * @file useRegisterForm.ts
+ * @description Hook personalizado para el formulario de registro de usuario.
+ *
+ * Gestiona el estado del formulario (`nombre`, `correo`, `password`, `terminos`),
+ * la validación de cada campo (nombre requerido, formato de correo, mínimo 8
+ * caracteres en contraseña, aceptación de términos) y el estado de carga.
+ * Llama a `AuthContext.register` al enviar.
+ *
+ * @returns form, setField, loading, errors, handleRegister
+ */
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { useAuth } from '../state/AuthContext';

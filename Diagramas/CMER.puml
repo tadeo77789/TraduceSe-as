@@ -1,0 +1,161 @@
+@startuml CMER
+
+' ─────────────────────────────────────────────────────────────────────────────
+' CMER — Modelo Entidad-Relación Corregido para "Traduce Señas"
+' Correcciones aplicadas sobre MER.puml:
+'  1. Nueva entidad `notificacion` (estaba en types/index.ts pero no en el MER)
+'  2. Campo `tipo` agregado a `traduccion` (TipoTraduccion del frontend)
+'  3. Convención unificada a snake_case (estándar PostgreSQL)
+'  4. `seccionuso` renombrado a `sesion_uso` (era ambiguo con eventoUso.seccion)
+'  5. Cardinalidades completas en ambos extremos
+'  6. PKs y FKs marcadas explícitamente
+'  7. `password` → `password_hash` y campos de auditoría (created_at/updated_at)
+'  8. Valores de ENUM documentados
+'  9. `email` marcado como UNIQUE
+' 10. Relación `alarma → notificacion` agregada
+' ─────────────────────────────────────────────────────────────────────────────
+
+skinparam linetype ortho
+skinparam entity {
+  BackgroundColor #DBEAFE
+  BorderColor #3B82F6
+  FontName Arial
+}
+
+entity "usuario" as usuario {
+  * id_usuario : INT <<PK>>
+  --
+  nombre : VARCHAR(255)
+  edad : INT
+  email : VARCHAR(255) <<UNIQUE>>
+  password_hash : VARCHAR(255)
+  tema : BOOLEAN
+  idioma : VARCHAR(10)
+  termino_acept : BOOLEAN
+  fecha_terminos : DATETIME
+  created_at : DATETIME
+  updated_at : DATETIME
+}
+
+entity "usuario_auth" as usuario_auth {
+  * id_auth : INT <<PK>>
+  --
+  proveedor : ENUM('google','facebook','apple','local')
+  provider_id : VARCHAR(255)
+  email_pr : VARCHAR(150)
+  id_usuario : INT <<FK>>
+  created_at : DATETIME
+}
+
+entity "rol" as rol {
+  * id_rol : INT <<PK>>
+  --
+  nombre : VARCHAR(100)
+  descripcion : VARCHAR(255)
+}
+
+entity "usuario_rol" as usuario_rol {
+  * id_usuario : INT <<PK,FK>>
+  * id_rol : INT <<PK,FK>>
+  --
+  asignado_at : DATETIME
+}
+
+entity "traduccion" as traduccion {
+  * id_traduccion : INT <<PK>>
+  --
+  texto_entrada : VARCHAR(255)
+  texto_traducido : VARCHAR(255)
+  tipo : ENUM('texto_sena','sena_texto','voz_sena')
+  fecha_traduccion : DATETIME
+  is_deleted : BOOLEAN
+  id_usuario : INT <<FK>>
+}
+
+entity "lexico_senas" as lexico_senas {
+  * id_lexico : INT <<PK>>
+  --
+  palabras : VARCHAR(100)
+  tipo : ENUM('letra','numero','palabra','frase')
+  letra : CHAR(1)
+  idioma : VARCHAR(10)
+  created_at : DATETIME
+  updated_at : DATETIME
+}
+
+entity "recurso_multimedia" as recurso_multimedia {
+  * id_recurso : INT <<PK>>
+  --
+  tipo : ENUM('video','imagen','gif')
+  url : VARCHAR(255)
+  mime_type : VARCHAR(50)
+  orden : INT
+  id_lexico : INT <<FK>>
+}
+
+entity "alarma" as alarma {
+  * id_alarma : INT <<PK>>
+  --
+  hora : TIME
+  mensaje : VARCHAR(255)
+  activa : BOOLEAN
+  id_usuario : INT <<FK>>
+  created_at : DATETIME
+  updated_at : DATETIME
+}
+
+entity "notificacion" as notificacion {
+  * id_notif : INT <<PK>>
+  --
+  titulo : VARCHAR(150)
+  cuerpo : VARCHAR(500)
+  leida : BOOLEAN
+  created_at : DATETIME
+  id_usuario : INT <<FK>>
+  id_alarma : INT <<FK>>
+}
+
+entity "evento_uso" as evento_uso {
+  * id_evento : INT <<PK>>
+  --
+  seccion : VARCHAR(255)
+  accion : VARCHAR(255)
+  created_at : DATETIME
+  id_usuario : INT <<FK>>
+}
+
+entity "sesion_uso" as sesion_uso {
+  * id_sesion : INT <<PK>>
+  --
+  inicio : DATETIME
+  fin : DATETIME
+  duracion_seg : INT
+  id_usuario : INT <<FK>>
+}
+
+entity "password_reset_token" as password_reset_token {
+  * id_token : INT <<PK>>
+  --
+  token_hash : VARCHAR(255)
+  expires_at : DATETIME
+  used_at : DATETIME
+  id_usuario : INT <<FK>>
+  created_at : DATETIME
+}
+
+' ─── Relaciones ───────────────────────────────────────────────────────────────
+' Notación: ||--o{ = uno a cero-o-muchos ; ||--|{ = uno a uno-o-muchos
+
+usuario       ||--o{ usuario_auth
+usuario       ||--|{ usuario_rol
+rol           ||--|{ usuario_rol
+usuario       ||--o{ traduccion
+usuario       ||--o{ alarma
+usuario       ||--o{ notificacion
+usuario       ||--o{ evento_uso
+usuario       ||--o{ sesion_uso
+usuario       ||--o{ password_reset_token
+lexico_senas  ||--o{ recurso_multimedia
+alarma        ||--o{ notificacion
+
+@enduml

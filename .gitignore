@@ -40,11 +40,21 @@ desktop.ini
 # ─────────────────────────────────────────────
 # CLAUDE CODE — configuración local del agente
 # ─────────────────────────────────────────────
-# La carpeta .claude contiene configuración local de Claude Code
-# (historial de sesiones, caché, ajustes personales). No es parte
-# del proyecto y no debe subirse al repositorio.
+# .claude/ contiene caché y sesiones locales de Claude Code.
+# .agents/ contiene skills descargadas localmente.
+# skills-lock.json registra hashes de skills instaladas.
+# Ninguno es parte del proyecto compartido.
+# CLAUDE.md contiene instrucciones del agente — no es parte del proyecto compartido.
 .claude/
+.agents/
+skills-lock.json
 CLAUDE.md
+
+# ─────────────────────────────────────────────
+# IMÁGENES / ARCHIVOS GENERADOS LOCALMENTE
+# ─────────────────────────────────────────────
+# Capturas de pantalla y previsualizaciones generadas en local.
+signia_preview.png
 
 # ─────────────────────────────────────────────
 # EDITORES — configuración local del editor
@@ -63,6 +73,27 @@ CLAUDE.md
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# ─────────────────────────────────────────────
+# REACT NATIVE / EXPO — archivos nativos generados
+# ─────────────────────────────────────────────
+# Carpetas nativas generadas por Expo/EAS Build. Se regeneran
+# automáticamente; no forman parte del código fuente.
+android/
+ios/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Caché de Metro bundler (React Native)
+.metro-health-check*
+
+# Caché de react-native-webview y otros módulos nativos
+DesarrolloAplicativo/app/android/
+DesarrolloAplicativo/app/ios/
 
 # ─────────────────────────────────────────────
 # BUILD / COMPILADOS — archivos generados

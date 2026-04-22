@@ -1,3 +1,13 @@
+/**
+ * @file theme.ts
+ * @description Tokens avanzados del sistema de diseño (design tokens).
+ * Incluye: `Spacing` (grid de 8pt), `FontSize`, `FontWeight`, `LineHeight`,
+ * `LetterSpacing`, `TextStyles` (estilos de texto precompuestos),
+ * `BorderRadius`, `BorderWidth`, `Shadows`, `ZIndex`, `ComponentSizes`
+ * (alturas y paddings de botones/inputs/iconos/avatares) y `Animation`.
+ * Más granular que `sizes.ts`; usar para estilos de componentes reutilizables.
+ */
+
 // ─── Design System Tokens ─────────────────────────────────────────────────────
 // Generado a partir de: design_token_generator.py brand=#7C3AED style=modern
 // Adaptado para React Native (sin unidades CSS, valores numéricos)
