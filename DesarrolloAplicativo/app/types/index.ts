@@ -5,7 +5,7 @@
  * - `User` / `AuthState` / `LoginPayload` / `RegisterPayload`: autenticación.
  * - `Traduccion` / `TipoTraduccion`: traducciones de señas.
  * - `LexicoSena` / `RecursoMultimedia` / `TipoLexico`: léxico LSC.
- * - `Notificacion` / `Alarma`: notificaciones y alarmas.
+ * - `Notificacion`: notificaciones.
  * - `ThemeMode` / `ThemeState`: tema visual.
  * - `ApiResponse<T>` / `PaginatedResponse<T>`: respuestas genéricas del backend.
  */
@@ -82,15 +82,6 @@ export interface Notificacion {
   cuerpo: string;
   leida: boolean;
   created_at: string;
-}
-
-// ─── Alarma ──────────────────────────────────────────────────────────────────
-export interface Alarma {
-  id_alarma: number;
-  hora: string;
-  mensaje: string;
-  activa: boolean;
-  id_usuario: number;
 }
 
 // ─── Tema ────────────────────────────────────────────────────────────────────

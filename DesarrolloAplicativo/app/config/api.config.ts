@@ -5,7 +5,7 @@
  *   (emulador Android → localhost del PC) y a la URL de producción en release.
  * - `API_TIMEOUT`: tiempo máximo de espera para las peticiones (10 s).
  * - `ENDPOINTS`: mapa de todos los endpoints de la API (auth, traducciones,
- *   léxico, alarmas, estadísticas, perfil). Los endpoints con parámetro id
+ *   léxico, estadísticas, perfil). Los endpoints con parámetro id
  *   son funciones que reciben el id y retornan la ruta completa.
  */
 
@@ -33,12 +33,6 @@ export const ENDPOINTS = {
   // Léxico
   lexicon: '/lexicon',
   lexiconSearch: '/lexicon/search',
-
-  // Alarmas
-  alarms: '/alarms',
-  createAlarm: '/alarms',
-  updateAlarm: (id: number) => `/alarms/${id}`,
-  deleteAlarm: (id: number) => `/alarms/${id}`,
 
   // Estadísticas
   stats: '/stats',

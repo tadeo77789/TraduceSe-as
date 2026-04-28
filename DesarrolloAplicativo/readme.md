@@ -1,6 +1,6 @@
-# DesarrolloAplicativo — Signia
+# DesarrolloAplicativo 
 
-Carpeta raíz del desarrollo de **Signia** (Traduce Señas), una aplicación móvil y web para la traducción del lenguaje de señas colombiano (LSC). Contiene las tres capas principales del proyecto más el modelo 3D interactivo.
+Carpeta raíz del desarrollo de Traduce Señas, una aplicación móvil y web para la traducción del lenguaje de señas colombiano (LSC). Contiene las tres capas principales del proyecto más el modelo 3D interactivo.
 
 ---
 
@@ -113,15 +113,15 @@ La pantalla de **Alfabeto** integra un modelo 3D animado que reproduce la seña 
 | Archivo | Ubicación | Descripción |
 |---|---|---|
 | `signia_model.glb` | `app/assets/` | Modelo 3D del personaje con 26 animaciones del alfabeto exportado desde Blender |
-| `model_viewer.html` | `app/assets/` | Visor Three.js autocontenido, se carga dentro de un WebView |
-| `AlphabetScreen.tsx` | `app/presentation/screens/Alphabet/` | Pantalla con grilla A-Z + sheet inferior con visor 3D |
+| `model_viewer.html` | `app/assets/` | Visor Three.js: fondo gradiente, spinner de carga, barra de progreso, auto-rotación, animación de entrada, aro de luz en el suelo |
+| `AlphabetScreen.tsx` | `app/presentation/screens/Alphabet/` | Pantalla con grilla A-Z + modal centrado con visor 3D, navegación prev/next y botón Repetir |
 
 ### Diseño de la pantalla
 
 La pantalla tiene dos capas:
 
 1. **Grilla de letras (A–Z):** 26 cartas con imagen de la seña y badge de color. Ocupa toda la pantalla. El número de columnas se adapta al ancho: 5 cols en móvil, 7 en tablet, 9 en desktop.
-2. **Modal centrado (al tocar una letra):** una tarjeta animada aparece centrada sobre un fondo oscuro semitransparente, mostrando el visor 3D con la animación de la seña seleccionada. Se cierra tocando fuera o el botón ✕.
+2. **Modal centrado (al tocar una letra):** una tarjeta animada aparece centrada sobre un fondo oscuro semitransparente, mostrando el visor 3D con la animación de la seña seleccionada. Incluye flechas para navegar entre letras sin cerrar el modal. Se cierra tocando fuera o el botón ✕.
 
 ```
 ┌────────────────────────┐
@@ -133,16 +133,18 @@ La pantalla tiene dos capas:
 │  ...                   │
 └────────────────────────┘
           ↓ (al tocar una carta)
-     ┌──────────────┐
-     │[A] Seña: A[✕]│  ← Header con gradiente
-     ├──────────────┤
-     │              │
-     │  Visor 3D    │  ← WebView con Three.js
-     │  (WebView)   │
-     ├──────────────┤
-     │ Tip de seña  │
-     │ Toca fuera   │
-     └──────────────┘
+     ┌──────────────────┐
+     │[‹][A] Seña: A[›][✕]│  ← Header con gradiente + nav prev/next
+     ├──────────────────┤
+     │                  │
+     │    Visor 3D      │  ← WebView con Three.js (250 px)
+     │    (WebView)     │
+     ├──────────────────┤
+     │  [↺ Repetir]     │  ← Botón para repetir la animación
+     ├──────────────────┤
+     │  Tip de seña     │
+     │  Toca fuera      │
+     └──────────────────┘
 ```
 
 ### Cómo funciona
@@ -158,8 +160,9 @@ Usuario toca letra  →  AlphabetScreen  →  postMessage al WebView
 
 1. Al montar la pantalla el `WebView` carga `model_viewer.html` en segundo plano (siempre montado).
 2. React Native envía `{ type: 'LOAD_MODEL', url: '...' }` para cargar el GLB una sola vez.
-3. Cuando el usuario toca una letra, el sheet se desliza hacia arriba y se envía `{ type: 'PLAY_ANIMATION', animation: 'Letra_A' }`.
-4. Three.js reproduce la animación del esqueleto. El modelo permanece en memoria entre letras.
+3. Cuando el usuario toca una letra, el modal se abre y se envía `{ type: 'PLAY_ANIMATION', animation: 'Letra_A' }`.
+4. Three.js reproduce la animación con fade-in de 0.22 s. El modelo permanece en memoria al navegar entre letras con las flechas prev/next.
+5. El botón **Repetir** reenvía el mismo mensaje sin recargar el modelo.
 
 ### Animaciones disponibles en el GLB
 
@@ -173,10 +176,7 @@ El modelo tiene **33 acciones** nombradas:
 
 ### Editar el modelo en Blender
 
-El archivo fuente del modelo está en:
-```
-C:\Users\USUARIO\Documents\INSTRUCTOR CarlosJulio\PROYECTO\modelado\65-lowpolyboy (1)\cuerpo.blend
-```
+El archivo fuente es `cuerpo.blend`, ubicado en la carpeta `modelado/` del repositorio del proyecto.
 
 Después de modificar el modelo o las animaciones, exportarlo como GLB:
 
@@ -303,16 +303,83 @@ Todas las pantallas usan `useWindowDimensions()` para adaptarse:
 
 | Breakpoint | Ancho | Comportamiento |
 |---|---|---|
-| Móvil pequeño | alto < 640px | 5 cols en alfabeto, visor 3D 200 px |
-| Móvil normal | < 768px | 5 cols en alfabeto, visor 3D = 34% alto pantalla |
-| Tablet | 768–1023px | 7 cols en alfabeto, visor 3D = 40% alto pantalla |
-| Desktop/Web | ≥ 1024px | 9 cols en alfabeto, visor 3D = 40% alto pantalla |
+| Móvil pequeño | alto < 600px | 5 cols en alfabeto, visor 3D 200 px |
+| Móvil normal | < 768px | 5 cols en alfabeto, visor 3D 250 px |
+| Tablet | 768–1023px | 7 cols en alfabeto, visor 3D 250 px |
+| Desktop/Web | ≥ 1024px | 9 cols en alfabeto, visor 3D 250 px |
 
 ```tsx
 // Siempre dentro del componente, nunca a nivel de módulo
 const { width, height } = useWindowDimensions();
 const VIEWER_H = height < 640 ? 200 : width >= 768 ? Math.round(height * 0.40) : Math.round(height * 0.34);
 ```
+
+---
+
+## Internacionalización (i18n)
+
+La app soporta **4 idiomas** seleccionables desde la pantalla de Perfil: Español, Inglés, Francés y Portugués.
+
+### Archivos del sistema
+
+| Archivo | Descripción |
+|---|---|
+| `app/i18n/locales/es.ts` | Fuente de verdad con ~150 claves en español |
+| `app/i18n/locales/en.ts` | Traducciones al inglés (tipadas como `typeof es`) |
+| `app/i18n/locales/fr.ts` | Traducciones al francés |
+| `app/i18n/locales/pt.ts` | Traducciones al portugués |
+| `app/i18n/index.ts` | Hook `useTranslation()` con fallback `es` |
+| `app/state/LanguageContext.tsx` | Contexto global + persistencia en AsyncStorage |
+
+### Cómo funciona
+
+1. El usuario elige un idioma en **Perfil → Idioma de la app**.
+2. `LanguageContext` guarda la selección en `AsyncStorage` con la clave `@app_language` y la propaga a todos los componentes hijos.
+3. Cualquier pantalla llama `const { t } = useTranslation()` y usa `t('clave')` para obtener el texto en el idioma activo.
+4. Si una clave no existe en el idioma elegido, se usa el valor en español como fallback.
+
+```tsx
+// Ejemplo de uso en cualquier componente
+import { useTranslation } from '../../i18n';
+
+const MyScreen = () => {
+  const { t } = useTranslation();
+  return <Text>{t('loginBtn')}</Text>; // → "Sign In" en inglés, "Ingresar" en español
+};
+```
+
+### Cómo agregar un idioma nuevo
+
+1. Crear `app/i18n/locales/xx.ts` tipado como `typeof es` y completar todas las claves.
+2. Importarlo en `app/i18n/index.ts` y agregarlo al objeto `translations`.
+3. Agregar el código al tipo `LanguageCode` y su nombre en `LANGUAGE_NAMES` en `app/state/LanguageContext.tsx`.
+4. El selector en `ProfileScreen` lo detecta automáticamente.
+
+### Cómo agregar una nueva clave
+
+1. Agregar la clave con su valor en español a `app/i18n/locales/es.ts`.
+2. Agregar la traducción equivalente en `en.ts`, `fr.ts` y `pt.ts` (TypeScript marcará un error si falta).
+3. Usar `t('nuevaClave')` en el componente.
+
+### Pantallas traducidas
+
+Todas las pantallas de la app usan `useTranslation()`:
+
+| Pantalla | Estado |
+|---|---|
+| LandingScreen | ✅ |
+| LoginScreen | ✅ |
+| RegisterScreen | ✅ |
+| ForgotPasswordScreen | ✅ |
+| VerifyCodeScreen | ✅ |
+| NewPasswordScreen | ✅ |
+| TranslationScreen | ✅ |
+| AlphabetScreen | ✅ |
+| AlarmsScreen | ✅ |
+| HistoryScreen | ✅ |
+| StatsScreen | ✅ |
+| ProfileScreen | ✅ |
+| MainTabNavigator / WebTopBar | ✅ |
 
 ---
 
@@ -395,7 +462,9 @@ El ícono vive en dos lugares con roles distintos:
 | Pantalla en blanco | Error de JS | Abrir **F12 → Console** |
 | `Cannot find module '...'` | Dependencias faltantes | `npm install` |
 | Modelo 3D no carga | GLB no copiado a assets | Verificar `app/assets/signia_model.glb` |
+| Modelo 3D no carga en iOS | Rutas `file://` no resueltas en iOS Expo | El código usa `expo-asset` para obtener el `localUri` real; verificar que `expo-asset` esté instalado |
 | WebView en blanco | `react-native-webview` no instalado | `npm install react-native-webview` |
+| Visor 3D sin fondo / negro | Three.js no cargó desde CDN (sin internet) | El visor requiere conexión para cargar Three.js r160 desde jsDelivr |
 | `node_modules` no existe | Primera ejecución | `npm install` en `app/` |
 | `Project is incompatible with this version of Expo Go` | SDK desactualizado | Ejecutar `npm install --legacy-peer-deps` en `app/` (proyecto ya actualizado a SDK 54) |
 | **`PlatformConstants could not be found` en móvil** | `react-native-worklets` declarado manualmente en versión incorrecta, conflicto con TurboModules de RN 0.81 | Eliminar `react-native-worklets` de `package.json`, luego `rm -rf node_modules && npm install && npx expo start --clear` |

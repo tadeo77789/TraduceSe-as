@@ -4,7 +4,7 @@
  *
  * Muestra:
  * - Avatar con degradado, nombre (extraído del email), email y badge de nivel.
- * - Mini-estadísticas: traducciones, señas aprendidas, alarmas activas.
+ * - Mini-estadísticas: traducciones y señas aprendidas.
  * - Sección "Cuenta": correo y contraseña (solo lectura) + link de cambio de contraseña.
  * - Sección "Preferencias": toggle de tema claro/oscuro, toggle de notificaciones
  *   y selector de idioma de la app (Español, Inglés, Francés, Português).
@@ -18,7 +18,7 @@
  * @todo Conectar los campos de cuenta con `ENDPOINTS.updateProfile`.
  * @todo Implementar cambio de contraseña real.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -39,14 +39,10 @@ import { Button } from '../../components/common/Button';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../../state/AuthContext';
 import { useTheme, useColors } from '../../../state/ThemeContext';
+import { useLanguage, LANGUAGE_NAMES, type LanguageCode } from '../../../state/LanguageContext';
+import { useTranslation } from '../../../i18n';
 
-const IDIOMAS = ['Español', 'Inglés', 'Francés', 'Português'];
-
-const USER_STATS = [
-  { label: 'Traducciones', value: '1,248', icon: 'swap-horizontal-outline' as const, color: Colors.primary },
-  { label: 'Señas aprendidas', value: '84', icon: 'hand-left-outline' as const, color: '#D97706' },
-  { label: 'Alarmas', value: '3', icon: 'alarm-outline' as const, color: '#059669' },
-];
+const LANG_CODES: LanguageCode[] = ['es', 'en', 'fr', 'pt'];
 
 export const ProfileScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -55,7 +51,13 @@ export const ProfileScreen: React.FC = () => {
   const { user, logout } = useAuth();
   const { isDark, toggleTheme, resetTheme } = useTheme();
   const C = useColors();
-  const [selectedIdioma, setSelectedIdioma] = useState('Español');
+  const { language, setLanguage } = useLanguage();
+  const { t } = useTranslation();
+
+  const USER_STATS = [
+    { label: t('profileTranslations'), value: '1,248', icon: 'swap-horizontal-outline' as const, color: Colors.primary },
+    { label: t('profileLearned'), value: '84', icon: 'hand-left-outline' as const, color: '#D97706' },
+  ];
 
   const displayName = user?.email?.split('@')[0] ?? 'Usuario';
   const displayEmail = user?.email ?? 'usuario@traducsenas.com';
@@ -63,14 +65,14 @@ export const ProfileScreen: React.FC = () => {
   const handleLogout = async () => {
     if (Platform.OS === 'web') {
       // eslint-disable-next-line no-restricted-globals
-      if (confirm('¿Deseas cerrar sesión?')) {
+      if (confirm(t('profileConfirmLogout'))) {
         resetTheme();
         await logout();
       }
     } else {
-      Alert.alert('Cerrar sesión', '¿Deseas cerrar sesión?', [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Cerrar sesión', style: 'destructive', onPress: async () => { resetTheme(); await logout(); } },
+      Alert.alert(t('logout'), t('profileConfirmLogout'), [
+        { text: t('cancel'), style: 'cancel' },
+        { text: t('profileLogout'), style: 'destructive', onPress: async () => { resetTheme(); await logout(); } },
       ]);
     }
   };
@@ -78,16 +80,16 @@ export const ProfileScreen: React.FC = () => {
   const handleDeleteAccount = () => {
     if (Platform.OS === 'web') {
       // eslint-disable-next-line no-restricted-globals
-      if (confirm('¿Estás seguro? Esta acción no se puede deshacer.')) {
-        alert('Cuenta eliminada');
+      if (confirm(t('profileConfirmDelete'))) {
+        alert(t('profileAccountDeleted'));
       }
     } else {
       Alert.alert(
-        'Eliminar cuenta',
-        '¿Estás seguro? Esta acción no se puede deshacer.',
+        t('profileDeleteAccount'),
+        t('profileConfirmDelete'),
         [
-          { text: 'Cancelar', style: 'cancel' },
-          { text: 'Eliminar', style: 'destructive', onPress: () => Alert.alert('Cuenta eliminada') },
+          { text: t('cancel'), style: 'cancel' },
+          { text: t('delete'), style: 'destructive', onPress: () => Alert.alert(t('profileAccountDeleted')) },
         ]
       );
     }
@@ -120,17 +122,17 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Sección de cuenta */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>Cuenta</Text>
+          <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>{t('profileAccount')}</Text>
           <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
             <Input
-              label="Correo electrónico"
+              label={t('email')}
               value={displayEmail}
               editable={false}
               rightIcon="lock-closed-outline"
               containerStyle={styles.inputStyle}
             />
             <Input
-              label="Contraseña"
+              label={t('password')}
               value="••••••••"
               isPassword
               editable={false}
@@ -141,14 +143,14 @@ export const ProfileScreen: React.FC = () => {
               onPress={() => (navigation.navigate as any)('ForgotPassword', { fromProfile: true })}
             >
               <Ionicons name="key-outline" size={14} color={Colors.primary} />
-              <Text style={styles.forgotLink}>Cambiar contraseña</Text>
+              <Text style={styles.forgotLink}>{t('profileChangePassword')}</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Preferencias */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>Preferencias</Text>
+          <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>{t('profilePreferences')}</Text>
           <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
             {/* Tema */}
             <View style={styles.prefRow}>
@@ -156,7 +158,7 @@ export const ProfileScreen: React.FC = () => {
                 <View style={[styles.prefIcon, { backgroundColor: C.primaryBg }]}>
                   <Ionicons name={isDark ? 'moon' : 'sunny'} size={18} color={Colors.primary} />
                 </View>
-                <Text style={[styles.themeLabel, { color: C.textPrimary }]}>Tema {isDark ? 'Oscuro' : 'Claro'}</Text>
+                <Text style={[styles.themeLabel, { color: C.textPrimary }]}>{t('profileThemeLabel')} {isDark ? t('profileThemeDark') : t('profileThemeLight')}</Text>
               </View>
               <Switch
                 value={isDark}
@@ -174,7 +176,7 @@ export const ProfileScreen: React.FC = () => {
                 <View style={[styles.prefIcon, { backgroundColor: isDark ? 'rgba(16,185,129,0.18)' : '#D1FAE5' }]}>
                   <Ionicons name="notifications-outline" size={18} color="#059669" />
                 </View>
-                <Text style={[styles.themeLabel, { color: C.textPrimary }]}>Notificaciones</Text>
+                <Text style={[styles.themeLabel, { color: C.textPrimary }]}>{t('profileNotifications')}</Text>
               </View>
               <Switch
                 value={true}
@@ -186,20 +188,20 @@ export const ProfileScreen: React.FC = () => {
             <View style={[styles.divider, { backgroundColor: C.border }]} />
 
             {/* Idioma */}
-            <Text style={[styles.idiomaLabel, { color: C.textSecondary }]}>Idioma de la app</Text>
+            <Text style={[styles.idiomaLabel, { color: C.textSecondary }]}>{t('profileLanguage')}</Text>
             <View style={styles.idiomaRow}>
-              {IDIOMAS.map(lang => (
+              {LANG_CODES.map(code => (
                 <TouchableOpacity
-                  key={lang}
-                  onPress={() => setSelectedIdioma(lang)}
+                  key={code}
+                  onPress={() => setLanguage(code)}
                   style={[
                     styles.idiomaChip,
                     { backgroundColor: C.surface, borderColor: C.border },
-                    selectedIdioma === lang && [styles.idiomaChipActive, { backgroundColor: C.primaryBg }],
+                    language === code && [styles.idiomaChipActive, { backgroundColor: C.primaryBg }],
                   ]}
                 >
-                  <Text style={[styles.idiomaText, { color: C.textSecondary }, selectedIdioma === lang && styles.idiomaTextActive]}>
-                    {lang}
+                  <Text style={[styles.idiomaText, { color: C.textSecondary }, language === code && styles.idiomaTextActive]}>
+                    {LANGUAGE_NAMES[code]}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -209,12 +211,12 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Información de la app */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>Acerca de</Text>
+          <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>{t('profileAbout')}</Text>
           <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
             {[
-              { icon: 'information-circle-outline', label: 'Versión de la app', value: '1.0.0' },
-              { icon: 'document-text-outline', label: 'Términos y condiciones', value: '' },
-              { icon: 'shield-checkmark-outline', label: 'Política de privacidad', value: '' },
+              { icon: 'information-circle-outline', label: t('profileAppVersion'), value: '1.0.0' },
+              { icon: 'document-text-outline', label: t('profileTerms'), value: '' },
+              { icon: 'shield-checkmark-outline', label: t('profilePrivacy'), value: '' },
             ].map((item, i) => (
               <View key={i}>
                 {i > 0 && <View style={[styles.divider, { backgroundColor: C.border }]} />}
@@ -231,8 +233,8 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Acciones */}
         <View style={styles.actionsSection}>
-          <Button title="Cerrar sesión" onPress={handleLogout} fullWidth />
-          <Button title="Eliminar cuenta" onPress={handleDeleteAccount} variant="danger" fullWidth />
+          <Button title={t('profileLogout')} onPress={handleLogout} fullWidth />
+          <Button title={t('profileDeleteAccount')} onPress={handleDeleteAccount} variant="danger" fullWidth />
         </View>
         </View>
       </ScrollView>

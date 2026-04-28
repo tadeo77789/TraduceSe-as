@@ -18,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
 import { Input } from '../../components/common/Input';
 import { useColors, useTheme } from '../../../state/ThemeContext';
+import { useTranslation } from '../../../i18n';
 
 export const ForgotPasswordScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -31,9 +32,10 @@ export const ForgotPasswordScreen: React.FC = () => {
   const C = useColors();
   const { isDark } = useTheme();
   const rootBg = isDark ? '#0F0B1A' : '#EDE9FE';
+  const { t } = useTranslation();
 
   const handleConfirm = async () => {
-    if (!email) { Alert.alert('Error', 'Ingresa tu correo'); return; }
+    if (!email) { Alert.alert(t('error'), t('forgotErrorEmpty')); return; }
     setLoading(true);
     // TODO: llamar al backend para enviar código
     setTimeout(() => {
@@ -67,17 +69,15 @@ export const ForgotPasswordScreen: React.FC = () => {
       <View style={styles.formInner}>
       <View style={[styles.card, { backgroundColor: C.surface }]}>
         <Text style={[styles.title, { color: C.textPrimary }]}>
-          {fromProfile ? 'Cambiar contraseña' : 'Recuperar contraseña'}
+          {fromProfile ? t('forgotTitleFromProfile') : t('forgotTitle')}
         </Text>
         <Text style={[styles.subtitle, { color: C.textSecondary }]}>
-          {fromProfile
-            ? 'Ingresa tu correo y te enviaremos un código para verificar tu identidad'
-            : 'Ingresa tu correo y te enviaremos un código de verificación'}
+          {fromProfile ? t('forgotSubtitleFromProfile') : t('forgotSubtitle')}
         </Text>
 
         <Input
-          label="Correo electrónico"
-          placeholder="correo@ejemplo.com"
+          label={t('forgotEmailLabel')}
+          placeholder={t('forgotEmailPlaceholder')}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -92,7 +92,7 @@ export const ForgotPasswordScreen: React.FC = () => {
             disabled={loading}
           >
             <Text style={styles.submitBtnText}>
-              {loading ? 'Enviando...' : 'Enviar código'}
+              {loading ? t('forgotBtnLoading') : t('forgotBtn')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -104,8 +104,8 @@ export const ForgotPasswordScreen: React.FC = () => {
           style={styles.linkRow}
         >
           <Text style={[styles.linkText, { color: C.textSecondary }]}>
-            ¿Recordaste tu contraseña?{' '}
-            <Text style={styles.linkAccent}>Inicia sesión</Text>
+            {t('forgotRemembered')}{' '}
+            <Text style={styles.linkAccent}>{t('forgotLoginLink')}</Text>
           </Text>
         </TouchableOpacity>
       )}
