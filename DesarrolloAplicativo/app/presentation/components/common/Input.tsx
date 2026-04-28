@@ -91,7 +91,6 @@ function InputBase({ // Define el componente funcional interno InputBase (se exp
           secureTextEntry={isPassword && !showPassword} // Oculta el texto como puntos si isPassword=true Y showPassword=false
           autoCapitalize="none" // Desactiva la capitalización automática (importante para emails y contraseñas)
           textAlignVertical="center" // Centra el texto verticalmente dentro del campo (especialmente en Android)
-          includeFontPadding={false} // Elimina el padding de fuente extra de Android para alineación vertical precisa
           onFocus={() => setFocused(true)} // Cuando el campo recibe foco: activa el estado focused para cambiar estilos
           onBlur={() => setFocused(false)} // Cuando el campo pierde el foco: desactiva el estado focused
           {...props} // Pasa todas las props restantes de TextInput (placeholder, value, onChangeText, keyboardType, etc.)

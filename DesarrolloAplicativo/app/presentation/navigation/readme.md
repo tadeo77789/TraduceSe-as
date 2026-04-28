@@ -24,7 +24,6 @@ AppNavigator
 │
 └── Autenticado → MainTabNavigator (Tabs)
     ├── TranslationScreen  (Traducción)
-    ├── AlarmsScreen       (Alarmas)
     ├── AlphabetScreen     (Alfabeto LSC)
     ├── StatsScreen        (Estadística)
     ├── HistoryScreen      (Historial)

@@ -7,7 +7,7 @@
  * - Header con logo y botones "Registrarse" / "Ingresar".
  * - Tarjeta de notificación push simulada (descartable).
  * - Sección hero con título, subtítulo y badge LSC.
- * - Cards de características principales (Traducción, Recordatorios).
+ * - Card de característica principal (Traducción).
  * - Slider de 3 slides con imágenes, flechas de navegación y dots.
  * - Testimonio de usuario.
  * - CTA final con botón de registro y link de login.
@@ -54,7 +54,16 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
   ];
 
   const FEATURES = [
-    { icon: 'hand-left-outline' as const, label: t('featureTranslation'), desc: t('featureTranslationDesc'), color: Colors.primary, bg: '#EDE9FE' },
+    { icon: 'hand-left-outline' as const, label: 'Traducción',  desc: 'Seña a texto en tiempo real con IA', color: '#7C3AED', bg: '#EDE9FE' },
+    { icon: 'hand-left-outline' as const, label: 'Alfabeto LSC', desc: 'Las 27 letras del abecedario en señas', color: '#06B6D4', bg: '#CFFAFE' },
+    { icon: 'bar-chart-outline' as const, label: 'Estadísticas', desc: 'Seguimiento de tu progreso diario',    color: '#10B981', bg: '#D1FAE5' },
+    { icon: 'time-outline' as const,      label: 'Historial',    desc: 'Revisa tus traducciones anteriores',   color: '#F59E0B', bg: '#FEF3C7' },
+  ];
+
+  const HOW_IT_WORKS = [
+    { step: '1', icon: 'camera-outline' as const,   title: 'Abre la cámara',       desc: 'Apunta tu cámara hacia tus manos en un lugar bien iluminado.' },
+    { step: '2', icon: 'hand-left-outline' as const, title: 'Realiza la seña',      desc: 'Haz la seña LSC frente a la cámara. El modelo la detecta en tiempo real.' },
+    { step: '3', icon: 'chatbubble-outline' as const, title: 'Obtén la traducción', desc: 'El texto traducido aparece instantáneamente en pantalla.' },
   ];
 
   const SLIDE_WIDTH = isWide ? Math.min(width - 80, 860) : width - 40; // Calcula el ancho de cada slide: en pantallas anchas máximo 860px, en móvil el ancho total menos 40px de margen
@@ -155,17 +164,17 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
           </View>{/* Cierre de la sección hero */}
 
           {/* ── Feature cards ────────────────────────────────── */}
-          <View style={[styles.featuresRow, isWide && styles.featuresRowWide]}>{/* Fila de tarjetas de características: en pantallas anchas aumenta el gap entre tarjetas */}
-            {FEATURES.map((f, i) => ( // Itera sobre el arreglo FEATURES y renderiza una tarjeta por cada elemento
-              <View key={i} style={[styles.featureCard, { backgroundColor: f.bg }]}>{/* Tarjeta individual de característica con fondo dinámico según el color definido en FEATURES */}
-                <View style={[styles.featureIconBox, { backgroundColor: f.color + '25' }]}>{/* Caja del ícono con fondo semitransparente del color de la característica (opacidad 25 en hex) */}
-                  <Ionicons name={f.icon} size={22} color={f.color} />{/* Ícono Ionicons de la característica con el color definido en el objeto */}
-                </View>{/* Cierre de featureIconBox */}
-                <Text style={[styles.featureLabel, { color: f.color }]}>{f.label}</Text>{/* Etiqueta del nombre de la característica con el color temático */}
-                <Text style={styles.featureDesc}>{f.desc}</Text>{/* Descripción breve de la característica en color secundario */}
-              </View> // Cierre de featureCard
-            ))}{/* Cierre del map de FEATURES */}
-          </View>{/* Cierre de featuresRow */}
+          <View style={styles.featuresRow}>
+            {FEATURES.map((f, i) => (
+              <View key={i} style={[styles.featureCard, { backgroundColor: f.bg }]}>
+                <View style={[styles.featureIconBox, { backgroundColor: f.color + '25' }]}>
+                  <Ionicons name={f.icon} size={22} color={f.color} />
+                </View>
+                <Text style={[styles.featureLabel, { color: f.color }]}>{f.label}</Text>
+                <Text style={styles.featureDesc}>{f.desc}</Text>
+              </View>
+            ))}
+          </View>
 
           {/* ── Slider ───────────────────────────────────────── */}
           <View style={styles.sliderSection}>{/* Sección completa del slider con gap para separar título, slider y dots */}
@@ -235,6 +244,100 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
               ))}{/* Cierre del map de dots */}
             </View>{/* Cierre del contenedor de dots */}
           </View>{/* Cierre de sliderSection */}
+
+          {/* ── Cómo funciona ────────────────────────────────── */}
+          <View style={styles.howSection}>
+            <View style={styles.sectionBadge}>
+              <View style={styles.sectionBadgeDot} />
+              <Text style={styles.sectionBadgeText}>Fácil de usar</Text>
+            </View>
+            <Text style={styles.sectionHeading}>¿Cómo funciona?</Text>
+            <Text style={styles.sectionSubtitle}>En tres pasos estarás traduciendo señas con precisión.</Text>
+
+            {HOW_IT_WORKS.map((item, i) => (
+              <View key={i} style={styles.howCard}>
+                <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.howStep}>
+                  <Text style={styles.howStepNum}>{item.step}</Text>
+                </LinearGradient>
+                <View style={[styles.howIconBox, { backgroundColor: '#EDE9FE' }]}>
+                  <Ionicons name={item.icon} size={22} color={Colors.primary} />
+                </View>
+                <View style={styles.howBody}>
+                  <Text style={styles.howTitle}>{item.title}</Text>
+                  <Text style={styles.howDesc}>{item.desc}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          {/* ── Sobre la LSC ─────────────────────────────────── */}
+          <View style={styles.lscSection}>
+            <View style={styles.sectionBadge}>
+              <View style={styles.sectionBadgeDot} />
+              <Text style={styles.sectionBadgeText}>Conoce más</Text>
+            </View>
+            <Text style={styles.sectionHeading}>La Lengua de Señas Colombiana</Text>
+
+            <View style={styles.lscImageCard}>
+              <Image
+                source={require('../../assets/images/slide2.jpg')}
+                style={styles.lscImage}
+                resizeMode="cover"
+              />
+              <LinearGradient
+                colors={['transparent', 'rgba(124,58,237,0.85)']}
+                style={styles.lscImageOverlay}
+              />
+              <View style={styles.lscImageText}>
+                <Text style={styles.lscImageTitle}>Reconocida oficialmente</Text>
+                <Text style={styles.lscImageSub}>Ley 324 de 1996 — Colombia</Text>
+              </View>
+            </View>
+
+            <View style={[styles.statsGrid, isWide && styles.statsGridWide]}>
+              {[
+                { value: '+500K', label: 'Personas sordas en Colombia', icon: 'people-outline' as const, color: '#7C3AED' },
+                { value: '27',    label: 'Letras en el alfabeto LSC',    icon: 'hand-left-outline' as const, color: '#06B6D4' },
+                { value: '100%',  label: 'Gratis y sin registro previo', icon: 'shield-checkmark-outline' as const, color: '#10B981' },
+              ].map((stat, i) => (
+                <View key={i} style={styles.statBox}>
+                  <Ionicons name={stat.icon} size={22} color={stat.color} />
+                  <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
+                  <Text style={styles.statLabel}>{stat.label}</Text>
+                </View>
+              ))}
+            </View>
+
+            <View style={styles.lscInfoCard}>
+              <Ionicons name="information-circle-outline" size={20} color={Colors.primary} />
+              <Text style={styles.lscInfoText}>
+                La LSC es la lengua natural de la comunidad sorda colombiana. Tiene su propia gramática, sintaxis y expresiones culturales únicas, distintas del español hablado.
+              </Text>
+            </View>
+
+            <View style={styles.lscBanner}>
+              <Image
+                source={require('../../assets/images/slide3.jpg')}
+                style={styles.lscBannerImage}
+                resizeMode="cover"
+              />
+              <LinearGradient
+                colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.7)']}
+                style={styles.lscBannerOverlay}
+              />
+              <View style={styles.lscBannerContent}>
+                <Text style={styles.lscBannerTitle}>Aprende el alfabeto dactilológico</Text>
+                <Text style={styles.lscBannerSub}>Domina las 27 letras y empieza a deletrear en LSC desde cero.</Text>
+                <TouchableOpacity
+                  style={styles.lscBannerBtn}
+                  onPress={() => navigation.navigate('Register' as never)}
+                >
+                  <Text style={styles.lscBannerBtnText}>Comenzar gratis</Text>
+                  <Ionicons name="arrow-forward" size={14} color={Colors.primary} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
 
           {/* ── Testimonio ───────────────────────────────────── */}
           <View style={styles.testimonialCard}>{/* Tarjeta del testimonio con bordes redondeados y sombra morada */}
@@ -418,26 +521,64 @@ const styles = StyleSheet.create({ // Crea la hoja de estilos del componente con
     maxWidth: 420, // Línea 449 — ancho máximo de 420px para evitar líneas demasiado largas
   }, // Cierre del estilo heroSubtitle
 
+  // ── Badges de sección ──
+  sectionBadge: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', backgroundColor: Colors.primaryBg, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, marginBottom: 10 },
+  sectionBadgeDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primary },
+  sectionBadgeText: { fontSize: 12, color: Colors.primary, fontWeight: '700' },
+  sectionHeading: { fontSize: 22, fontWeight: '900', color: Colors.textPrimary, lineHeight: 30, marginBottom: 6 },
+  sectionSubtitle: { fontSize: 14, color: Colors.textSecondary, lineHeight: 22, marginBottom: 16 },
+
+  // ── Cómo funciona ──
+  howSection: { gap: 12 },
+  howCard: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#fff', borderRadius: 18, padding: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
+  howStep: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  howStepNum: { color: '#fff', fontSize: 14, fontWeight: '800' },
+  howIconBox: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  howBody: { flex: 1, gap: 3 },
+  howTitle: { fontSize: 14, fontWeight: '700', color: Colors.textPrimary },
+  howDesc: { fontSize: 12, color: Colors.textSecondary, lineHeight: 18 },
+
+  // ── LSC ──
+  lscSection: { gap: 16 },
+  lscImageCard: { width: '100%', height: 200, borderRadius: 22, overflow: 'hidden', shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.2, shadowRadius: 14, elevation: 8 },
+  lscImage: { width: '100%', height: '100%' },
+  lscImageOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%' },
+  lscImageText: { position: 'absolute', bottom: 18, left: 18 },
+  lscImageTitle: { color: '#fff', fontSize: 18, fontWeight: '800', marginBottom: 4 },
+  lscImageSub: { color: 'rgba(255,255,255,0.85)', fontSize: 13 },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  statsGridWide: { flexWrap: 'nowrap' },
+  statBox: { flex: 1, minWidth: '28%', backgroundColor: '#fff', borderRadius: 18, padding: 16, alignItems: 'center', gap: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
+  statValue: { fontSize: 22, fontWeight: '900' },
+  statLabel: { fontSize: 11, color: Colors.textSecondary, textAlign: 'center', lineHeight: 15 },
+  lscInfoCard: { flexDirection: 'row', gap: 12, backgroundColor: Colors.primaryBg, borderRadius: 16, padding: 16, alignItems: 'flex-start' },
+  lscInfoText: { flex: 1, fontSize: 13, color: Colors.textPrimary, lineHeight: 21 },
+  lscBanner: { width: '100%', height: 220, borderRadius: 22, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.14, shadowRadius: 14, elevation: 8 },
+  lscBannerImage: { width: '100%', height: '100%' },
+  lscBannerOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '75%' },
+  lscBannerContent: { position: 'absolute', bottom: 20, left: 20, right: 20, gap: 6 },
+  lscBannerTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
+  lscBannerSub: { color: 'rgba(255,255,255,0.85)', fontSize: 13, lineHeight: 20 },
+  lscBannerBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, marginTop: 4 },
+  lscBannerBtnText: { color: Colors.primary, fontSize: 13, fontWeight: '700' },
+
   // ── Features ──
-  featuresRow: { flexDirection: 'row', gap: 12 }, // Línea 453 — fila de tarjetas de características con separación de 12px
-  featuresRowWide: { gap: 16 }, // Línea 454 — aumenta la separación a 16px en pantallas anchas
-  featureCard: { // Línea 455 — estilos base de cada tarjeta de característica
-    flex: 1, // Línea 456 — cada tarjeta ocupa el mismo espacio disponible en la fila
-    borderRadius: 18, // Línea 457 — bordes redondeados de 18px
-    padding: 16, // Línea 458 — padding interno de 16px en todos los lados
-    gap: 8, // Línea 459 — separación de 8px entre el ícono, el label y la descripción
-    shadowColor: '#000', // Línea 460 — color de sombra en negro
-    shadowOffset: { width: 0, height: 2 }, // Línea 461 — sombra desplazada 2px hacia abajo
-    shadowOpacity: 0.06, // Línea 462 — sombra muy sutil al 6% de opacidad
-    shadowRadius: 8, // Línea 463 — radio de difuminado de 8px
-    elevation: 2, // Línea 464 — elevación mínima en Android de 2 unidades
-  }, // Cierre del estilo featureCard
-  featureIconBox: { // Línea 466 — caja del ícono de la característica
-    width: 40, height: 40, borderRadius: 12, // Línea 467 — dimensiones 40x40 con bordes redondeados de 12px
-    alignItems: 'center', justifyContent: 'center', // Línea 468 — centra el ícono dentro de la caja
-  }, // Cierre del estilo featureIconBox
-  featureLabel: { fontSize: 13, fontWeight: '800' }, // Línea 470 — etiqueta del nombre de la característica en tamaño 13 y peso 800
-  featureDesc: { fontSize: 11, color: Colors.textSecondary, lineHeight: 16 }, // Línea 471 — descripción en tamaño 11, color secundario e interlineado 16px
+  featuresRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  featuresRowWide: { gap: 16 },
+  featureCard: {
+    width: '47%',
+    borderRadius: 18,
+    padding: 16,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  featureIconBox: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  featureLabel: { fontSize: 13, fontWeight: '800' },
+  featureDesc: { fontSize: 11, color: Colors.textSecondary, lineHeight: 16 },
 
   // ── Slider ──
   sliderSection: { gap: 14 }, // Línea 474 — sección del slider con separación de 14px entre título, slider y dots

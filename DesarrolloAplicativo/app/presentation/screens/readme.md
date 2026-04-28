@@ -9,7 +9,6 @@ screens/
 ├── LandingScreen.tsx      → Pantalla de bienvenida (carrusel de imágenes, testimonios, botones de acción)
 ├── Auth/                  → Flujo de autenticación
 ├── Translation/           → Pantalla principal de traducción
-├── Alarms/                → Gestión de alarmas visuales
 ├── Alphabet/              → Alfabeto de señas colombianas
 ├── Stats/                 → Estadísticas de uso
 ├── History/               → Historial de traducciones
@@ -36,11 +35,6 @@ Flujo completo de autenticación con 5 pantallas encadenadas:
 | Pantalla | Descripción |
 |---|---|
 | `TranslationScreen.tsx` | Pantalla principal con toggle **Seña ↔ Texto**. En modo *Seña→Texto* activa la cámara para detectar señas. En modo *Texto→Seña* muestra un avatar 3D con la representación de la seña |
-
-### `Alarms/`
-| Pantalla | Descripción |
-|---|---|
-| `AlarmsScreen.tsx` | Lista de alarmas activas/inactivas con toggle. Incluye un selector de hora con reloj analógico para crear nuevas alarmas |
 
 ### `Alphabet/`
 | Pantalla | Descripción |
