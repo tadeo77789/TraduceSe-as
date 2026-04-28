@@ -37,8 +37,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => { // Efecto que se ejecuta una sola vez al montar el proveedor (array de dependencias vacío); su objetivo es restaurar la sesión persistida
     const loadStoredAuth = async () => { // Define la función asíncrona interna que lee el token y el usuario guardados en AsyncStorage
       try { // Bloque try: intenta leer los valores de AsyncStorage y actualizar el estado
-        const token = await AsyncStorage.getItem('@auth_token'); // Lee el token JWT guardado bajo la clave '@auth_token'; devuelve string o null si no existe
-        const userStr = await AsyncStorage.getItem('@auth_user'); // Lee el objeto usuario serializado como JSON guardado bajo la clave '@auth_user'; devuelve string o null si no existe
+        const [token, userStr] = await Promise.all([
+          AsyncStorage.getItem('@auth_token'),
+          AsyncStorage.getItem('@auth_user'),
+        ]); // Lee token y usuario en paralelo desde AsyncStorage para reducir el tiempo de inicio
         if (token && userStr) { // Condición: si ambos valores existen, la sesión anterior es válida y se restaura
           setState({ // Actualiza el estado completo con los datos recuperados de AsyncStorage
             user: JSON.parse(userStr), // Deserializa el JSON del usuario guardado y lo asigna al campo user del estado

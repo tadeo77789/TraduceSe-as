@@ -28,6 +28,6 @@
       "backgroundColor": "#EDE9FE",
       "favicon": "./assets/images/icono.png"
     },
-    "plugins": ["expo-camera"]
+    "plugins": ["expo-camera", "expo-notifications"]
   }
 }

@@ -32,6 +32,7 @@ import { useColors, useTheme } from '../../../state/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Traduccion } from '../../../types';
+import { useTranslation } from '../../../i18n';
 
 const MOCK_HISTORY: Traduccion[] = [
   { id_traduccion: 1, texto_entrada: 'No entiendo lo que dices', texto_traducido: '🤟 [seña detectada]', tipo: 'sena_texto', fecha_traduccion: '07/12/25', is_deleted: false },
@@ -60,33 +61,6 @@ type TipoConfig = {
   darkTextColor: string;
 };
 
-const TIPO_CONFIG: Record<string, TipoConfig> = {
-  sena_texto: {
-    label: 'Seña → Texto',
-    icon: 'hand-left-outline',
-    gradient:     ['#EDE9FE', '#DDD6FE'],
-    darkGradient: ['#2D1F4E', '#1E183A'],
-    textColor:     Colors.primary,
-    darkTextColor: '#9F71ED',
-  },
-  texto_sena: {
-    label: 'Texto → Seña',
-    icon: 'text-outline',
-    gradient:     ['#DBEAFE', '#BFDBFE'],
-    darkGradient: ['#162644', '#111B35'],
-    textColor:     '#2563EB',
-    darkTextColor: '#60A5FA',
-  },
-  voz_sena: {
-    label: 'Voz → Seña',
-    icon: 'mic-outline',
-    gradient:     ['#D1FAE5', '#A7F3D0'],
-    darkGradient: ['#0D2B1E', '#0A1E16'],
-    textColor:     '#059669',
-    darkTextColor: '#34D399',
-  },
-};
-
 const keyExtractor = (item: Traduccion) => String(item.id_traduccion);
 
 export const HistoryScreen: React.FC = () => {
@@ -95,21 +69,49 @@ export const HistoryScreen: React.FC = () => {
   const numCols = isTablet ? 2 : 1;
   const C = useColors();
   const { isDark } = useTheme();
+  const { t } = useTranslation();
   const [items, setItems] = useState<Traduccion[]>(MOCK_HISTORY);
 
+  const TIPO_CONFIG: Record<string, TipoConfig> = {
+    sena_texto: {
+      label: t('historySenaTexto'),
+      icon: 'hand-left-outline',
+      gradient:     ['#EDE9FE', '#DDD6FE'],
+      darkGradient: ['#2D1F4E', '#1E183A'],
+      textColor:     Colors.primary,
+      darkTextColor: '#9F71ED',
+    },
+    texto_sena: {
+      label: t('historyTextoSena'),
+      icon: 'text-outline',
+      gradient:     ['#DBEAFE', '#BFDBFE'],
+      darkGradient: ['#162644', '#111B35'],
+      textColor:     '#2563EB',
+      darkTextColor: '#60A5FA',
+    },
+    voz_sena: {
+      label: t('historyVozSena'),
+      icon: 'mic-outline',
+      gradient:     ['#D1FAE5', '#A7F3D0'],
+      darkGradient: ['#0D2B1E', '#0A1E16'],
+      textColor:     '#059669',
+      darkTextColor: '#34D399',
+    },
+  };
+
   const handleDelete = useCallback((id: number) => {
-    Alert.alert('Eliminar traducción', '¿Deseas eliminar este registro del historial?', [
-      { text: 'Cancelar', style: 'cancel' },
+    Alert.alert(t('historyDeleteTitle'), t('historyConfirmDelete'), [
+      { text: t('cancel'), style: 'cancel' },
       {
-        text: 'Eliminar', style: 'destructive',
-        onPress: () => setItems(prev => prev.filter(t => t.id_traduccion !== id)),
+        text: t('historyDeleteBtn'), style: 'destructive',
+        onPress: () => setItems(prev => prev.filter(item => item.id_traduccion !== id)),
       },
     ]);
-  }, []);
+  }, [t]);
 
   const handleReuse = useCallback((item: Traduccion) => {
-    Alert.alert('Reusar traducción', `¿Traducir de nuevo?\n\n"${item.texto_entrada}"`);
-  }, []);
+    Alert.alert(t('historyReuseTitle'), `${t('historyReuseMsg')}\n\n"${item.texto_entrada}"`);
+  }, [t]);
 
   const renderItem: ListRenderItem<Traduccion> = useCallback(({ item }) => {
     const config = TIPO_CONFIG[item.tipo] ?? TIPO_CONFIG['texto_sena'];
@@ -136,26 +138,26 @@ export const HistoryScreen: React.FC = () => {
           <View style={styles.cardActions}>
             <TouchableOpacity style={[styles.actionBtn, { backgroundColor: C.primaryBg }]} onPress={() => handleReuse(item)}>
               <Ionicons name="refresh-outline" size={15} color={Colors.primary} />
-              <Text style={[styles.actionText, { color: Colors.primary }]}>Reusar</Text>
+              <Text style={[styles.actionText, { color: Colors.primary }]}>{t('historyReuseBtn')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.actionBtn, { backgroundColor: 'rgba(239,68,68,0.12)' }]} onPress={() => handleDelete(item.id_traduccion)}>
               <Ionicons name="trash-outline" size={15} color={Colors.danger} />
-              <Text style={[styles.actionText, { color: Colors.danger }]}>Eliminar</Text>
+              <Text style={[styles.actionText, { color: Colors.danger }]}>{t('historyDeleteBtn')}</Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
     );
-  }, [handleDelete, handleReuse, C, isDark]);
+  }, [handleDelete, handleReuse, C, isDark, t, TIPO_CONFIG]);
 
   return (
     <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>
       <AppHeader />
       <View style={styles.container}>
         <View style={styles.headerRow}>
-          <Text style={[styles.title, { color: C.textPrimary }]}>Historial</Text>
+          <Text style={[styles.title, { color: C.textPrimary }]}>{t('historyTitle')}</Text>
           <View style={[styles.countBadge, { backgroundColor: C.primaryBg }]}>
-            <Text style={styles.countText}>{items.length} registros</Text>
+            <Text style={styles.countText}>{items.length} {t('historyRecords')}</Text>
           </View>
         </View>
 
@@ -164,8 +166,8 @@ export const HistoryScreen: React.FC = () => {
             <View style={[styles.emptyIcon, { backgroundColor: C.primaryBg }]}>
               <Ionicons name="time-outline" size={40} color={Colors.primary} />
             </View>
-            <Text style={[styles.emptyTitle, { color: C.textPrimary }]}>Sin traducciones</Text>
-            <Text style={[styles.emptyText, { color: C.textSecondary }]}>Las traducciones que realices aparecerán aquí</Text>
+            <Text style={[styles.emptyTitle, { color: C.textPrimary }]}>{t('historyEmpty')}</Text>
+            <Text style={[styles.emptyText, { color: C.textSecondary }]}>{t('historyEmptyText')}</Text>
           </View>
         ) : (
           <FlatList

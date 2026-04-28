@@ -77,7 +77,7 @@ function ButtonBase({ // Define el componente funcional interno ButtonBase (se e
 
   if (variant === 'primary') { // Rama condicional: si la variante es 'primary' renderiza el botón con degradado LinearGradient
     return ( // Retorna el JSX del botón primario con gradiente
-      <Animated.View style={[fullWidth && styles.fullWidth, { transform: [{ scale: scaleAnim }] }]}> {/* Contenedor animado: aplica width 100% si fullWidth=true y transforma la escala con scaleAnim para el efecto de presión */}
+      <Animated.View style={[fullWidth && styles.fullWidth, { transform: [{ scale: scaleAnim }] }]}>{/* Contenedor animado: aplica width 100% si fullWidth=true y transforma la escala con scaleAnim para el efecto de presión */}
         <TouchableOpacity
           onPress={onPress} // Ejecuta la función onPress al soltar el toque
           onPressIn={handlePressIn} // Ejecuta handlePressIn al inicio del toque: inicia animación de hundimiento
@@ -85,7 +85,7 @@ function ButtonBase({ // Define el componente funcional interno ButtonBase (se e
           disabled={isDisabled} // Deshabilita la interacción si isDisabled=true
           activeOpacity={0.9} // Opacidad al presionar: 90%, efecto sutil de retroalimentación visual
           style={[isDisabled && styles.disabled, style]} // Aplica opacidad reducida si está deshabilitado; fusiona con style externo
-        > {/* Cierra apertura de TouchableOpacity */}
+        >{/* Cierra apertura de TouchableOpacity */}
           <LinearGradient
             colors={Colors.gradientPrimaryDeep} // Array de colores del degradado: tonos púrpura profundos desde Colors
             start={{ x: 0, y: 0 }} // El degradado comienza en la esquina superior izquierda
@@ -94,20 +94,20 @@ function ButtonBase({ // Define el componente funcional interno ButtonBase (se e
               styles.gradientBase, // Estilo base: borderRadius, centrado y sombra
               { height: sizeTokens.height, paddingHorizontal: sizeTokens.paddingHorizontal }, // Altura y padding horizontal según el tamaño elegido
             ]}
-          > {/* Cierra apertura de LinearGradient */}
+          >{/* Cierra apertura de LinearGradient */}
             {loading ? ( // Condición: si loading=true muestra spinner, si no muestra el texto
               <ActivityIndicator color="#fff" size="small" /> // Spinner blanco pequeño mientras se procesa la acción
             ) : (
               <Text style={[styles.text, styles.primaryText, textStyle]}>{title}</Text> // Texto del botón con estilo base, color blanco (primaryText) y estilos extra opcionales
             )}
-          </LinearGradient> {/* Cierra LinearGradient */}
-        </TouchableOpacity> {/* Cierra TouchableOpacity del botón primary */}
+          </LinearGradient>{/* Cierra LinearGradient */}
+        </TouchableOpacity>{/* Cierra TouchableOpacity del botón primary */}
       </Animated.View> // Cierra Animated.View del botón primary
     );
   } // Cierra rama condicional variant === 'primary'
 
   return ( // Retorna el JSX para las variantes no-primary (secondary, danger, outline, ghost)
-    <Animated.View style={[fullWidth && styles.fullWidth, { transform: [{ scale: scaleAnim }] }]}> {/* Contenedor animado: aplica width 100% si fullWidth=true y la animación de escala */}
+    <Animated.View style={[fullWidth && styles.fullWidth, { transform: [{ scale: scaleAnim }] }]}>{/* Contenedor animado: aplica width 100% si fullWidth=true y la animación de escala */}
       <TouchableOpacity
         style={[ // Combina múltiples estilos en orden de precedencia
           styles.base, // Estilo base: borderRadius, centrado
@@ -122,15 +122,15 @@ function ButtonBase({ // Define el componente funcional interno ButtonBase (se e
         onPressOut={handlePressOut} // Regresa a escala normal al soltar el toque
         disabled={isDisabled} // Deshabilita la interacción cuando isDisabled=true
         activeOpacity={0.9} // Opacidad 90% al presionar para retroalimentación visual sutil
-      > {/* Cierra apertura de TouchableOpacity de variantes no-primary */}
+      >{/* Cierra apertura de TouchableOpacity de variantes no-primary */}
         {loading ? ( // Condición: spinner si loading=true, texto si loading=false
           <ActivityIndicator color={Colors.primary} size="small" /> // Spinner en color primario (púrpura) para variantes que no son blancas
         ) : (
-          <Text style={[styles.text, styles[`${variant}Text` as keyof typeof styles], textStyle]}> {/* Texto con estilo base, color dinámico según variante (ej: 'secondaryText') y estilos extra */}
-            {title} {/* Muestra el texto del botón recibido por prop */}
+          <Text style={[styles.text, styles[`${variant}Text` as keyof typeof styles], textStyle]}>{/* Texto con estilo base, color dinámico según variante (ej: 'secondaryText') y estilos extra */}
+            {title}{/* Muestra el texto del botón recibido por prop */}
           </Text>
         )}
-      </TouchableOpacity> {/* Cierra TouchableOpacity de variantes no-primary */}
+      </TouchableOpacity>{/* Cierra TouchableOpacity de variantes no-primary */}
     </Animated.View> // Cierra Animated.View de variantes no-primary
   );
 } // Cierra la función ButtonBase

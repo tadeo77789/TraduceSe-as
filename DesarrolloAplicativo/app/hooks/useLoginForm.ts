@@ -11,6 +11,7 @@
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { useAuth } from '../state/AuthContext';
+import { useTranslation } from '../i18n';
 
 interface LoginErrors {
   email?: string;
@@ -19,6 +20,7 @@ interface LoginErrors {
 
 export function useLoginForm() {
   const { login } = useAuth();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,12 +28,12 @@ export function useLoginForm() {
 
   const validate = useCallback((): boolean => {
     const e: LoginErrors = {};
-    if (!email) e.email = 'El correo es obligatorio';
-    else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Correo inválido';
-    if (!password) e.password = 'La contraseña es obligatoria';
+    if (!email) e.email = t('loginEmailRequired');
+    else if (!/\S+@\S+\.\S+/.test(email)) e.email = t('loginEmailInvalid');
+    if (!password) e.password = t('loginPasswordRequired');
     setErrors(e);
     return Object.keys(e).length === 0;
-  }, [email, password]);
+  }, [email, password, t]);
 
   const handleLogin = useCallback(async () => {
     if (!validate()) return;
@@ -39,11 +41,11 @@ export function useLoginForm() {
     try {
       await login({ email, password });
     } catch {
-      Alert.alert('Error', 'Correo o contraseña incorrectos');
+      Alert.alert(t('error'), t('loginErrorMsg'));
     } finally {
       setLoading(false);
     }
-  }, [validate, login, email, password]);
+  }, [validate, login, email, password, t]);
 
   return { email, setEmail, password, setPassword, loading, errors, handleLogin };
 }

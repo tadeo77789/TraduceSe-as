@@ -41,6 +41,7 @@ import {
 import { AppHeader } from '../../components/common/AppHeader'; // Barra superior con logo — ubicación: app/presentation/components/common/AppHeader.tsx
 import { Colors } from '../../../constants/colors';            // Paleta de colores del diseño — ubicación: app/constants/colors.ts
 import { useColors, useTheme } from '../../../state/ThemeContext'; // Hooks para obtener colores del tema activo y saber si es modo oscuro — ubicación: app/state/ThemeContext.tsx
+import { useTranslation } from '../../../i18n';
 import { Ionicons } from '@expo/vector-icons';                 // Librería de íconos vectoriales de Expo (alarm, trash, add, etc.)
 import { LinearGradient } from 'expo-linear-gradient';         // Componente para fondos con degradado de color
 import { Alarma } from '../../../types';                       // Interfaz TypeScript del tipo Alarma — ubicación: app/types/index.ts
@@ -127,7 +128,7 @@ const ClockPicker: React.FC<{  // Declaración del componente ClockPicker como c
             onPress={() => onHourChange(n)}      // Al presionar, informa al padre que la hora cambió a n
             activeOpacity={0.65}                 // Reduce opacidad al 65% mientras se presiona
           >
-            <Text style={[clk.numTxt, { color: C.textSecondary }, sel && clk.numTxtSel]}>{n}</Text> {/* Número del reloj; texto blanco si está seleccionado */}
+            <Text style={[clk.numTxt, { color: C.textSecondary }, sel && clk.numTxtSel]}>{n}</Text>{/* Número del reloj; texto blanco si está seleccionado */}
           </TouchableOpacity>
         );
       })}
@@ -161,37 +162,37 @@ const ClockPicker: React.FC<{  // Declaración del componente ClockPicker como c
 
   // ── Controles de hora/minuto/AM-PM (también reutilizado en móvil y tablet) ──
   const Controls = (
-    <View style={clk.controls}> {/* Contenedor vertical de todos los controles — estilo en línea 228 */}
+    <View style={clk.controls}>{/* Contenedor vertical de todos los controles — estilo en línea 228 */}
 
       {/* Pantalla digital que muestra HH:MM */}
-      <View style={clk.display}> {/* Fila horizontal con hora, dos puntos y minuto — estilo en línea 229 */}
-        <Text style={[clk.timeTxt, compact && clk.timeTxtSm]}> {/* Hora: fuente grande en tablet, mediana en móvil */}
-          {String(hour).padStart(2, '0')}   {/* Formatea la hora con cero adelante si es de un dígito: 7 → "07" */}
+      <View style={clk.display}>{/* Fila horizontal con hora, dos puntos y minuto — estilo en línea 229 */}
+        <Text style={[clk.timeTxt, compact && clk.timeTxtSm]}>{/* Hora: fuente grande en tablet, mediana en móvil */}
+          {String(hour).padStart(2, '0')}{/* Formatea la hora con cero adelante si es de un dígito: 7 → "07" */}
         </Text>
-        <Text style={[clk.colon, compact && clk.colonSm]}>:</Text> {/* Separador de dos puntos entre hora y minuto */}
-        <Text style={[clk.timeTxt, compact && clk.timeTxtSm]}> {/* Minuto: misma fuente que la hora */}
-          {String(minute).padStart(2, '0')} {/* Formatea el minuto con cero adelante: 5 → "05" */}
+        <Text style={[clk.colon, compact && clk.colonSm]}>:</Text>{/* Separador de dos puntos entre hora y minuto */}
+        <Text style={[clk.timeTxt, compact && clk.timeTxtSm]}>{/* Minuto: misma fuente que la hora */}
+          {String(minute).padStart(2, '0')}{/* Formatea el minuto con cero adelante: 5 → "05" */}
         </Text>
       </View>
 
       {/* Fila de botones para ajustar minutos en pasos de 5 */}
-      <View style={clk.minRow}> {/* Contenedor horizontal: [−] min [+] — estilo en línea 235 */}
-        <TouchableOpacity style={[clk.minBtn, { backgroundColor: C.primaryBg }]} onPress={() => stepMinute(-5)}> {/* Botón para restar 5 minutos */}
-          <Ionicons name="remove" size={16} color={Colors.primary} /> {/* Ícono de guión/menos */}
+      <View style={clk.minRow}>{/* Contenedor horizontal: [−] min [+] — estilo en línea 235 */}
+        <TouchableOpacity style={[clk.minBtn, { backgroundColor: C.primaryBg }]} onPress={() => stepMinute(-5)}>{/* Botón para restar 5 minutos */}
+          <Ionicons name="remove" size={16} color={Colors.primary} />{/* Ícono de guión/menos */}
         </TouchableOpacity>
-        <Text style={[clk.minLbl, { color: C.textSecondary }]}>min</Text> {/* Etiqueta "min" entre los dos botones */}
-        <TouchableOpacity style={[clk.minBtn, { backgroundColor: C.primaryBg }]} onPress={() => stepMinute(5)}> {/* Botón para sumar 5 minutos */}
-          <Ionicons name="add" size={16} color={Colors.primary} /> {/* Ícono de más */}
+        <Text style={[clk.minLbl, { color: C.textSecondary }]}>min</Text>{/* Etiqueta "min" entre los dos botones */}
+        <TouchableOpacity style={[clk.minBtn, { backgroundColor: C.primaryBg }]} onPress={() => stepMinute(5)}>{/* Botón para sumar 5 minutos */}
+          <Ionicons name="add" size={16} color={Colors.primary} />{/* Ícono de más */}
         </TouchableOpacity>
       </View>
 
       {/* Selector AM / PM */}
-      <View style={clk.ampm}> {/* Fila horizontal con los dos botones AM y PM — estilo en línea 239 */}
-        <TouchableOpacity style={[clk.ampmBtn, { backgroundColor: C.inputBg }, isAm && clk.ampmActive]} onPress={() => onAmPmChange(true)}> {/* Botón AM: fondo púrpura si isAm es true */}
-          <Text style={[clk.ampmTxt, { color: C.textSecondary }, isAm && clk.ampmTxtActive]}>AM</Text> {/* Texto "AM": blanco si está activo */}
+      <View style={clk.ampm}>{/* Fila horizontal con los dos botones AM y PM — estilo en línea 239 */}
+        <TouchableOpacity style={[clk.ampmBtn, { backgroundColor: C.inputBg }, isAm && clk.ampmActive]} onPress={() => onAmPmChange(true)}>{/* Botón AM: fondo púrpura si isAm es true */}
+          <Text style={[clk.ampmTxt, { color: C.textSecondary }, isAm && clk.ampmTxtActive]}>AM</Text>{/* Texto "AM": blanco si está activo */}
         </TouchableOpacity>
-        <TouchableOpacity style={[clk.ampmBtn, { backgroundColor: C.inputBg }, !isAm && clk.ampmActive]} onPress={() => onAmPmChange(false)}> {/* Botón PM: fondo púrpura si isAm es false */}
-          <Text style={[clk.ampmTxt, { color: C.textSecondary }, !isAm && clk.ampmTxtActive]}>PM</Text> {/* Texto "PM": blanco si está activo */}
+        <TouchableOpacity style={[clk.ampmBtn, { backgroundColor: C.inputBg }, !isAm && clk.ampmActive]} onPress={() => onAmPmChange(false)}>{/* Botón PM: fondo púrpura si isAm es false */}
+          <Text style={[clk.ampmTxt, { color: C.textSecondary }, !isAm && clk.ampmTxtActive]}>PM</Text>{/* Texto "PM": blanco si está activo */}
         </TouchableOpacity>
       </View>
     </View>
@@ -200,41 +201,41 @@ const ClockPicker: React.FC<{  // Declaración del componente ClockPicker como c
   // ── Layout compacto (móvil): reloj y controles en fila horizontal ──
   if (compact) {
     return (
-      <View style={clk.rowContainer}> {/* Fila horizontal: reloj a la izquierda, controles a la derecha — estilo en línea 212 */}
-        {ClockFace}  {/* Renderiza el círculo del reloj */}
-        {Controls}   {/* Renderiza los controles de hora/minuto/AM-PM */}
+      <View style={clk.rowContainer}>{/* Fila horizontal: reloj a la izquierda, controles a la derecha — estilo en línea 212 */}
+        {ClockFace}{/* Renderiza el círculo del reloj */}
+        {Controls}{/* Renderiza los controles de hora/minuto/AM-PM */}
       </View>
     );
   }
 
   // ── Layout tablet: reloj arriba, controles abajo en fila ──
   return (
-    <View style={clk.colContainer}> {/* Columna vertical: reloj arriba, controles abajo — estilo en línea 211 */}
-      {ClockFace} {/* Reloj analógico grande (180px) */}
+    <View style={clk.colContainer}>{/* Columna vertical: reloj arriba, controles abajo — estilo en línea 211 */}
+      {ClockFace}{/* Reloj analógico grande (180px) */}
       {/* Controles en fila horizontal para aprovechar el espacio horizontal del tablet */}
       <View style={[clk.controls, { flexDirection: 'row', gap: 16, marginTop: 14 }]}>
         {/* Pantalla digital HH:MM (versión tablet, fuente grande) */}
         <View style={clk.display}>
-          <Text style={clk.timeTxt}>{String(hour).padStart(2, '0')}</Text>   {/* Hora con cero adelante */}
-          <Text style={clk.colon}>:</Text>                                    {/* Separador */}
-          <Text style={clk.timeTxt}>{String(minute).padStart(2, '0')}</Text> {/* Minuto con cero adelante */}
+          <Text style={clk.timeTxt}>{String(hour).padStart(2, '0')}</Text>{/* Hora con cero adelante */}
+          <Text style={clk.colon}>:</Text>{/* Separador */}
+          <Text style={clk.timeTxt}>{String(minute).padStart(2, '0')}</Text>{/* Minuto con cero adelante */}
         </View>
         {/* Botones de minuto (−5 / +5) */}
         <View style={clk.minRow}>
-          <TouchableOpacity style={[clk.minBtn, { backgroundColor: C.primaryBg }]} onPress={() => stepMinute(-5)}> {/* Resta 5 minutos */}
-            <Ionicons name="remove" size={16} color={Colors.primary} /> {/* Ícono menos */}
+          <TouchableOpacity style={[clk.minBtn, { backgroundColor: C.primaryBg }]} onPress={() => stepMinute(-5)}>{/* Resta 5 minutos */}
+            <Ionicons name="remove" size={16} color={Colors.primary} />{/* Ícono menos */}
           </TouchableOpacity>
-          <Text style={[clk.minLbl, { color: C.textSecondary }]}>min</Text> {/* Etiqueta central */}
-          <TouchableOpacity style={[clk.minBtn, { backgroundColor: C.primaryBg }]} onPress={() => stepMinute(5)}> {/* Suma 5 minutos */}
-            <Ionicons name="add" size={16} color={Colors.primary} /> {/* Ícono más */}
+          <Text style={[clk.minLbl, { color: C.textSecondary }]}>min</Text>{/* Etiqueta central */}
+          <TouchableOpacity style={[clk.minBtn, { backgroundColor: C.primaryBg }]} onPress={() => stepMinute(5)}>{/* Suma 5 minutos */}
+            <Ionicons name="add" size={16} color={Colors.primary} />{/* Ícono más */}
           </TouchableOpacity>
         </View>
         {/* Selector AM/PM (versión tablet) */}
         <View style={clk.ampm}>
-          <TouchableOpacity style={[clk.ampmBtn, { backgroundColor: C.inputBg }, isAm && clk.ampmActive]} onPress={() => onAmPmChange(true)}> {/* Botón AM activo si isAm=true */}
+          <TouchableOpacity style={[clk.ampmBtn, { backgroundColor: C.inputBg }, isAm && clk.ampmActive]} onPress={() => onAmPmChange(true)}>{/* Botón AM activo si isAm=true */}
             <Text style={[clk.ampmTxt, { color: C.textSecondary }, isAm && clk.ampmTxtActive]}>AM</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[clk.ampmBtn, { backgroundColor: C.inputBg }, !isAm && clk.ampmActive]} onPress={() => onAmPmChange(false)}> {/* Botón PM activo si isAm=false */}
+          <TouchableOpacity style={[clk.ampmBtn, { backgroundColor: C.inputBg }, !isAm && clk.ampmActive]} onPress={() => onAmPmChange(false)}>{/* Botón PM activo si isAm=false */}
             <Text style={[clk.ampmTxt, { color: C.textSecondary }, !isAm && clk.ampmTxtActive]}>PM</Text>
           </TouchableOpacity>
         </View>
@@ -290,9 +291,10 @@ const AlarmCard: React.FC<{        // Componente funcional con TypeScript para c
   onEdit:   (item: AlarmaExtended) => void; // Callback: carga la alarma en el panel de edición
 }> = React.memo(({ item, onToggle, onDelete, onEdit }) => { // React.memo evita re-render si las props no cambiaron
   const C = useColors(); // Colores del tema activo — hook de app/state/ThemeContext.tsx
+  const { t } = useTranslation();
   return (
   // Tarjeta principal: fila con ícono, información y switch
-  <View style={[styles.alarmCard, { backgroundColor: C.surface }]}> {/* styles.alarmCard en línea 588; C.surface = blanco en modo claro */}
+  <View style={[styles.alarmCard, { backgroundColor: C.surface }]}>{/* styles.alarmCard en línea 588; C.surface = blanco en modo claro */}
 
     {/* Cuadrado con ícono de alarma — fondo degradado si está activa, gris si no */}
     <LinearGradient
@@ -304,36 +306,36 @@ const AlarmCard: React.FC<{        // Componente funcional con TypeScript para c
     </LinearGradient>
 
     {/* Sección central con toda la información de la alarma */}
-    <View style={styles.alarmInfo}> {/* Ocupa el espacio restante flex:1 — estilo en línea 595 */}
+    <View style={styles.alarmInfo}>{/* Ocupa el espacio restante flex:1 — estilo en línea 595 */}
 
       {/* Fila superior: hora grande + badge AM/PM */}
-      <View style={styles.alarmTimeRow}> {/* Fila horizontal — estilo en línea 597 */}
+      <View style={styles.alarmTimeRow}>{/* Fila horizontal — estilo en línea 597 */}
         {/* Texto de la hora (ej: "11:00") — grisáceo si la alarma está desactivada */}
         <Text style={[styles.alarmTime, { color: C.textPrimary }, !item.activa && styles.alarmTimeOff]}>
-          {item.hora} {/* Muestra la hora almacenada en formato "HH:MM" */}
+          {item.hora}{/* Muestra la hora almacenada en formato "HH:MM" */}
         </Text>
         {/* Badge AM/PM — solo se muestra si existe el campo ampm */}
         {item.ampm && (
-          <View style={[styles.ampmBadge, { backgroundColor: C.primaryBg }, item.ampm === 'PM' && styles.ampmBadgePm]}> {/* Fondo amarillo si es PM — estilo en línea 600 */}
-            <Text style={[styles.ampmBadgeTxt, item.ampm === 'PM' && styles.ampmBadgeTxtPm]}> {/* Texto dorado si es PM — estilo en línea 602 */}
-              {item.ampm} {/* Muestra "AM" o "PM" */}
+          <View style={[styles.ampmBadge, { backgroundColor: C.primaryBg }, item.ampm === 'PM' && styles.ampmBadgePm]}>{/* Fondo amarillo si es PM — estilo en línea 600 */}
+            <Text style={[styles.ampmBadgeTxt, item.ampm === 'PM' && styles.ampmBadgeTxtPm]}>{/* Texto dorado si es PM — estilo en línea 602 */}
+              {item.ampm}{/* Muestra "AM" o "PM" */}
             </Text>
           </View>
         )}
       </View>
 
       {/* Nombre/mensaje de la alarma (ej: "Práctica de señas diaria") */}
-      <Text style={[styles.alarmMsg, { color: C.textSecondary }]} numberOfLines={1}>{item.mensaje}</Text> {/* numberOfLines=1 trunca con "..." si es muy largo — estilo en línea 605 */}
+      <Text style={[styles.alarmMsg, { color: C.textSecondary }]} numberOfLines={1}>{item.mensaje}</Text>{/* numberOfLines=1 trunca con "..." si es muy largo — estilo en línea 605 */}
 
       {/* Días de repetición — solo se muestra si hay días configurados */}
       {item.dias && item.dias.length > 0 && (
-        <View style={styles.diasRow}> {/* Fila horizontal de indicadores de días — estilo en línea 607 */}
+        <View style={styles.diasRow}>{/* Fila horizontal de indicadores de días — estilo en línea 607 */}
           {DIAS_SEMANA.map(dia => {           // Itera los 7 días de la semana en orden
             const active = item.dias!.includes(dia); // true si este día está en la lista de días de la alarma
             return (
               // Círculo pequeño con la inicial del día (L, M, X...)
-              <View key={dia} style={[styles.diaBadge, { backgroundColor: C.inputBg }, active && [styles.diaBadgeActive, { backgroundColor: C.primaryBg }]]}> {/* Fondo lavanda si el día está activo — estilo en línea 608 */}
-                <Text style={[styles.diaTxt, { color: C.textHint }, active && styles.diaTxtActive]}>{dia[0]}</Text> {/* Solo la primera letra del día; púrpura si activo — estilo en línea 610 */}
+              <View key={dia} style={[styles.diaBadge, { backgroundColor: C.inputBg }, active && [styles.diaBadgeActive, { backgroundColor: C.primaryBg }]]}>{/* Fondo lavanda si el día está activo — estilo en línea 608 */}
+                <Text style={[styles.diaTxt, { color: C.textHint }, active && styles.diaTxtActive]}>{dia[0]}</Text>{/* Solo la primera letra del día; púrpura si activo — estilo en línea 610 */}
               </View>
             );
           })}
@@ -341,18 +343,18 @@ const AlarmCard: React.FC<{        // Componente funcional con TypeScript para c
       )}
 
       {/* Fila de acciones: botón Eliminar y botón Editar */}
-      <View style={styles.alarmActions}> {/* Fila horizontal de botones — estilo en línea 613 */}
+      <View style={styles.alarmActions}>{/* Fila horizontal de botones — estilo en línea 613 */}
 
         {/* Botón Eliminar — llama a onDelete con el id de la alarma */}
-        <TouchableOpacity style={[styles.alarmBtnDelete, { backgroundColor: 'rgba(239,68,68,0.12)' }]} onPress={() => onDelete(item.id_alarma)}> {/* Fondo rojo transparente — estilo en línea 614 */}
-          <Ionicons name="trash-outline" size={13} color={Colors.danger} /> {/* Ícono de papelera rojo — Colors.danger definido en app/constants/colors.ts */}
-          <Text style={styles.alarmBtnDeleteTxt}>Eliminar</Text> {/* Texto del botón rojo — estilo en línea 615 */}
+        <TouchableOpacity style={[styles.alarmBtnDelete, { backgroundColor: 'rgba(239,68,68,0.12)' }]} onPress={() => onDelete(item.id_alarma)}>{/* Fondo rojo transparente — estilo en línea 614 */}
+          <Ionicons name="trash-outline" size={13} color={Colors.danger} />{/* Ícono de papelera rojo — Colors.danger definido en app/constants/colors.ts */}
+          <Text style={styles.alarmBtnDeleteTxt}>{t('alarmDeleteBtn')}</Text>{/* Texto del botón rojo — estilo en línea 615 */}
         </TouchableOpacity>
 
         {/* Botón Editar — carga la alarma en el panel superior para editar */}
-        <TouchableOpacity style={[styles.alarmBtnEdit, { backgroundColor: C.primaryBg }]} onPress={() => onEdit(item)}> {/* Fondo lavanda — estilo en línea 616 */}
-          <Ionicons name="create-outline" size={13} color={Colors.primary} /> {/* Ícono de lápiz púrpura */}
-          <Text style={styles.alarmBtnEditTxt}>Editar</Text> {/* Texto del botón púrpura — estilo en línea 617 */}
+        <TouchableOpacity style={[styles.alarmBtnEdit, { backgroundColor: C.primaryBg }]} onPress={() => onEdit(item)}>{/* Fondo lavanda — estilo en línea 616 */}
+          <Ionicons name="create-outline" size={13} color={Colors.primary} />{/* Ícono de lápiz púrpura */}
+          <Text style={styles.alarmBtnEditTxt}>{t('alarmEditBtn')}</Text>{/* Texto del botón púrpura — estilo en línea 617 */}
         </TouchableOpacity>
       </View>
     </View>
@@ -374,6 +376,7 @@ export const AlarmsScreen: React.FC = () => {                    // Componente e
   const isTablet = width >= 768;                                 // true si el ancho es 768px o más (tablet o web) → activa el layout de dos columnas
   const C = useColors();                                         // Colores del tema activo — hook de app/state/ThemeContext.tsx
   const { isDark } = useTheme();                                 // Booleano que indica si el modo oscuro está activado — hook de app/state/ThemeContext.tsx
+  const { t } = useTranslation();
 
   // ── Estado local de la pantalla ───────────────────────────────────────────
   const [alarms,       setAlarms]       = useState<AlarmaExtended[]>(MOCK_ALARMS); // Lista de alarmas mostradas; inicia con los datos mock
@@ -395,11 +398,11 @@ export const AlarmsScreen: React.FC = () => {                    // Componente e
   const deleteAlarm = useCallback((id: number) => {
     const doDelete = () => setAlarms(prev => prev.filter(a => a.id_alarma !== id)); // Filtra y elimina la alarma con el id indicado del array de estado
     if (Platform.OS === 'web') {                                 // En web, Alert.alert no ejecuta los callbacks — se usa window.confirm() nativo del browser
-      if (window.confirm('¿Deseas eliminar esta alarma?')) doDelete(); // window.confirm() retorna true si el usuario hizo clic en "Aceptar"
+      if (window.confirm(t('alarmConfirmDelete'))) doDelete(); // window.confirm() retorna true si el usuario hizo clic en "Aceptar"
     } else {                                                     // En iOS y Android se usa el Alert nativo con botones personalizados
-      Alert.alert('Eliminar alarma', '¿Deseas eliminar esta alarma?', [
-        { text: 'Cancelar', style: 'cancel' },                  // Botón izquierdo: cierra el diálogo sin hacer nada
-        { text: 'Eliminar', style: 'destructive', onPress: doDelete }, // Botón derecho: rojo, ejecuta el borrado
+      Alert.alert(t('alarmDeleteTitle'), t('alarmConfirmDelete'), [
+        { text: t('alarmCancel'), style: 'cancel' },
+        { text: t('alarmDeleteBtn'), style: 'destructive', onPress: doDelete },
       ]);
     }
   }, []); // Sin dependencias: usa updater funcional, no necesita capturar el estado
@@ -439,7 +442,7 @@ export const AlarmsScreen: React.FC = () => {                    // Componente e
     const data = {
       hora:    `${String(pickerHour).padStart(2, '0')}:${String(pickerMinute).padStart(2, '0')}`, // Construye "HH:MM" formateado con ceros
       ampm:    (isAm ? 'AM' : 'PM') as AmPm,        // Convierte el booleano isAm al string 'AM' o 'PM'
-      mensaje: alarmName.trim() || 'Práctica de señas', // Usa el nombre escrito o un texto por defecto si está vacío
+      mensaje: alarmName.trim() || t('alarmDefaultName'),
       dias:    selectedDias,                         // Días seleccionados en el picker
     };
     if (editingId !== null) {                        // Si hay un id de edición, actualiza la alarma existente
@@ -471,13 +474,14 @@ export const AlarmsScreen: React.FC = () => {                    // Componente e
       />
 
       {/* Campo de texto para el nombre de la alarma */}
-      <View style={[styles.nameField, { borderColor: C.border, backgroundColor: C.inputBg }]}> {/* Contenedor del input con borde y fondo del tema — estilo en línea 543 */}
-        <Ionicons name="pencil-outline" size={14} color={C.textSecondary} style={{ marginTop: 1 }} /> {/* Ícono de lápiz decorativo a la izquierda del campo */}
+      <View style={[styles.nameField, { borderColor: C.border, backgroundColor: C.inputBg }]}>{/* Contenedor del input con borde y fondo del tema — estilo en línea 543 */}
+        <Ionicons name="pencil-outline" size={14} color={C.textSecondary} style={{ marginTop: 1 }} />{/* Ícono de lápiz decorativo a la izquierda del campo */}
         <TextInput
           style={[styles.nameInput, { color: C.textPrimary }]} // Estilo del input — línea 550; color del texto del tema
           value={alarmName}                          // Valor controlado: lo que está en el estado alarmName
           onChangeText={setAlarmName}                // Actualiza el estado en cada tecla presionada
-          placeholder="Nombre de la alarma"          // Texto gris cuando el campo está vacío
+          placeholder={t('alarmNamePlaceholder')}
+
           placeholderTextColor={C.textHint}          // Color del placeholder según el tema
           maxLength={40}                             // Límite de 40 caracteres para el nombre
           returnKeyType="done"                       // Cambia el botón "Enter" del teclado a "Listo"
@@ -486,9 +490,9 @@ export const AlarmsScreen: React.FC = () => {                    // Componente e
       </View>
 
       {/* Selector de días de repetición */}
-      <View style={styles.diasBlock}> {/* Contenedor de la sección de días — estilo en línea 559 */}
-        <Text style={[styles.diasLabel, { color: C.textSecondary }]}>REPETIR</Text> {/* Etiqueta en mayúsculas — estilo en línea 560 */}
-        <View style={styles.diasGrid}> {/* Fila de los 7 botones de días — estilo en línea 561 */}
+      <View style={styles.diasBlock}>{/* Contenedor de la sección de días — estilo en línea 559 */}
+        <Text style={[styles.diasLabel, { color: C.textSecondary }]}>{t('alarmRepeat')}</Text>{/* Etiqueta en mayúsculas — estilo en línea 560 */}
+        <View style={styles.diasGrid}>{/* Fila de los 7 botones de días — estilo en línea 561 */}
           {DIAS_SEMANA.map(dia => ( // Itera los 7 días para crear un botón por cada uno
             <TouchableOpacity
               key={dia}             // Key única para React
@@ -496,7 +500,7 @@ export const AlarmsScreen: React.FC = () => {                    // Componente e
               onPress={() => toggleDia(dia)} // Al presionar, agrega o quita el día de la selección
             >
               <Text style={[styles.diaSelectorTxt, { color: C.textSecondary }, selectedDias.includes(dia) && styles.diaSelectorTxtActive]}>
-                {dia[0]} {/* Muestra solo la primera letra del día: L, M, X, J, V, S, D */}
+                {dia[0]}{/* Muestra solo la primera letra del día: L, M, X, J, V, S, D */}
               </Text>
             </TouchableOpacity>
           ))}
@@ -504,20 +508,20 @@ export const AlarmsScreen: React.FC = () => {                    // Componente e
       </View>
 
       {/* Fila de botones de acción: Cancelar (solo en modo edición) + Agregar/Guardar */}
-      <View style={styles.actionRow}> {/* Fila horizontal de botones — estilo en línea 568 */}
+      <View style={styles.actionRow}>{/* Fila horizontal de botones — estilo en línea 568 */}
 
         {/* Botón Cancelar: solo visible cuando se está editando una alarma existente */}
         {editingId !== null && (
-          <TouchableOpacity style={[styles.cancelBtn, { backgroundColor: C.inputBg, borderColor: C.border }]} onPress={cancelEdit}> {/* Fondo gris, borde del tema — estilo en línea 569 */}
-            <Text style={[styles.cancelBtnTxt, { color: C.textSecondary }]}>Cancelar</Text> {/* Texto gris — estilo en línea 570 */}
+          <TouchableOpacity style={[styles.cancelBtn, { backgroundColor: C.inputBg, borderColor: C.border }]} onPress={cancelEdit}>{/* Fondo gris, borde del tema — estilo en línea 569 */}
+            <Text style={[styles.cancelBtnTxt, { color: C.textSecondary }]}>{t('alarmCancel')}</Text>{/* Texto gris — estilo en línea 570 */}
           </TouchableOpacity>
         )}
 
         {/* Botón principal: "Agregar alarma" o "Guardar cambios" según el modo */}
-        <TouchableOpacity style={[styles.addBtn, editingId !== null && styles.addBtnFlex]} onPress={handleSave}> {/* flex:1 cuando hay botón cancelar — estilo en línea 571 */}
-          <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.addBtnGrad}> {/* Degradado púrpura de fondo — estilo en línea 573 */}
-            <Ionicons name={editingId !== null ? 'checkmark-circle-outline' : 'add-circle-outline'} size={18} color="#fff" /> {/* Ícono de check en edición, + en creación */}
-            <Text style={styles.addBtnTxt}>{editingId !== null ? 'Guardar cambios' : 'Agregar alarma'}</Text> {/* Texto del botón según el modo — estilo en línea 574 */}
+        <TouchableOpacity style={[styles.addBtn, editingId !== null && styles.addBtnFlex]} onPress={handleSave}>{/* flex:1 cuando hay botón cancelar — estilo en línea 571 */}
+          <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.addBtnGrad}>{/* Degradado púrpura de fondo — estilo en línea 573 */}
+            <Ionicons name={editingId !== null ? 'checkmark-circle-outline' : 'add-circle-outline'} size={18} color="#fff" />{/* Ícono de check en edición, + en creación */}
+            <Text style={styles.addBtnTxt}>{editingId !== null ? t('alarmSave') : t('alarmAdd')}</Text>{/* Texto del botón según el modo — estilo en línea 574 */}
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -526,10 +530,10 @@ export const AlarmsScreen: React.FC = () => {                    // Componente e
 
   // ── Cabecera de la lista "Mis alarmas" ────────────────────────────────────
   const listHeader = (
-    <View style={styles.listHeader}> {/* Fila entre el título y el contador — estilo en línea 581 */}
-      <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>Mis alarmas</Text> {/* Título de sección — estilo en línea 582 */}
-      <View style={[styles.countBadge, { backgroundColor: C.primaryBg }]}> {/* Badge redondeado con fondo lavanda — estilo en línea 583 */}
-        <Text style={styles.countTxt}>{alarms.filter(a => a.activa).length} activas</Text> {/* Cuenta cuántas alarmas tienen activa=true y muestra el número — estilo en línea 584 */}
+    <View style={styles.listHeader}>{/* Fila entre el título y el contador — estilo en línea 581 */}
+      <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>{t('alarmMyAlarms')}</Text>
+      <View style={[styles.countBadge, { backgroundColor: C.primaryBg }]}>
+        <Text style={styles.countTxt}>{alarms.filter(a => a.activa).length} {t('alarmActive')}</Text>{/* Cuenta cuántas alarmas tienen activa=true y muestra el número — estilo en línea 584 */}
       </View>
     </View>
   );
@@ -537,20 +541,20 @@ export const AlarmsScreen: React.FC = () => {                    // Componente e
   // ── Render para tablet (ancho ≥ 768px): dos columnas ─────────────────────
   if (isTablet) {
     return (
-      <View style={[styles.root, { backgroundColor: C.backgroundGray }]}> {/* Contenedor raíz full-screen — estilo en línea 524 */}
-        <AppHeader /> {/* Barra superior con logo — app/presentation/components/common/AppHeader.tsx */}
-        <View style={styles.tabletContainer}> {/* Fila de dos columnas — estilo en línea 527 */}
+      <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>{/* Contenedor raíz full-screen — estilo en línea 524 */}
+        <AppHeader />{/* Barra superior con logo — app/presentation/components/common/AppHeader.tsx */}
+        <View style={styles.tabletContainer}>{/* Fila de dos columnas — estilo en línea 527 */}
 
           {/* Columna izquierda: lista de alarmas */}
-          <View style={styles.listSection}> {/* Ocupa el espacio disponible flex:1 — estilo en línea 580 */}
-            {listHeader}   {/* Título "Mis alarmas" + contador de activas */}
-            <FlatList data={alarms} keyExtractor={keyExtractor} contentContainerStyle={styles.listContent} renderItem={renderItem} showsVerticalScrollIndicator={false} /> {/* Lista de tarjetas de alarma, oculta el scrollbar */}
+          <View style={styles.listSection}>{/* Ocupa el espacio disponible flex:1 — estilo en línea 580 */}
+            {listHeader}{/* Título "Mis alarmas" + contador de activas */}
+            <FlatList data={alarms} keyExtractor={keyExtractor} contentContainerStyle={styles.listContent} renderItem={renderItem} showsVerticalScrollIndicator={false} />{/* Lista de tarjetas de alarma, oculta el scrollbar */}
           </View>
 
           {/* Columna derecha: panel de crear/editar alarma */}
-          <View style={[styles.tabletPanel, { backgroundColor: C.surface, borderColor: C.border }]}> {/* Panel con sombra y borde — estilo en línea 528 */}
-            <Text style={[styles.panelTitle, { color: C.textPrimary }]}>{editingId !== null ? 'Editar alarma' : 'Nueva alarma'}</Text> {/* Título dinámico del panel — estilo en línea 540 */}
-            {pickerContent} {/* Reloj + nombre + días + botones */}
+          <View style={[styles.tabletPanel, { backgroundColor: C.surface, borderColor: C.border }]}>{/* Panel con sombra y borde — estilo en línea 528 */}
+            <Text style={[styles.panelTitle, { color: C.textPrimary }]}>{editingId !== null ? t('alarmEditPanel') : t('alarmNewPanel')}</Text>{/* Título dinámico del panel — estilo en línea 540 */}
+            {pickerContent}{/* Reloj + nombre + días + botones */}
           </View>
         </View>
       </View>
@@ -559,8 +563,8 @@ export const AlarmsScreen: React.FC = () => {                    // Componente e
 
   // ── Render para móvil: panel fijo arriba + lista scrolleable abajo ────────
   return (
-    <View style={[styles.root, { backgroundColor: C.backgroundGray }]}> {/* Contenedor raíz full-screen — estilo en línea 524 */}
-      <AppHeader /> {/* Barra superior con logo — app/presentation/components/common/AppHeader.tsx */}
+    <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>{/* Contenedor raíz full-screen — estilo en línea 524 */}
+      <AppHeader />{/* Barra superior con logo — app/presentation/components/common/AppHeader.tsx */}
 
       {/* Panel superior fijo (no scrollea): reloj + formulario */}
       <LinearGradient
@@ -571,25 +575,25 @@ export const AlarmsScreen: React.FC = () => {                    // Componente e
         style={styles.mobilePanel} // Padding del panel — estilo en línea 537
       >
         {/* Cabecera del panel: ícono + título */}
-        <View style={styles.panelHeader}> {/* Fila horizontal — estilo en línea 538 */}
+        <View style={styles.panelHeader}>{/* Fila horizontal — estilo en línea 538 */}
           <LinearGradient
             colors={editingId !== null ? ['#D97706', '#F59E0B'] : ['#9333EA', '#7C3AED']} // Naranja si editando, púrpura si creando
             style={styles.panelIcon} // Cuadrado redondeado de 26px — estilo en línea 539
           >
-            <Ionicons name={editingId !== null ? 'create' : 'alarm'} size={15} color="#fff" /> {/* Ícono lápiz en edición, alarma en creación */}
+            <Ionicons name={editingId !== null ? 'create' : 'alarm'} size={15} color="#fff" />{/* Ícono lápiz en edición, alarma en creación */}
           </LinearGradient>
-          <Text style={[styles.panelTitle, { color: C.textPrimary }]}>{editingId !== null ? 'Editar alarma' : 'Nueva alarma'}</Text> {/* Título dinámico del panel */}
+          <Text style={[styles.panelTitle, { color: C.textPrimary }]}>{editingId !== null ? t('alarmEditPanel') : t('alarmNewPanel')}</Text>{/* Título dinámico del panel */}
         </View>
-        {pickerContent} {/* Reloj + campo de nombre + días + botón de guardar */}
+        {pickerContent}{/* Reloj + campo de nombre + días + botón de guardar */}
       </LinearGradient>
 
       {/* Línea divisoria entre el panel y la lista */}
-      <View style={[styles.divider, { backgroundColor: C.border }]} /> {/* Línea horizontal de 1px — estilo en línea 577 */}
+      <View style={[styles.divider, { backgroundColor: C.border }]} />{/* Línea horizontal de 1px — estilo en línea 577 */}
 
       {/* Lista scrolleable de alarmas */}
-      <View style={styles.listSection}> {/* Ocupa todo el espacio restante — estilo en línea 580 */}
-        {listHeader}   {/* Título "Mis alarmas" + contador de activas */}
-        <FlatList data={alarms} keyExtractor={keyExtractor} contentContainerStyle={styles.listContent} renderItem={renderItem} showsVerticalScrollIndicator={false} /> {/* Lista virtualizada de tarjetas */}
+      <View style={styles.listSection}>{/* Ocupa todo el espacio restante — estilo en línea 580 */}
+        {listHeader}{/* Título "Mis alarmas" + contador de activas */}
+        <FlatList data={alarms} keyExtractor={keyExtractor} contentContainerStyle={styles.listContent} renderItem={renderItem} showsVerticalScrollIndicator={false} />{/* Lista virtualizada de tarjetas */}
       </View>
     </View>
   );

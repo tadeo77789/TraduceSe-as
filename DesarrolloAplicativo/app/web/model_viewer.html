@@ -313,6 +313,10 @@ function loadModel(url) {
   );
 }
 
+// ── Auto-load desde URL param ?model= (para web en iframe) ──────────
+const _urlModel = new URLSearchParams(window.location.search).get('model');
+if (_urlModel) loadModel(decodeURIComponent(_urlModel));
+
 // ── Message bridge con React Native ──────────────────────────────────
 window.addEventListener('message', (e) => {
   try {
