@@ -15,7 +15,7 @@ import {
   ScrollView, KeyboardAvoidingView, Platform,
   Alert, useWindowDimensions,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -27,6 +27,8 @@ const CODE_LENGTH = 6;
 
 export const VerifyCodeScreen: React.FC = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const fromProfile = (route.params as any)?.fromProfile ?? false;
   const [code, setCode] = useState(Array(CODE_LENGTH).fill(''));
   const [loading, setLoading] = useState(false);
   const inputs = useRef<TextInput[]>([]);
@@ -62,7 +64,7 @@ export const VerifyCodeScreen: React.FC = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      navigation.navigate('NewPassword' as never);
+      navigation.navigate('NewPassword' as never, { fromProfile } as never);
     }, 1000);
   };
 
@@ -104,7 +106,7 @@ export const VerifyCodeScreen: React.FC = () => {
               style={[
                 styles.otpInput,
                 { backgroundColor: C.inputBg, borderColor: C.border, color: C.textPrimary },
-                digit ? { borderColor: Colors.primary, backgroundColor: isDark ? '#1E183A' : '#EDE9FE' } : null,
+                digit ? { borderColor: Colors.primary, backgroundColor: '#EDE9FE' } : null,
               ]}
               value={digit}
               onChangeText={text => handleChange(text.slice(-1), i)}

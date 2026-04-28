@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
+import { useColors } from '../../../state/ThemeContext';
 import { BorderRadius, Shadows, Spacing } from '../../../constants/theme';
 
 interface AppHeaderProps {
@@ -39,11 +40,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onProfile,
 }) => {
   const insets = useSafeAreaInsets();
+  const C = useColors();
   if (Platform.OS === 'web') return null;
 
   return (
     <LinearGradient
-      colors={['#9333EA', '#7C3AED']}
+      colors={C.gradientPrimary}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }}
       style={[styles.container, { paddingTop: insets.top + Spacing[3] }]}

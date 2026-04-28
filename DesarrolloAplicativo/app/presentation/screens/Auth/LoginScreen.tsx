@@ -51,14 +51,14 @@ const FACEBOOK_LOGO_URI = `data:image/svg+xml;utf8,${encodeURIComponent(
 
 export const LoginScreen: React.FC = () => { // Declara y exporta el componente funcional LoginScreen tipado como React.FC
   const navigation = useNavigation(); // Obtiene el objeto de navegación para navegar entre pantallas
-  const { email, setEmail, password, setPassword, loading, errors, handleLogin } = useLoginForm(); // Desestructura del hook: campos email/password, sus setters, estado de carga, errores de validación y función de submit
-  const { width } = useWindowDimensions(); // Obtiene el ancho actual de la ventana para determinar el layout
-  const insets = useSafeAreaInsets(); // Obtiene los insets del área segura para posicionar el botón de volver correctamente
-  const isWide = width >= 768; // Booleano: true si la pantalla tiene 768px o más (modo escritorio/tablet)
+  const { email, setEmail, password, setPassword, loading, errors, handleLogin } = useLoginForm();
+  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const isWide = width >= 768;
 
   const BackButton = ( // Define el botón de volver como constante JSX reutilizable en ambos layouts
     <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}> {/* Botón circular de volver posicionado sobre el inset del área segura; al presionar regresa a la pantalla anterior */}
-      <Ionicons name="chevron-back" size={22} color={Colors.primary} /> {/* Ícono de flecha hacia atrás en color morado primario */}
+      <Ionicons name="chevron-back" size={22} color={Colors.primary} />
     </TouchableOpacity> // Cierre del TouchableOpacity del botón de volver
   ); // Cierre de la constante BackButton
 
@@ -74,50 +74,52 @@ export const LoginScreen: React.FC = () => { // Declara y exporta el componente 
           donde justifyContent en contentContainerStyle desalinea los toques */}
       <View style={styles.formInner}> {/* Contenedor interno del formulario sin estilos propios (workaround para bug de Android) */}
         {/* Avatar */}
-        <View style={styles.avatarCircle}> {/* Círculo morado claro que contiene el ícono de persona como avatar */}
-          <Ionicons name="person" size={38} color={Colors.primary} /> {/* Ícono de silueta de persona en morado primario, tamaño 38 */}
+        <View style={styles.avatarCircle}>
+          <Ionicons name="person" size={38} color={Colors.primary} />
         </View> {/* Cierre del avatarCircle */}
 
         {/* Inputs */}
         <Input // Campo de texto para el correo electrónico
-          placeholder="Correo electrónico" // Texto de placeholder que se muestra cuando el campo está vacío
-          value={email} // Valor actual del campo controlado por el estado email del hook
-          onChangeText={setEmail} // Actualiza el estado email con cada tecla presionada
-          keyboardType="email-address" // Muestra el teclado optimizado para correos (con @)
-          leftIcon="mail-outline" // Muestra un ícono de sobre a la izquierda del campo
-          error={errors.email} // Muestra el mensaje de error de validación del email si existe
-          containerStyle={styles.inputSpacing} // Aplica margen inferior de 14px entre campos
-        /> {/* Cierre del Input de correo */}
+          placeholder="Correo electrónico"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          leftIcon="mail-outline"
+          error={errors.email}
+          accentColor={Colors.primary}
+          containerStyle={styles.inputSpacing}
+        />
 
-        <Input // Campo de texto para la contraseña
-          placeholder="Contraseña" // Texto de placeholder que se muestra cuando el campo está vacío
-          value={password} // Valor actual del campo controlado por el estado password del hook
-          onChangeText={setPassword} // Actualiza el estado password con cada tecla presionada
-          isPassword // Activa la máscara de contraseña y el botón de mostrar/ocultar
-          leftIcon="lock-closed-outline" // Muestra un ícono de candado a la izquierda del campo
-          error={errors.password} // Muestra el mensaje de error de validación del password si existe
-          containerStyle={styles.inputSpacing} // Aplica margen inferior de 14px entre campos
-        /> {/* Cierre del Input de contraseña */}
+        <Input
+          placeholder="Contraseña"
+          value={password}
+          onChangeText={setPassword}
+          isPassword
+          leftIcon="lock-closed-outline"
+          error={errors.password}
+          accentColor={Colors.primary}
+          containerStyle={styles.inputSpacing}
+        />
 
         {/* Olvidé contraseña */}
         <TouchableOpacity // Botón de texto para ir a la pantalla de recuperación de contraseña
           onPress={() => navigation.navigate('ForgotPassword' as never)} // Al presionar navega a la pantalla ForgotPassword
           style={styles.forgotRow} // Alinea el enlace a la derecha con margen inferior
         > {/* Cierre de la apertura del TouchableOpacity de "olvidé contraseña" */}
-          <Text style={styles.forgotText}>¿Has olvidado tu contraseña?</Text> {/* Texto del enlace de recuperación de contraseña en morado */}
+          <Text style={styles.forgotText}>¿Has olvidado tu contraseña?</Text>
         </TouchableOpacity> {/* Cierre del botón de "olvidé contraseña" */}
 
         {/* Registrarse / Ingresar */}
         <View style={styles.authRow}> {/* Fila horizontal con los dos botones principales de autenticación */}
           <TouchableOpacity // Botón para navegar a la pantalla de registro
-            style={styles.registerBtn} // Aplica fondo lavanda, bordes redondeados y padding
+            style={styles.registerBtn}
             onPress={() => navigation.navigate('Register' as never)} // Al presionar navega a la pantalla Register
           > {/* Cierre de la apertura del TouchableOpacity de Registrarse */}
-            <Text style={styles.registerBtnText}>Registrarse</Text> {/* Texto del botón de registro en morado oscuro */}
+            <Text style={styles.registerBtnText}>Registrarse</Text>
           </TouchableOpacity> {/* Cierre del botón Registrarse */}
 
           <TouchableOpacity // Botón principal de inicio de sesión
-            style={[styles.loginBtn, loading && styles.btnDisabled]} // Fondo morado; si está cargando aplica opacidad reducida
+            style={[styles.loginBtn, loading && styles.btnDisabled]}
             onPress={handleLogin} // Al presionar llama a la función handleLogin del hook que valida y envía el formulario
             disabled={loading} // Desactiva el botón mientras se procesa el login para evitar doble envío
           > {/* Cierre de la apertura del TouchableOpacity de Ingresar */}
@@ -161,7 +163,7 @@ export const LoginScreen: React.FC = () => { // Declara y exporta el componente 
         </View> {/* Cierre de imagePanel */}
 
         {/* Panel formulario */}
-        <View style={styles.formPanel}> {/* Panel derecho de 420px de ancho con fondo lavanda para el formulario */}
+        <View style={styles.formPanel}>
           {BackButton} {/* Botón de volver posicionado absolutamente en la esquina superior izquierda */}
           {FormPanel} {/* Formulario completo de login con scroll */}
         </View> {/* Cierre de formPanel */}
@@ -172,7 +174,7 @@ export const LoginScreen: React.FC = () => { // Declara y exporta el componente 
   // ── Layout móvil: fondo lavanda full screen ──
   return ( // Retorno del layout móvil cuando la pantalla es menor a 768px
     <KeyboardAvoidingView // Contenedor que sube el contenido cuando aparece el teclado
-      style={styles.mobileRoot} // Fondo lavanda que ocupa toda la pantalla
+      style={styles.mobileRoot}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined} // En iOS usa behavior 'padding', en Android no aplica ninguno
     > {/* Cierre de la apertura del KeyboardAvoidingView */}
       {BackButton} {/* Botón de volver posicionado absolutamente en la esquina superior izquierda */}

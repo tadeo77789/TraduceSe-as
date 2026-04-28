@@ -53,7 +53,7 @@ export const MainTabNavigator: React.FC = () => { // Define y exporta el compone
     screenOptions={({ route }) => ({ // Función que recibe la ruta activa y retorna las opciones de pantalla; se evalúa para cada tab
       headerShown: isWide, // Muestra el header solo en modo web de escritorio (isWide=true); en móvil se oculta
       header: isWide ? (props) => <WebTopBar {...props} /> : undefined, // Si es web de escritorio usa WebTopBar como header personalizado; si no, no hay header
-      tabBarActiveTintColor: Colors.primary, // Color del ícono y texto del tab activo; usa el color primario (#7C3AED) de la paleta estática
+      tabBarActiveTintColor: C.primary, // Color del ícono y texto del tab activo; usa el acento del tema activo
       tabBarInactiveTintColor: C.textSecondary, // Color del ícono y texto de los tabs inactivos; usa el token de texto secundario del tema activo
       tabBarStyle: isWide ? styles.hidden : (hideLabels // Controla el estilo de la barra de tabs: oculta en web de escritorio, compacta en viewports estrechos, normal en los demás
         ? { ...styles.tabBarCompact, ...tabBarTheme } // Si es viewport estrecho aplica el estilo compacto (altura 56px) mezclado con los colores del tema

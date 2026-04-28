@@ -60,6 +60,7 @@ export const RegisterScreen: React.FC = () => {
           onChangeText={v => setField('nombre', v)}
           leftIcon="person-outline"
           error={errors.nombre}
+          accentColor={Colors.primary}
           containerStyle={styles.inputSpacing}
         />
 
@@ -71,6 +72,7 @@ export const RegisterScreen: React.FC = () => {
           keyboardType="email-address"
           leftIcon="mail-outline"
           error={errors.correo}
+          accentColor={Colors.primary}
           containerStyle={styles.inputSpacing}
         />
 
@@ -83,6 +85,7 @@ export const RegisterScreen: React.FC = () => {
           leftIcon="lock-closed-outline"
           hint={t('registerPasswordHint')}
           error={errors.password}
+          accentColor={Colors.primary}
           containerStyle={styles.inputSpacing}
         />
 

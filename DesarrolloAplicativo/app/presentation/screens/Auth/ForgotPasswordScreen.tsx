@@ -40,7 +40,7 @@ export const ForgotPasswordScreen: React.FC = () => {
     // TODO: llamar al backend para enviar código
     setTimeout(() => {
       setLoading(false);
-      navigation.navigate('VerifyCode' as never);
+      navigation.navigate('VerifyCode' as never, { fromProfile } as never);
     }, 1000);
   };
 
@@ -82,6 +82,7 @@ export const ForgotPasswordScreen: React.FC = () => {
           onChangeText={setEmail}
           keyboardType="email-address"
           leftIcon="mail-outline"
+          accentColor={Colors.primary}
           containerStyle={styles.inputSpacing}
         />
 

@@ -47,10 +47,14 @@ export const NewPasswordScreen: React.FC = () => {
     // TODO: llamar al backend
     setTimeout(() => {
       setLoading(false);
-      // popToTop vuelve al primer screen del stack actual:
-      // en el flujo de perfil → ProfileScreen
-      // en el flujo de auth   → LandingScreen
-      (navigation as any).popToTop();
+      const routeNames: string[] = (navigation as any).getState()?.routeNames ?? [];
+      if (routeNames.includes('Login')) {
+        // AuthNavigator: ir a Login
+        navigation.navigate('Login' as never);
+      } else {
+        // MainStackNavigator: volver a MainTabs (Profile tab activo)
+        (navigation as any).popToTop();
+      }
     }, 1000);
   };
 
@@ -87,6 +91,7 @@ export const NewPasswordScreen: React.FC = () => {
           onChangeText={setPassword}
           isPassword
           leftIcon="lock-closed-outline"
+          accentColor={Colors.primary}
           hint={t('newPasswordHint')}
           containerStyle={styles.inputSpacing}
         />
@@ -98,6 +103,7 @@ export const NewPasswordScreen: React.FC = () => {
           onChangeText={setConfirm}
           isPassword
           leftIcon="lock-closed-outline"
+          accentColor={Colors.primary}
           containerStyle={styles.inputSpacing}
         />
 
