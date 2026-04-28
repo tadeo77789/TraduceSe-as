@@ -143,7 +143,7 @@ export const LoginScreen: React.FC = () => { // Declara y exporta el componente 
         {/* Panel imagen */}
         <View style={styles.imagePanel}>{/* Panel izquierdo que contiene la imagen de fondo con overlay */}
           <Image // Imagen de fondo del panel izquierdo
-            source={require('../../../assets/images/slide1.jpg')} // Imagen local del slide 1 — ruta: app/assets/images/slide1.jpg
+            source={require('../../../assets/images/login.png')} // Imagen local del slide 1 — ruta: app/assets/images/slide1.jpg
             style={styles.heroImage} // Posicionada absolutamente para cubrir todo el panel
             resizeMode="cover" // Escala la imagen para cubrir el contenedor sin deformarla
           />{/* Cierre de Image */}
@@ -182,7 +182,6 @@ const styles = StyleSheet.create({ // Crea la hoja de estilos del componente con
   heroImage: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }, // Línea 179 — imagen de fondo posicionada absolutamente cubriendo todo el panel
   imageOverlay: { // Línea 180 — overlay semitransparente sobre la imagen del panel izquierdo
     ...StyleSheet.absoluteFillObject, // Línea 181 — expande el overlay para cubrir absolutamente todo el contenedor padre
-    backgroundColor: 'rgba(109,40,217,0.35)', // Línea 182 — fondo morado al 35% de opacidad sobre la imagen
   }, // Cierre del estilo imageOverlay
   imageBadge: { // Línea 184 — contenedor del branding posicionado en la esquina inferior izquierda del panel
     position: 'absolute', // Línea 185 — posicionado absolutamente dentro del imagePanel
@@ -197,7 +196,7 @@ const styles = StyleSheet.create({ // Crea la hoja de estilos del componente con
   }, // Cierre del estilo imageBadgeText
   imageTagline: { // Línea 195 — estilos del slogan debajo del nombre en el panel de imagen
     fontSize: 16, // Línea 196 — tamaño de fuente de 16px
-    color: 'rgba(255,255,255,0.85)', // Línea 197 — blanco al 85% de opacidad para efecto sutil
+    color: 'rgba(255, 255, 255, 0.85)', // Línea 197 — blanco al 85% de opacidad para efecto sutil
     marginTop: 6, // Línea 198 — margen superior de 6px respecto al nombre
     fontWeight: '500', // Línea 199 — peso de fuente medio
   }, // Cierre del estilo imageTagline
