@@ -33,7 +33,7 @@ import { useNavigation } from '@react-navigation/native'; // Hook para acceder a
 import { Ionicons } from '@expo/vector-icons'; // Librería de iconos vectoriales de Expo (Ionicons es uno de los conjuntos disponibles)
 import { LinearGradient } from 'expo-linear-gradient'; // Componente de Expo para aplicar degradados lineales de color
 import { Colors } from '../../constants/colors'; // Paleta de colores centralizada del proyecto — ruta: app/constants/colors.ts
-import { useTranslation } from '../../i18n';
+import { useTranslation } from '../../i18n'; 
 
 export const LandingScreen: React.FC = () => { // Declara y exporta el componente funcional LandingScreen tipado como React.FC
   const navigation = useNavigation(); // Obtiene el objeto de navegación para poder navegar entre pantallas
@@ -48,9 +48,10 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
   const { t } = useTranslation();
 
   const SLIDES = [
-    { id: '1', image: require('../../assets/images/slide1.jpg'), title: t('slide1Title'), caption: t('slide1Caption') },
-    { id: '2', image: require('../../assets/images/slide2.jpg'), title: t('slide2Title'), caption: t('slide2Caption') },
-    { id: '3', image: require('../../assets/images/slide3.jpg'), title: t('slide3Title'), caption: t('slide3Caption') },
+    { id: '1', image: require('../../assets/images/traducion-real.png'), title: t('slide1Title'), caption: t('slide1Caption') },
+    { id: '2', image: require('../../assets/images/comunicate-sinbarreras.png'), title: t('slide2Title'), caption: t('slide2Caption') },
+    { id: '3', image: require('../../assets/images/alfabeto.png'), title: t('slide3Title'), caption: t('slide3Caption') },
+    { id: '4', image: require('../../assets/images/historial.png'), title: t('slide4Title'), caption: t('slide4Caption') }
   ];
 
   const FEATURES = [

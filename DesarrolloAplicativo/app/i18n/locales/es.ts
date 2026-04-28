@@ -62,6 +62,8 @@ const es = {
   slide2Caption: 'Conecta con personas sordas usando la Lengua de Señas Colombiana.',
   slide3Title: 'Aprende el alfabeto LSC',
   slide3Caption: 'Domina el alfabeto y amplía tu vocabulario paso a paso.',
+  slide4Title: 'Revisa tu historial',
+  slide4Caption: 'Consulta tus traducciones pasadas y sigue tu progreso.',
   testimonialQuote: '"La app ha facilitado mi comunicación con mis compañeros en clase. Es increíble cómo una app puede cambiar tanto la vida de una persona."',
   testimonialName: 'Juan Pérez',
   testimonialRole: 'Estudiante universitario',
