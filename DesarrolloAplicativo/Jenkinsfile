@@ -22,7 +22,7 @@ pipeline {
 
         stage('Instalar Dependencias - Backend') {
             steps {
-                dir('backend') {
+                dir('DesarrolloAplicativo/backend') {
                     sh 'npm install'
                 }
             }
@@ -30,7 +30,7 @@ pipeline {
 
         stage('Instalar Dependencias - Frontend') {
             steps {
-                dir('app') {
+                dir('DesarrolloAplicativo/app') {
                     sh 'npm install'
                 }
             }
@@ -42,7 +42,7 @@ pipeline {
                     sh '''
                         sonar-scanner \
                           -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                          -Dsonar.sources=app/app,backend/src \
+                          -Dsonar.sources=DesarrolloAplicativo/app/app,DesarrolloAplicativo/backend/src \
                           -Dsonar.exclusions=**/node_modules/**,**/coverage/**
                     '''
                 }
@@ -59,13 +59,13 @@ pipeline {
 
         stage('Build Docker - Backend') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE_BACKEND} ./backend"
+                sh "docker build -t ${DOCKER_IMAGE_BACKEND} ./DesarrolloAplicativo/backend"
             }
         }
 
         stage('Build Docker - Frontend') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE_FRONTEND} ./app"
+                sh "docker build -t ${DOCKER_IMAGE_FRONTEND} ./DesarrolloAplicativo/app"
             }
         }
 
