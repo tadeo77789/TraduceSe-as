@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
     tools {
         nodejs 'node20'
     }
@@ -16,7 +20,17 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                checkout scm
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/jenkins']],
+                    extensions: [[
+                        $class: 'CloneOption',
+                        shallow: true,
+                        depth: 1,
+                        noTags: true
+                    ]],
+                    userRemoteConfigs: [[url: 'https://github.com/tadeo77789/TraduceSe-as.git']]
+                ])
                 echo "Codigo obtenido del repositorio: ${env.GIT_BRANCH}"
             }
         }
