@@ -39,12 +39,15 @@ pipeline {
         stage('Analisis SonarQube') {
             steps {
                 withSonarQubeEnv('Sonar') {
-                    sh '''
-                        sonar-scanner \
-                          -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                          -Dsonar.sources=DesarrolloAplicativo/app/app,DesarrolloAplicativo/backend/src \
-                          -Dsonar.exclusions=**/node_modules/**,**/coverage/**
-                    '''
+                    script {
+                        def scannerHome = tool 'sonar-scanner'
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                              -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                              -Dsonar.sources=DesarrolloAplicativo/app/app,DesarrolloAplicativo/backend/src \
+                              -Dsonar.exclusions=**/node_modules/**,**/coverage/**
+                        """
+                    }
                 }
             }
         }
