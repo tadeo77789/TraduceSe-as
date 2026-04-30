@@ -116,6 +116,11 @@ pipeline {
         }
 
         stage('Deploy a Kubernetes') {
+            when {
+                expression {
+                    return sh(script: 'command -v kubectl >/dev/null 2>&1', returnStatus: true) == 0
+                }
+            }
             steps {
                 sh """
                     kubectl set image deployment/traduce-senas-backend \
