@@ -1,0 +1,111 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE_BACKEND  = "traduce-senas/backend:${env.BUILD_ID}"
+        DOCKER_IMAGE_FRONTEND = "traduce-senas/frontend:${env.BUILD_ID}"
+        SONAR_PROJECT_KEY     = "traduce-senas"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+                echo "Codigo obtenido del repositorio: ${env.GIT_BRANCH}"
+            }
+        }
+
+        stage('Instalar Dependencias - Backend') {
+            steps {
+                dir('backend') {
+                    sh 'npm install'
+                }
+            }
+        }
+
+        stage('Instalar Dependencias - Frontend') {
+            steps {
+                dir('app') {
+                    sh 'npm install'
+                }
+            }
+        }
+
+        stage('Analisis SonarQube') {
+            steps {
+                withSonarQubeEnv('Sonar') {
+                    sh '''
+                        sonar-scanner \
+                          -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                          -Dsonar.sources=app/app,backend/src \
+                          -Dsonar.exclusions=**/node_modules/**,**/coverage/**
+                    '''
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Build Docker - Backend') {
+            steps {
+                sh "docker build -t ${DOCKER_IMAGE_BACKEND} ./backend"
+            }
+        }
+
+        stage('Build Docker - Frontend') {
+            steps {
+                sh "docker build -t ${DOCKER_IMAGE_FRONTEND} ./app"
+            }
+        }
+
+        stage('Push a Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh """
+                        echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
+                        docker push ${DOCKER_IMAGE_BACKEND}
+                        docker push ${DOCKER_IMAGE_FRONTEND}
+                    """
+                }
+            }
+        }
+
+        stage('Deploy a Kubernetes') {
+            steps {
+                sh """
+                    kubectl set image deployment/traduce-senas-backend \
+                        backend=${DOCKER_IMAGE_BACKEND} --record
+
+                    kubectl set image deployment/traduce-senas-frontend \
+                        frontend=${DOCKER_IMAGE_FRONTEND} --record
+
+                    kubectl rollout status deployment/traduce-senas-backend
+                    kubectl rollout status deployment/traduce-senas-frontend
+                """
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline exitoso. Traduce Senas desplegado correctamente. Build #${env.BUILD_ID}"
+        }
+        failure {
+            echo "Pipeline fallido en Build #${env.BUILD_ID}. Revisa los logs para mas detalles."
+        }
+        always {
+            cleanWs()
+        }
+    }
+}

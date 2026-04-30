@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+
+  backend:
+    build: ./backend
+    container_name: traduce-senas-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: traduce_senas
+      DB_USER: senas_user
+      DB_PASSWORD: senas_pass
+      JWT_SECRET: clave_secreta_desarrollo
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - senas-net
+
+  frontend:
+    build: ./app
+    container_name: traduce-senas-frontend
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - senas-net
+
+  db:
+    image: postgres:16-alpine
+    container_name: traduce-senas-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: traduce_senas
+      POSTGRES_USER: senas_user
+      POSTGRES_PASSWORD: senas_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U senas_user -d traduce_senas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - senas-net
+
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: traduce-senas-sonar
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    volumes:
+      - sonar_data:/opt/sonarqube/data
+      - sonar_logs:/opt/sonarqube/logs
+    networks:
+      - senas-net
+
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: traduce-senas-jenkins
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - senas-net
+
+volumes:
+  postgres_data:
+  sonar_data:
+  sonar_logs:
+  jenkins_home:
+
+networks:
+  senas-net:
+    driver: bridge

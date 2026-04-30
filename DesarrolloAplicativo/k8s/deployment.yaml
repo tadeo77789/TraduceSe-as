@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traduce-senas-backend
+  labels:
+    app: traduce-senas
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: traduce-senas
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: traduce-senas
+        tier: backend
+    spec:
+      containers:
+        - name: backend
+          image: traduce-senas/backend:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: traduce-senas-secrets
+                  key: db-host
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: traduce-senas-secrets
+                  key: db-name
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: traduce-senas-secrets
+                  key: db-user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: traduce-senas-secrets
+                  key: db-password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: traduce-senas-secrets
+                  key: jwt-secret
+          readinessProbe:
+            httpGet:
+              path: /api/auth/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traduce-senas-frontend
+  labels:
+    app: traduce-senas
+    tier: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: traduce-senas
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: traduce-senas
+        tier: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: traduce-senas/frontend:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
