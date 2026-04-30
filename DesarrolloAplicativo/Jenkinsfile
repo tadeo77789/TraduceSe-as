@@ -6,8 +6,9 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE_BACKEND  = "traduce-senas/backend:${env.BUILD_ID}"
-        DOCKER_IMAGE_FRONTEND = "traduce-senas/frontend:${env.BUILD_ID}"
+        DOCKER_HUB_USER       = "luisduarte86"
+        DOCKER_IMAGE_BACKEND  = "${DOCKER_HUB_USER}/traduce-senas-backend:${env.BUILD_ID}"
+        DOCKER_IMAGE_FRONTEND = "${DOCKER_HUB_USER}/traduce-senas-frontend:${env.BUILD_ID}"
         SONAR_PROJECT_KEY     = "traduce-senas"
     }
 
