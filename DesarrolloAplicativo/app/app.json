@@ -19,7 +19,13 @@
       "permissions": ["CAMERA", "RECORD_AUDIO"]
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "lang": "es",
+      "name": "Traduce Señas",
+      "shortName": "TraduceSeña",
+      "description": "Traduce Lengua de Señas Colombiana a texto en tiempo real.",
+      "themeColor": "#7C3AED",
+      "backgroundColor": "#EDE9FE"
     },
     "plugins": ["expo-camera"]
   }

@@ -1,5 +1,21 @@
+/**
+ * @file AppHeader.tsx
+ * @description Header de navegación para plataforma móvil.
+ *
+ * En **web** el componente retorna `null` — la navegación web está en `WebTopBar`.
+ * En **móvil** muestra una barra con degradado púrpura que contiene:
+ * - Logo + nombre de la app (cuando no hay botón de volver).
+ * - Botón de regreso (cuando `showBack = true`).
+ * - Icono de perfil (cuando `showProfile = true`).
+ *
+ * @prop showBack - Muestra el botón de regreso. Default: false.
+ * @prop showProfile - Muestra el ícono de perfil. Default: false.
+ * @prop onBack - Callback del botón de regreso.
+ * @prop onProfile - Callback del ícono de perfil.
+ */
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
@@ -22,6 +38,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onBack,
   onProfile,
 }) => {
+  const insets = useSafeAreaInsets();
   if (Platform.OS === 'web') return null;
 
   return (
@@ -29,7 +46,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       colors={['#9333EA', '#7C3AED']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }}
-      style={styles.container}
+      style={[styles.container, { paddingTop: insets.top + Spacing[3] }]}
     >
       <View style={styles.left}>
         {showBack ? (

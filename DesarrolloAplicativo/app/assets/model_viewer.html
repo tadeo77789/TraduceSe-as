@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: transparent; }
+    canvas { display: block; width: 100% !important; height: 100% !important; }
+    #label {
+      position: absolute; bottom: 12px; left: 0; right: 0;
+      text-align: center; pointer-events: none;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 15px; font-weight: 700; color: #1e1b4b;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    #label.visible { opacity: 1; }
+  </style>
+</head>
+<body>
+<div id="label"></div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ── Renderer ──────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+document.body.appendChild(renderer.domElement);
+
+// ── Scene ─────────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf0f2f7);   // gris-azulado muy claro (ref imagen)
+
+// ── Camera ────────────────────────────────────────────────
+const cam = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+cam.position.set(0, 5.8, 3.5);
+cam.lookAt(0, 5.2, 0);
+
+// ── Orbit Controls (solo rotación suave) ──────────────────
+const controls = new OrbitControls(cam, renderer.domElement);
+controls.target.set(0, 5.2, 0);
+controls.enablePan = false;
+controls.enableZoom = false;
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.minPolarAngle = Math.PI * 0.3;
+controls.maxPolarAngle = Math.PI * 0.55;
+controls.minAzimuthAngle = -Math.PI * 0.25;
+controls.maxAzimuthAngle =  Math.PI * 0.25;
+controls.autoRotate = false;
+controls.update();
+
+// ── Lights ────────────────────────────────────────────────
+// Ambient suave
+const ambient = new THREE.AmbientLight(0xfff5e8, 0.7);
+scene.add(ambient);
+
+// Key light (cálida, frontal-derecha)
+const key = new THREE.DirectionalLight(0xfff3df, 2.8);
+key.position.set(2.5, 8, 4);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.near = 0.5;
+key.shadow.camera.far  = 30;
+key.shadow.camera.left = key.shadow.camera.bottom = -3;
+key.shadow.camera.right = key.shadow.camera.top  =  3;
+key.shadow.bias = -0.001;
+scene.add(key);
+
+// Fill light (suave azulada, izquierda)
+const fill = new THREE.DirectionalLight(0xd0e8ff, 1.0);
+fill.position.set(-3, 7, 2);
+scene.add(fill);
+
+// Rim light (contraluz, separa del fondo)
+const rim = new THREE.DirectionalLight(0xfff0d0, 1.4);
+rim.position.set(0, 7, -4);
+scene.add(rim);
+
+// Bottom fill (evita sombras duras abajo)
+const bot = new THREE.PointLight(0xffe8d0, 0.6, 8);
+bot.position.set(0, 3.5, 2);
+scene.add(bot);
+
+// ── Shadow floor ──────────────────────────────────────────
+const floorGeo  = new THREE.CircleGeometry(1.2, 64);
+const floorMat  = new THREE.ShadowMaterial({ opacity: 0.12 });
+const floor     = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.position.set(0, 2.53, 0);
+floor.receiveShadow = true;
+scene.add(floor);
+
+// ── Animation state ───────────────────────────────────────
+let mixer    = null;
+let actions  = {};
+let current  = null;
+let clock    = new THREE.Clock();
+const label  = document.getElementById('label');
+
+function playAnimation(name) {
+  if (!mixer) return;
+  const next = actions[name];
+  if (!next) return;
+
+  if (current && current !== next) {
+    current.fadeOut(0.25);
+  }
+  next.reset().setLoop(THREE.LoopOnce, 1);
+  next.clampWhenFinished = true;
+  next.fadeIn(0.25).play();
+  current = next;
+
+  // Mostrar etiqueta
+  label.textContent = name.replace('Letra_', '');
+  label.classList.add('visible');
+}
+
+// ── Load GLB ──────────────────────────────────────────────
+const loader = new GLTFLoader();
+
+// La app React Native pasa la URL del modelo via postMessage
+// Por defecto usamos ruta relativa
+let modelLoaded = false;
+
+function loadModel(url) {
+  loader.load(url,
+    (gltf) => {
+      const model = gltf.scene;
+
+      // Centrar y escalar el modelo
+      const box = new THREE.Box3().setFromObject(model);
+      const center = box.getCenter(new THREE.Vector3());
+      const size   = box.getSize(new THREE.Vector3());
+      model.position.sub(center);
+      model.position.y += size.y * 0.5;
+
+      model.traverse(child => {
+        if (child.isMesh) {
+          child.castShadow    = true;
+          child.receiveShadow = true;
+          // Mejorar materiales si vienen sin PBR
+          if (child.material) {
+            child.material.roughness = child.material.roughness ?? 0.7;
+            child.material.needsUpdate = true;
+          }
+        }
+      });
+
+      scene.add(model);
+      modelLoaded = true;
+
+      // Configurar animaciones
+      mixer = new THREE.AnimationMixer(model);
+      gltf.animations.forEach(clip => {
+        actions[clip.name] = mixer.clipAction(clip);
+      });
+
+      // Pose neutral por defecto
+      if (actions['Pose_Neutral']) playAnimation('Pose_Neutral');
+
+      // Notificar que el modelo cargó
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'MODEL_LOADED', animations: Object.keys(actions) }));
+      }
+    },
+    (progress) => {
+      const pct = Math.round((progress.loaded / progress.total) * 100);
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'LOADING', progress: pct }));
+      }
+    },
+    (error) => {
+      console.error('Error cargando modelo:', error);
+    }
+  );
+}
+
+// ── Message bridge con React Native ──────────────────────
+window.addEventListener('message', (e) => {
+  try {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'LOAD_MODEL') {
+      loadModel(msg.url);
+    } else if (msg.type === 'PLAY_ANIMATION') {
+      playAnimation(msg.animation);
+    } else if (msg.type === 'SET_BG') {
+      scene.background = new THREE.Color(msg.color);
+    }
+  } catch (_) {}
+});
+
+// También escuchar desde document (iOS WebView)
+document.addEventListener('message', (e) => {
+  window.dispatchEvent(new MessageEvent('message', { data: e.data }));
+});
+
+// ── Render loop ───────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = clock.getDelta();
+  if (mixer) mixer.update(delta);
+  controls.update();
+  renderer.render(scene, cam);
+}
+animate();
+
+// ── Resize ────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  cam.aspect = window.innerWidth / window.innerHeight;
+  cam.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>

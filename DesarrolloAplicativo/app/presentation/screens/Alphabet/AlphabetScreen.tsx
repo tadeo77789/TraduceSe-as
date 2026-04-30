@@ -1,4 +1,26 @@
-import React, { useState, useCallback, useMemo } from 'react';
+/**
+ * @file AlphabetScreen.tsx
+ * @description Pantalla del alfabeto LSC con visor 3D integrado.
+ *
+ * Layout:
+ *  ┌──────────────────────────────────┐
+ *  │  Header (AppHeader)              │
+ *  ├──────────────────────────────────┤
+ *  │  Grilla A–Z (FlatList)           │
+ *  │  (cartas con badge de letra)     │
+ *  └──────────────────────────────────┘
+ *
+ *  Al tocar una carta → sheet se desliza desde abajo:
+ *  ┌──────────────────────────────────┐
+ *  │  [Badge letra]         [✕]       │  gradiente
+ *  ├──────────────────────────────────┤
+ *  │       Visor 3D (WebView)         │
+ *  ├──────────────────────────────────┤
+ *  │  💡 Tip de la seña               │
+ *  │  Toca fuera para cerrar          │
+ *  └──────────────────────────────────┘
+ */
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,151 +28,545 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
-  Modal,
-  Dimensions,
+  useWindowDimensions,
   ListRenderItem,
+  Platform,
+  Animated,
+  TouchableWithoutFeedback,
 } from 'react-native';
+import { WebView } from 'react-native-webview';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
+import { useColors, useTheme } from '../../../state/ThemeContext';
 
-const { width } = Dimensions.get('window');
-const COLS = 5;
-const ITEM_SIZE = (width - 32 - (COLS - 1) * 10) / COLS;
-const ITEM_HEIGHT = ITEM_SIZE + 24;
+// ─── Tipos ───────────────────────────────────────────────────────────────────
+interface LetterItem { letter: string; imageUrl: string; tip: string }
 
-interface AlphabetItem {
-  letter: string;
-  imageUrl: string;
-}
+// ─── Tips de cada seña ───────────────────────────────────────────────────────
+const TIPS: Record<string, string> = {
+  A: 'Puño cerrado con el pulgar al costado.',
+  B: 'Cuatro dedos extendidos juntos, pulgar doblado hacia adentro.',
+  C: 'Mano curvada en forma de C.',
+  D: 'Índice apunta hacia arriba, los otros dedos curvados tocan el pulgar.',
+  E: 'Todos los dedos semi-curvados hacia adelante, pulgar bajo.',
+  F: 'Índice y pulgar se tocan formando un círculo, otros extendidos.',
+  G: 'Índice apunta al costado, pulgar paralelo a él.',
+  H: 'Índice y medio extendidos y juntos, apuntando al costado.',
+  I: 'Solo el meñique extendido, puño cerrado.',
+  J: 'Meñique extendido, traza la letra J en el aire.',
+  K: 'Índice arriba, medio en diagonal y pulgar entre los dos.',
+  L: 'Índice hacia arriba y pulgar extendido forman una L.',
+  M: 'Tres dedos doblados cubren el pulgar.',
+  N: 'Dos dedos doblados cubren el pulgar.',
+  O: 'Todos los dedos y el pulgar curvados forman un círculo.',
+  P: 'Como K pero con la mano apuntando hacia abajo.',
+  Q: 'Como G pero con la mano apuntando hacia abajo.',
+  R: 'Índice y medio cruzados uno sobre el otro.',
+  S: 'Puño cerrado con el pulgar sobre los dedos.',
+  T: 'Pulgar asoma entre el índice y el medio.',
+  U: 'Índice y medio juntos y extendidos hacia arriba.',
+  V: 'Índice y medio en V abierta (signo de victoria).',
+  W: 'Índice, medio y anular extendidos en abanico.',
+  X: 'Solo el índice extendido y doblado en gancho.',
+  Y: 'Pulgar y meñique extendidos, otros doblados.',
+  Z: 'Índice extendido traza la letra Z en el aire.',
+};
 
-// Datos estáticos fuera del componente para no recrearse en cada render
-const ALPHABET: AlphabetItem[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(letter => ({
-  letter,
-  imageUrl: `https://www.lifeprint.com/asl101/images-handshapes/${letter.toLowerCase()}.gif`,
-}));
+const ALPHABET: LetterItem[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  .split('')
+  .map(letter => ({
+    letter,
+    imageUrl: `https://www.lifeprint.com/asl101/images-handshapes/${letter.toLowerCase()}.gif`,
+    tip: TIPS[letter] ?? '',
+  }));
 
-const keyExtractor = (item: AlphabetItem) => item.letter;
-const getItemLayout = (_: unknown, index: number) => ({
-  length: ITEM_HEIGHT,
-  offset: ITEM_HEIGHT * Math.floor(index / COLS),
-  index,
-});
+// ─── Paleta de acento por letra (ciclo de 6) ─────────────────────────────────
+const ACCENTS = [
+  { bg: '#EDE9FE', fg: '#7C3AED' },
+  { bg: '#DBEAFE', fg: '#2563EB' },
+  { bg: '#D1FAE5', fg: '#059669' },
+  { bg: '#FEF3C7', fg: '#D97706' },
+  { bg: '#FCE7F3', fg: '#DB2777' },
+  { bg: '#FFE4E6', fg: '#E11D48' },
+];
 
+const DARK_ACCENTS = [
+  { bg: '#2D1F4E', fg: '#9F71ED' },
+  { bg: '#162644', fg: '#60A5FA' },
+  { bg: '#0D2B1E', fg: '#34D399' },
+  { bg: '#2A1C08', fg: '#FCD34D' },
+  { bg: '#2A0F23', fg: '#F472B6' },
+  { bg: '#2A0A10', fg: '#FB7185' },
+];
+
+// ─── Rutas del modelo según plataforma ───────────────────────────────────────
+const MODEL_URL = Platform.OS === 'android'
+  ? 'file:///android_asset/signia_model.glb'
+  : 'signia_model.glb';
+
+const VIEWER_SRC = Platform.OS === 'android'
+  ? { uri: 'file:///android_asset/model_viewer.html' }
+  : { uri: 'model_viewer.html' };
+
+// ─── Componente ──────────────────────────────────────────────────────────────
 export const AlphabetScreen: React.FC = () => {
-  const [selected, setSelected] = useState<AlphabetItem | null>(null);
+  const { width, height } = useWindowDimensions();
+  const C = useColors();
+  const { isDark } = useTheme();
+  const PALETTE = isDark ? DARK_ACCENTS : ACCENTS;
+  const webViewRef   = useRef<WebView>(null);
+  const backdropAnim = useRef(new Animated.Value(0)).current;
 
-  const handleSelect = useCallback((item: AlphabetItem) => {
+  const [selected,   setSelected]   = useState<LetterItem | null>(null);
+  const [modelReady, setModelReady] = useState(false);
+  const [sheetOpen,  setSheetOpen]  = useState(false);
+
+  // ── Layout responsive ──────────────────────────────────────────────────
+  const COLS      = width >= 1024 ? 9 : width >= 768 ? 7 : 5;
+  const GAP       = 10;
+  const H_PAD     = 20;
+  const ITEM_SIZE = Math.floor((width - H_PAD * 2 - (COLS - 1) * GAP) / COLS);
+  const ITEM_H    = ITEM_SIZE + 28;
+
+  // Visor 3D dentro del modal centrado de 320px de ancho
+  const VIEWER_H = height < 600 ? 180 : 220;
+
+  const sheetAnim = useRef(new Animated.Value(500)).current;
+
+  // ── Animación del sheet ────────────────────────────────────────────────
+  const openSheet = useCallback(() => {
+    setSheetOpen(true);
+    Animated.parallel([
+      Animated.spring(sheetAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        damping: 20,
+        stiffness: 180,
+      }),
+      Animated.timing(backdropAnim, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [sheetAnim, backdropAnim]);
+
+  const closeSheet = useCallback(() => {
+    Animated.parallel([
+      Animated.timing(sheetAnim, {
+        toValue: 500,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+      Animated.timing(backdropAnim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setSheetOpen(false);
+      setSelected(null);
+      setModelReady(false);
+    });
+  }, [sheetAnim, backdropAnim]);
+
+  // ── Carga del modelo ───────────────────────────────────────────────────
+  const onWebViewLoad = useCallback(() => {
+    webViewRef.current?.postMessage(
+      JSON.stringify({ type: 'LOAD_MODEL', url: MODEL_URL })
+    );
+  }, []);
+
+  const onWebViewMessage = useCallback((e: { nativeEvent: { data: string } }) => {
+    try {
+      const msg = JSON.parse(e.nativeEvent.data);
+      if (msg.type === 'MODEL_LOADED') setModelReady(true);
+    } catch (_) {}
+  }, []);
+
+  // ── Reproducir animación cuando cambia la letra seleccionada ──────────
+  useEffect(() => {
+    if (selected && modelReady) {
+      webViewRef.current?.postMessage(
+        JSON.stringify({ type: 'PLAY_ANIMATION', animation: `Letra_${selected.letter}` })
+      );
+    }
+  }, [selected, modelReady]);
+
+  // ── Selección de letra ─────────────────────────────────────────────────
+  const handleSelect = useCallback((item: LetterItem) => {
     setSelected(item);
-  }, []);
+    openSheet();
+  }, [openSheet]);
 
-  const handleClose = useCallback(() => {
-    setSelected(null);
-  }, []);
+  // ── Render de carta ────────────────────────────────────────────────────
+  const renderItem: ListRenderItem<LetterItem> = useCallback(({ item, index }) => {
+    const ac = PALETTE[index % PALETTE.length];
+    return (
+      <TouchableOpacity
+        style={[
+          styles.letterCard,
+          { backgroundColor: ac.bg, width: ITEM_SIZE, height: ITEM_H },
+        ]}
+        onPress={() => handleSelect(item)}
+        activeOpacity={0.75}
+      >
+        <View style={{ width: ITEM_SIZE - 10, height: ITEM_SIZE - 10, borderRadius: 10, overflow: 'hidden', backgroundColor: ac.bg }}>
+          <Image
+            source={{ uri: item.imageUrl }}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="contain"
+          />
+        </View>
+        <View style={[
+          styles.letterBadge,
+          isDark
+            ? { borderWidth: 1.5, borderColor: ac.fg }
+            : { backgroundColor: ac.fg },
+        ]}>
+          <Text style={[styles.letterBadgeText, isDark && { color: ac.fg }]}>
+            {item.letter}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }, [handleSelect, ITEM_SIZE, ITEM_H, PALETTE]);
 
-  const renderItem: ListRenderItem<AlphabetItem> = useCallback(({ item }) => (
-    <TouchableOpacity style={styles.letterCard} onPress={() => handleSelect(item)}>
-      <Image
-        source={{ uri: item.imageUrl }}
-        style={styles.handImage}
-        resizeMode="contain"
-      />
-      <View style={styles.letterBadge}>
-        <Text style={styles.letterText}>{item.letter}</Text>
-      </View>
-    </TouchableOpacity>
-  ), [handleSelect]);
+  const getItemLayout = useCallback((_: unknown, i: number) => ({
+    length: ITEM_H, offset: ITEM_H * Math.floor(i / COLS), index: i,
+  }), [ITEM_H, COLS]);
 
+  // Acento de la letra seleccionada
+  const selIdx    = selected ? ALPHABET.findIndex(a => a.letter === selected.letter) : 0;
+  const selAccent = PALETTE[selIdx % PALETTE.length];
+
+  // ── JSX ────────────────────────────────────────────────────────────────
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>
       <AppHeader />
-      <View style={styles.container}>
-        <Text style={styles.title}>Alfabeto de Señas</Text>
 
-        <FlatList
-          data={ALPHABET}
-          numColumns={COLS}
-          keyExtractor={keyExtractor}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={styles.grid}
-          renderItem={renderItem}
-          getItemLayout={getItemLayout}
-          initialNumToRender={15}
-          maxToRenderPerBatch={10}
-          windowSize={5}
-          removeClippedSubviews
-        />
+      {/* ── Cabecera de sección ─────────────────────────────────────────── */}
+      <View style={styles.sectionHeader}>
+        <View>
+          <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>Alfabeto LSC</Text>
+          <Text style={[styles.sectionSub, { color: C.textSecondary }]}>Lengua de Señas Colombiana</Text>
+        </View>
+        <View style={[styles.countBadge, { backgroundColor: C.primaryBg }]}>
+          <Text style={styles.countText}>26 letras</Text>
+        </View>
       </View>
 
-      {/* Modal detalle */}
-      <Modal visible={!!selected} transparent animationType="fade">
-        <TouchableOpacity style={styles.modalOverlay} onPress={handleClose}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalLetter}>{selected?.letter}</Text>
-            <Image
-              source={{ uri: selected?.imageUrl }}
-              style={styles.modalImage}
-              resizeMode="contain"
+      {/* ── Grilla A-Z ──────────────────────────────────────────────────── */}
+      <FlatList
+        data={ALPHABET}
+        key={COLS}
+        numColumns={COLS}
+        keyExtractor={(item) => item.letter}
+        columnWrapperStyle={styles.gridRow}
+        contentContainerStyle={styles.gridContent}
+        renderItem={renderItem}
+        getItemLayout={getItemLayout}
+        initialNumToRender={26}
+        showsVerticalScrollIndicator={false}
+      />
+
+      {/* ── Modal centrado con visor 3D ──────────────────────────────────── */}
+      {sheetOpen && (
+        <Animated.View
+          style={[styles.modalOverlay, { opacity: backdropAnim, pointerEvents: 'box-none' }]}
+        >
+          {/* Toca fuera para cerrar */}
+          <TouchableWithoutFeedback onPress={closeSheet}>
+            <View style={StyleSheet.absoluteFillObject} />
+          </TouchableWithoutFeedback>
+
+          {/* Carta modal centrada */}
+          <Animated.View
+            style={[
+              styles.sheet,
+              { transform: [{ translateY: sheetAnim }], backgroundColor: C.surface },
+            ]}
+          >
+          {/* ── Header del sheet ──────────────────────────────────────────── */}
+          <LinearGradient
+            colors={[selAccent.bg, C.surface] as [string, string]}
+            style={styles.sheetHeader}
+          >
+            {/* Badge de letra */}
+            <View style={[
+              styles.sheetLetterBadge,
+              isDark
+                ? { borderWidth: 2, borderColor: selAccent.fg, backgroundColor: selAccent.bg }
+                : { backgroundColor: selAccent.fg },
+            ]}>
+              <Text style={[styles.sheetLetter, isDark && { color: selAccent.fg }]}>
+                {selected?.letter ?? ''}
+              </Text>
+            </View>
+
+            {/* Título */}
+            <View style={styles.sheetTitleBlock}>
+              <Text style={[styles.sheetTitle, { color: C.textPrimary }]}>
+                Seña: <Text style={{ color: selAccent.fg }}>{selected?.letter ?? ''}</Text>
+              </Text>
+              <Text style={[styles.sheetSubtitle, { color: C.textSecondary }]}>Lengua de Señas Colombiana</Text>
+            </View>
+
+            {/* Botón cerrar */}
+            <TouchableOpacity style={[styles.closeBtn, { backgroundColor: C.inputBg }]} onPress={closeSheet}>
+              <Ionicons name="close" size={18} color={C.textSecondary} />
+            </TouchableOpacity>
+          </LinearGradient>
+
+          {/* ── Visor 3D ──────────────────────────────────────────────────── */}
+          <View style={[styles.viewerWrap, { height: VIEWER_H, backgroundColor: C.inputBg }]}>
+            <WebView
+              ref={webViewRef}
+              source={VIEWER_SRC}
+              style={styles.webview}
+              onLoad={onWebViewLoad}
+              onMessage={onWebViewMessage}
+              originWhitelist={['*']}
+              allowFileAccess
+              allowFileAccessFromFileURLs
+              allowUniversalAccessFromFileURLs
+              scrollEnabled={false}
+              bounces={false}
             />
-            <Text style={styles.modalHint}>Toca fuera para cerrar</Text>
+
+            {/* Overlay de carga */}
+            {!modelReady && (
+              <View style={[styles.loadingOverlay, { backgroundColor: C.inputBg }]}>
+                <View style={[styles.loadingPill, { backgroundColor: C.surface }]}>
+                  <Ionicons name="cube-outline" size={16} color={Colors.primary} />
+                  <Text style={styles.loadingText}>Cargando modelo 3D…</Text>
+                </View>
+              </View>
+            )}
           </View>
-        </TouchableOpacity>
-      </Modal>
+
+          {/* ── Tip de la seña ────────────────────────────────────────────── */}
+          <View style={[styles.tipRow, { borderLeftColor: selAccent.fg, backgroundColor: C.inputBg }]}>
+            <View style={[styles.tipIcon, { backgroundColor: selAccent.fg }]}>
+              <Ionicons name="hand-left" size={13} color="#fff" />
+            </View>
+            <Text style={[styles.tipText, { color: C.textPrimary }]} numberOfLines={2}>
+              {selected?.tip ?? ''}
+            </Text>
+          </View>
+
+            <Text style={[styles.closeHint, { color: C.textSecondary }]}>Toca fuera para cerrar</Text>
+          </Animated.View>
+        </Animated.View>
+      )}
     </View>
   );
 };
 
+// ─── Estilos ─────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.background },
-  container: { flex: 1, padding: 16 },
-  title: {
+  root: { flex: 1, backgroundColor: Colors.backgroundGray ?? '#F8F9FC' },
+
+  /* ── Cabecera de sección ──────────────────────────────────────────────── */
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 14,
+  },
+  sectionTitle: {
     fontSize: 22,
     fontWeight: '800',
     color: Colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: 16,
   },
-  grid: { paddingBottom: 20 },
-  row: { gap: 10, marginBottom: 10 },
+  sectionSub: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  countBadge: {
+    backgroundColor: Colors.primaryBg ?? '#EDE9FE',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  countText: {
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: '700',
+  },
+
+  /* ── Grilla ───────────────────────────────────────────────────────────── */
+  gridContent: { paddingHorizontal: 20 },
+  gridRow: { gap: 10, marginBottom: 10 },
+
   letterCard: {
-    width: ITEM_SIZE,
-    height: ITEM_HEIGHT,
     alignItems: 'center',
-  },
-  handImage: {
-    width: ITEM_SIZE,
-    height: ITEM_SIZE,
-    borderRadius: 6,
-    backgroundColor: '#f0ede8',
+    borderRadius: 16,
+    paddingTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   letterBadge: {
-    backgroundColor: Colors.textPrimary,
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    marginTop: 4,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    marginTop: 5,
   },
-  letterText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  letterBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '800',
+  },
 
-  // Modal
+  /* ── Overlay + centrado ──────────────────────────────────────────────── */
   modalOverlay: {
-    flex: 1,
-    backgroundColor: Colors.overlay,
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.50)',
+    zIndex: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  /* ── Tarjeta modal centrada ──────────────────────────────────────────── */
+  sheet: {
+    width: 320,
+    backgroundColor: '#fff',
+    borderRadius: 28,
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.22,
+    shadowRadius: 32,
+    elevation: 20,
+    overflow: 'hidden',
+  },
+
+  sheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 20,
+    paddingBottom: 16,
+  },
+  sheetLetterBadge: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  sheetLetter: {
+    color: '#fff',
+    fontSize: 30,
+    fontWeight: '900',
+    lineHeight: 34,
+  },
+  sheetTitleBlock: { flex: 1 },
+  sheetTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+  },
+  sheetSubtitle: {
+    fontSize: 11,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  closeBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  modalCard: {
-    backgroundColor: Colors.background,
+
+  /* ── Visor 3D ─────────────────────────────────────────────────────────── */
+  viewerWrap: {
+    marginHorizontal: 16,
     borderRadius: 20,
-    padding: 32,
+    overflow: 'hidden',
+    backgroundColor: '#ECEEF5',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  webview: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#ECEEF5',
     alignItems: 'center',
-    width: 240,
+    justifyContent: 'center',
   },
-  modalLetter: {
-    fontSize: 48,
-    fontWeight: '900',
+  loadingPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 30,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  loadingText: {
+    fontSize: 12,
     color: Colors.primary,
-    marginBottom: 12,
+    fontWeight: '600',
   },
-  modalImage: { width: 160, height: 160 },
-  modalHint: { fontSize: 12, color: Colors.textHint, marginTop: 16 },
+
+  /* ── Tip ──────────────────────────────────────────────────────────────── */
+  tipRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginHorizontal: 16,
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: '#F8F9FC',
+    borderRadius: 14,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.primary,
+  },
+  tipIcon: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tipText: {
+    flex: 1,
+    fontSize: 13,
+    color: Colors.textPrimary,
+    fontWeight: '500',
+    lineHeight: 19,
+  },
+
+  closeHint: {
+    textAlign: 'center',
+    fontSize: 11,
+    color: Colors.textSecondary,
+    paddingVertical: 12,
+  },
 });

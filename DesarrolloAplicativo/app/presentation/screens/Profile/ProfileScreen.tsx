@@ -1,3 +1,23 @@
+/**
+ * @file ProfileScreen.tsx
+ * @description Pantalla de perfil del usuario autenticado.
+ *
+ * Muestra:
+ * - Avatar con degradado, nombre (extraído del email), email y badge de nivel.
+ * - Mini-estadísticas: traducciones, señas aprendidas, alarmas activas.
+ * - Sección "Cuenta": correo y contraseña (solo lectura) + link de cambio de contraseña.
+ * - Sección "Preferencias": toggle de tema claro/oscuro, toggle de notificaciones
+ *   y selector de idioma de la app (Español, Inglés, Francés, Português).
+ * - Sección "Acerca de": versión, términos y condiciones, política de privacidad.
+ * - Botones de "Cerrar sesión" y "Eliminar cuenta" con confirmación.
+ *
+ * Usa `useAuth` para obtener el usuario y ejecutar `logout`, y `useTheme` para
+ * el toggle de tema. La confirmación de acciones críticas usa `Alert` en móvil
+ * y `confirm()` en web.
+ *
+ * @todo Conectar los campos de cuenta con `ENDPOINTS.updateProfile`.
+ * @todo Implementar cambio de contraseña real.
+ */
 import React, { useState } from 'react';
 import {
   View,
@@ -7,6 +27,8 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
@@ -14,67 +36,99 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../../state/AuthContext';
-import { useTheme } from '../../../state/ThemeContext';
+import { useTheme, useColors } from '../../../state/ThemeContext';
 
 const IDIOMAS = ['Español', 'Inglés', 'Francés', 'Português'];
 
+const USER_STATS = [
+  { label: 'Traducciones', value: '1,248', icon: 'swap-horizontal-outline' as const, color: Colors.primary },
+  { label: 'Señas aprendidas', value: '84', icon: 'hand-left-outline' as const, color: '#D97706' },
+  { label: 'Alarmas', value: '3', icon: 'alarm-outline' as const, color: '#059669' },
+];
+
 export const ProfileScreen: React.FC = () => {
+  const navigation = useNavigation();
+  const { width } = useWindowDimensions();
+  const isWide = width >= 768;
   const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme, resetTheme } = useTheme();
+  const C = useColors();
   const [selectedIdioma, setSelectedIdioma] = useState('Español');
 
-  const handleLogout = () => {
-    Alert.alert('Cerrar sesión', '¿Deseas cerrar sesión?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Cerrar sesión', onPress: logout },
-    ]);
+  const displayName = user?.email?.split('@')[0] ?? 'Usuario';
+  const displayEmail = user?.email ?? 'usuario@traducsenas.com';
+
+  const handleLogout = async () => {
+    if (Platform.OS === 'web') {
+      // eslint-disable-next-line no-restricted-globals
+      if (confirm('¿Deseas cerrar sesión?')) {
+        resetTheme();
+        await logout();
+      }
+    } else {
+      Alert.alert('Cerrar sesión', '¿Deseas cerrar sesión?', [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Cerrar sesión', style: 'destructive', onPress: async () => { resetTheme(); await logout(); } },
+      ]);
+    }
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      'Eliminar cuenta',
-      '¿Estás seguro? Esta acción no se puede deshacer.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: () => Alert.alert('Cuenta eliminada'),
-        },
-      ]
-    );
+    if (Platform.OS === 'web') {
+      // eslint-disable-next-line no-restricted-globals
+      if (confirm('¿Estás seguro? Esta acción no se puede deshacer.')) {
+        alert('Cuenta eliminada');
+      }
+    } else {
+      Alert.alert(
+        'Eliminar cuenta',
+        '¿Estás seguro? Esta acción no se puede deshacer.',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Eliminar', style: 'destructive', onPress: () => Alert.alert('Cuenta eliminada') },
+        ]
+      );
+    }
   };
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>
       <AppHeader />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+      <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, isWide && styles.contentWide]} showsVerticalScrollIndicator={false}>
+        <View style={[styles.innerWrapper, isWide && styles.innerWrapperWide]}>
 
-        {/* Avatar */}
+        {/* Avatar + nombre */}
         <View style={styles.avatarSection}>
-          <LinearGradient
-            colors={['#9333EA', '#7C3AED']}
-            style={styles.avatarCircle}
-          >
+          <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.avatarCircle}>
             <Ionicons name="person" size={44} color="#fff" />
           </LinearGradient>
-          <Text style={styles.userName}>{user?.email?.split('@')[0] || 'Usuario'}</Text>
-          <Text style={styles.userEmail}>{user?.email || 'luduarte@gmail.com'}</Text>
+          <Text style={[styles.userName, { color: C.textPrimary }]}>{displayName}</Text>
+          <Text style={[styles.userEmail, { color: C.textSecondary }]}>{displayEmail}</Text>
+        </View>
+        {/* Estadísticas del usuario */}
+        <View style={styles.statsRow}>
+          {USER_STATS.map((stat, i) => (
+            <View key={i} style={[styles.statCard, { backgroundColor: C.surface }]}>
+              <Ionicons name={stat.icon} size={18} color={stat.color} />
+              <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
+              <Text style={[styles.statLabel, { color: C.textSecondary }]}>{stat.label}</Text>
+            </View>
+          ))}
         </View>
 
         {/* Sección de cuenta */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Cuenta</Text>
-          <View style={styles.sectionCard}>
+          <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>Cuenta</Text>
+          <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
             <Input
-              label="Tu correo"
-              value={user?.email || 'luduarte@gmail.com'}
+              label="Correo electrónico"
+              value={displayEmail}
               editable={false}
               rightIcon="lock-closed-outline"
               containerStyle={styles.inputStyle}
             />
-
             <Input
               label="Contraseña"
               value="••••••••"
@@ -82,24 +136,27 @@ export const ProfileScreen: React.FC = () => {
               editable={false}
               containerStyle={styles.inputStyle}
             />
-            <TouchableOpacity style={styles.forgotRow}>
+            <TouchableOpacity
+              style={styles.forgotRow}
+              onPress={() => navigation.navigate('ForgotPassword' as never, { fromProfile: true } as never)}
+            >
               <Ionicons name="key-outline" size={14} color={Colors.primary} />
               <Text style={styles.forgotLink}>Cambiar contraseña</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Sección de preferencias */}
+        {/* Preferencias */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferencias</Text>
-          <View style={styles.sectionCard}>
+          <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>Preferencias</Text>
+          <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
             {/* Tema */}
             <View style={styles.prefRow}>
               <View style={styles.prefLeft}>
-                <View style={[styles.prefIcon, { backgroundColor: '#EDE9FE' }]}>
+                <View style={[styles.prefIcon, { backgroundColor: C.primaryBg }]}>
                   <Ionicons name={isDark ? 'moon' : 'sunny'} size={18} color={Colors.primary} />
                 </View>
-                <Text style={styles.themeLabel}>Tema {isDark ? 'Oscuro' : 'Claro'}</Text>
+                <Text style={[styles.themeLabel, { color: C.textPrimary }]}>Tema {isDark ? 'Oscuro' : 'Claro'}</Text>
               </View>
               <Switch
                 value={isDark}
@@ -109,24 +166,39 @@ export const ProfileScreen: React.FC = () => {
               />
             </View>
 
-            {/* Divider */}
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: C.border }]} />
+
+            {/* Notificaciones */}
+            <View style={styles.prefRow}>
+              <View style={styles.prefLeft}>
+                <View style={[styles.prefIcon, { backgroundColor: isDark ? 'rgba(16,185,129,0.18)' : '#D1FAE5' }]}>
+                  <Ionicons name="notifications-outline" size={18} color="#059669" />
+                </View>
+                <Text style={[styles.themeLabel, { color: C.textPrimary }]}>Notificaciones</Text>
+              </View>
+              <Switch
+                value={true}
+                trackColor={{ false: Colors.toggleOff, true: '#059669' }}
+                thumbColor="#fff"
+              />
+            </View>
+
+            <View style={[styles.divider, { backgroundColor: C.border }]} />
 
             {/* Idioma */}
-            <Text style={styles.idiomaLabel}>Idioma</Text>
+            <Text style={[styles.idiomaLabel, { color: C.textSecondary }]}>Idioma de la app</Text>
             <View style={styles.idiomaRow}>
               {IDIOMAS.map(lang => (
                 <TouchableOpacity
                   key={lang}
                   onPress={() => setSelectedIdioma(lang)}
-                  style={[styles.idiomaChip, selectedIdioma === lang && styles.idiomaChipActive]}
+                  style={[
+                    styles.idiomaChip,
+                    { backgroundColor: C.surface, borderColor: C.border },
+                    selectedIdioma === lang && [styles.idiomaChipActive, { backgroundColor: C.primaryBg }],
+                  ]}
                 >
-                  <Text
-                    style={[
-                      styles.idiomaText,
-                      selectedIdioma === lang && styles.idiomaTextActive,
-                    ]}
-                  >
+                  <Text style={[styles.idiomaText, { color: C.textSecondary }, selectedIdioma === lang && styles.idiomaTextActive]}>
                     {lang}
                   </Text>
                 </TouchableOpacity>
@@ -135,20 +207,33 @@ export const ProfileScreen: React.FC = () => {
           </View>
         </View>
 
+        {/* Información de la app */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>Acerca de</Text>
+          <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
+            {[
+              { icon: 'information-circle-outline', label: 'Versión de la app', value: '1.0.0' },
+              { icon: 'document-text-outline', label: 'Términos y condiciones', value: '' },
+              { icon: 'shield-checkmark-outline', label: 'Política de privacidad', value: '' },
+            ].map((item, i) => (
+              <View key={i}>
+                {i > 0 && <View style={[styles.divider, { backgroundColor: C.border }]} />}
+                <TouchableOpacity style={styles.infoRow}>
+                  <Ionicons name={item.icon as any} size={18} color={C.textSecondary} />
+                  <Text style={[styles.infoLabel, { color: C.textPrimary }]}>{item.label}</Text>
+                  <Text style={[styles.infoValue, { color: C.textSecondary }]}>{item.value}</Text>
+                  {!item.value && <Ionicons name="chevron-forward" size={16} color={C.textHint} />}
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        </View>
+
         {/* Acciones */}
         <View style={styles.actionsSection}>
-          <Button
-            title="Cerrar sesión"
-            onPress={handleLogout}
-            fullWidth
-          />
-
-          <Button
-            title="Eliminar cuenta"
-            onPress={handleDeleteAccount}
-            variant="danger"
-            fullWidth
-          />
+          <Button title="Cerrar sesión" onPress={handleLogout} fullWidth />
+          <Button title="Eliminar cuenta" onPress={handleDeleteAccount} variant="danger" fullWidth />
+        </View>
         </View>
       </ScrollView>
     </View>
@@ -158,106 +243,91 @@ export const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.backgroundGray },
   scroll: { flex: 1 },
-  content: { padding: 20, paddingBottom: 40 },
-  avatarSection: { alignItems: 'center', marginBottom: 28, paddingTop: 8 },
+  content: { padding: 20, paddingBottom: 48 },
+  contentWide: { alignItems: 'center', paddingVertical: 36 },
+  innerWrapper: { width: '100%' },
+  innerWrapperWide: { width: '100%', maxWidth: 640 },
+
+  // Avatar
+  avatarSection: { alignItems: 'center', marginBottom: 24, paddingTop: 12 },
   avatarCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
+    width: 100, height: 100, borderRadius: 50,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 14,
     shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35, shadowRadius: 16, elevation: 10,
   },
-  userName: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: Colors.textPrimary,
-    marginBottom: 4,
-    textTransform: 'capitalize',
+  userName: { fontSize: 22, fontWeight: '800', color: Colors.textPrimary, marginBottom: 5, textTransform: 'capitalize' },
+  userEmail: { fontSize: 14, color: Colors.textSecondary, marginBottom: 12 },
+  levelBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20,
   },
-  userEmail: {
-    fontSize: 13,
-    color: Colors.textSecondary,
+  levelText: { fontSize: 13, fontWeight: '700', color: '#D97706' },
+
+  // Stats del usuario
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
   },
-  section: { marginBottom: 20 },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: Colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 10,
-    marginLeft: 4,
-  },
-  sectionCard: {
+  statCard: {
+    flex: 1,
     backgroundColor: '#fff',
     borderRadius: 18,
     padding: 16,
+    alignItems: 'center',
+    gap: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.07,
     shadowRadius: 10,
     elevation: 3,
   },
-  inputStyle: { marginBottom: 12 },
-  forgotRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingTop: 2,
+  statValue: { fontSize: 18, fontWeight: '800' },
+  statLabel: { fontSize: 11, color: Colors.textSecondary, textAlign: 'center', lineHeight: 15 },
+
+  // Sections
+  section: { marginBottom: 22 },
+  sectionTitle: {
+    fontSize: 12, fontWeight: '700', color: Colors.textSecondary,
+    letterSpacing: 0.5,
+    marginBottom: 10, marginLeft: 4,
   },
-  forgotLink: {
-    fontSize: 13,
-    color: Colors.primary,
-    fontWeight: '600',
+  sectionCard: {
+    backgroundColor: '#fff', borderRadius: 22, padding: 18,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07, shadowRadius: 12, elevation: 4,
   },
+  inputStyle: { marginBottom: 14 },
+  forgotRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 4 },
+  forgotLink: { fontSize: 13, color: Colors.primary, fontWeight: '600' },
   prefRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 4,
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', paddingVertical: 6,
   },
-  prefLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  prefIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  prefLeft: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  prefIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   themeLabel: { fontSize: 15, color: Colors.textPrimary, fontWeight: '500' },
   divider: { height: 1, backgroundColor: Colors.border, marginVertical: 14 },
   idiomaLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 10,
+    fontSize: 12, fontWeight: '700', color: Colors.textSecondary,
+    letterSpacing: 0.4, marginBottom: 12,
   },
-  idiomaRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
+  idiomaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   idiomaChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    backgroundColor: '#fff',
+    paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20,
+    borderWidth: 1.5, borderColor: Colors.border, backgroundColor: '#fff',
   },
-  idiomaChipActive: {
-    backgroundColor: Colors.primaryBg,
-    borderColor: Colors.primary,
-  },
+  idiomaChipActive: { backgroundColor: Colors.primaryBg, borderColor: Colors.primary },
   idiomaText: { fontSize: 13, color: Colors.textSecondary, fontWeight: '500' },
   idiomaTextActive: { color: Colors.primary, fontWeight: '700' },
-  actionsSection: { gap: 12 },
+
+  // Acerca de
+  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 6 },
+  infoLabel: { flex: 1, fontSize: 15, color: Colors.textPrimary },
+  infoValue: { fontSize: 13, color: Colors.textSecondary },
+
+  actionsSection: { gap: 14 },
 });
