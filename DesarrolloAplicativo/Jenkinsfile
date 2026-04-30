@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'node20'
+    }
+
     environment {
         DOCKER_IMAGE_BACKEND  = "traduce-senas/backend:${env.BUILD_ID}"
         DOCKER_IMAGE_FRONTEND = "traduce-senas/frontend:${env.BUILD_ID}"
