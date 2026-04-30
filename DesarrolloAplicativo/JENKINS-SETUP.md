@@ -275,3 +275,9 @@ El PAT de Docker Hub se genera en https://app.docker.com/settings/personal-acces
 - **Imágenes publicadas en Docker Hub:**
   - `luisduarte86/traduce-senas-backend:<BUILD_ID>`
   - `luisduarte86/traduce-senas-frontend:<BUILD_ID>`
+
+---
+
+## 8. Evidencia de ejecución exitosa
+
+![Pipeline Jenkins ejecutado correctamente](./pipeline-exitoso.png)
