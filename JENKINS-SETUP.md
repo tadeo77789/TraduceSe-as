@@ -280,4 +280,4 @@ El PAT de Docker Hub se genera en https://app.docker.com/settings/personal-acces
 
 ## 8. Evidencia de ejecución exitosa
 
-![Pipeline Jenkins ejecutado correctamente](./pipeline-exitoso.png)
+![Pipeline Jenkins ejecutado correctamente](./DesarrolloAplicativo/pipeline-exitoso.png)
