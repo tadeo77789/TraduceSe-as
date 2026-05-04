@@ -48,7 +48,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       colors={C.gradientPrimary}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }}
-      style={[styles.container, { paddingTop: insets.top + Spacing[3] }]}
+      style={[styles.container, { paddingTop: insets.top + Spacing[3], shadowColor: C.primary }]}
     >
       <View style={styles.left}>
         {showBack ? (

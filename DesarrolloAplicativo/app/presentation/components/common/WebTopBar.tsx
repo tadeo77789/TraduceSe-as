@@ -36,7 +36,7 @@ export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route })
   const goTo = (name: string) => navigation.navigate(name);
 
   return (
-    <View style={[styles.bar, { backgroundColor: C.primaryHeader, borderBottomColor: C.border }]}>
+    <View style={[styles.bar, { backgroundColor: C.primaryHeader, borderBottomColor: C.border, shadowColor: C.primary }]}>
       <View style={styles.inner}>
 
         {/* Logo */}
@@ -93,7 +93,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryHeader,
     borderBottomWidth: 1,
     borderBottomColor: Colors.primaryLighter,
-    shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
     shadowRadius: 10,

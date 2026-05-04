@@ -54,4 +54,8 @@ Flujo completo de autenticación con 5 pantallas encadenadas:
 ### `Profile/`
 | Pantalla | Descripción |
 |---|---|
-| `ProfileScreen.tsx` | Muestra correo y contraseña del usuario. Permite cambiar tema claro/oscuro, seleccionar idioma de la interfaz, cerrar sesión y eliminar la cuenta |
+| `ProfileScreen.tsx` | Muestra correo y contraseña del usuario. Permite alternar el **acento de color** (Morado / Verde), cambiar tema claro/oscuro, seleccionar idioma de la interfaz, cerrar sesión y eliminar la cuenta. Da acceso a `Terms` y `PrivacyPolicy` |
+| `TermsScreen.tsx` | Términos y condiciones de uso (9 secciones legales). Se accede desde Perfil → Términos y condiciones |
+| `PrivacyPolicyScreen.tsx` | Política de privacidad alineada con la Ley 1581 de 2012 (11 secciones). Se accede desde Perfil → Política de privacidad |
+
+> Las pantallas internas usan `useColors()` del `ThemeContext` para que cualquier acento (púrpura/verde) o modo (claro/oscuro) se aplique sin filtraciones de morado.

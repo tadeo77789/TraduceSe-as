@@ -91,7 +91,7 @@ export const ProfileScreen: React.FC = () => {
 
           {/* Avatar + nombre */}
           <View style={styles.avatarSection}>
-            <LinearGradient colors={[C.primaryLight, C.primary]} style={styles.avatarCircle}>
+            <LinearGradient colors={[C.primaryLight, C.primary]} style={[styles.avatarCircle, { shadowColor: C.primary }]}>
               <Ionicons name="person" size={44} color="#fff" />
             </LinearGradient>
             <Text style={[styles.userName, { color: C.textPrimary }]}>{displayName}</Text>
@@ -170,7 +170,7 @@ export const ProfileScreen: React.FC = () => {
                 <Switch
                   value={isDark}
                   onValueChange={toggleTheme}
-                  trackColor={{ false: Colors.toggleOff, true: C.primary }}
+                  trackColor={{ false: C.toggleOff, true: C.primary }}
                   thumbColor="#fff"
                 />
               </View>
@@ -185,7 +185,7 @@ export const ProfileScreen: React.FC = () => {
                   </View>
                   <Text style={[styles.themeLabel, { color: C.textPrimary }]}>{t('profileNotifications')}</Text>
                 </View>
-                <Switch value={true} trackColor={{ false: Colors.toggleOff, true: '#059669' }} thumbColor="#fff" />
+                <Switch value={true} trackColor={{ false: C.toggleOff, true: '#059669' }} thumbColor="#fff" />
               </View>
 
               <View style={[styles.divider, { backgroundColor: C.border }]} />
@@ -217,13 +217,13 @@ export const ProfileScreen: React.FC = () => {
             <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>{t('profileAbout')}</Text>
             <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
               {[
-                { icon: 'information-circle-outline', label: t('profileAppVersion'), value: '1.0.0' },
-                { icon: 'document-text-outline', label: t('profileTerms'), value: '' },
-                { icon: 'shield-checkmark-outline', label: t('profilePrivacy'), value: '' },
+                { icon: 'information-circle-outline', label: t('profileAppVersion'), value: '1.0.0', onPress: undefined },
+                { icon: 'document-text-outline', label: t('profileTerms'), value: '', onPress: () => (navigation as any).navigate('Terms') },
+                { icon: 'shield-checkmark-outline', label: t('profilePrivacy'), value: '', onPress: () => (navigation as any).navigate('PrivacyPolicy') },
               ].map((item, i) => (
                 <View key={i}>
                   {i > 0 && <View style={[styles.divider, { backgroundColor: C.border }]} />}
-                  <TouchableOpacity style={styles.infoRow}>
+                  <TouchableOpacity style={styles.infoRow} onPress={item.onPress} disabled={!item.onPress}>
                     <Ionicons name={item.icon as any} size={18} color={C.textSecondary} />
                     <Text style={[styles.infoLabel, { color: C.textPrimary }]}>{item.label}</Text>
                     <Text style={[styles.infoValue, { color: C.textSecondary }]}>{item.value}</Text>
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   innerWrapperWide: { width: '100%', maxWidth: 640 },
 
   avatarSection: { alignItems: 'center', marginBottom: 24, paddingTop: 12 },
-  avatarCircle: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginBottom: 14, shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.35, shadowRadius: 16, elevation: 10 },
+  avatarCircle: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginBottom: 14, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.35, shadowRadius: 16, elevation: 10 },
   userName: { fontSize: 22, fontWeight: '800', marginBottom: 5, textTransform: 'capitalize' },
   userEmail: { fontSize: 14, marginBottom: 12 },
 

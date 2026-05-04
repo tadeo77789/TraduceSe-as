@@ -48,9 +48,9 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
   const { t } = useTranslation();
 
   const SLIDES = [
-    { id: '1', image: require('../../assets/images/slide1.jpg'), title: t('slide1Title'), caption: t('slide1Caption') },
-    { id: '2', image: require('../../assets/images/slide2.jpg'), title: t('slide2Title'), caption: t('slide2Caption') },
-    { id: '3', image: require('../../assets/images/slide3.jpg'), title: t('slide3Title'), caption: t('slide3Caption') },
+    { id: '1', image: require('../../assets/images/traducion-real.png'),         title: t('slide1Title'), caption: t('slide1Caption') },
+    { id: '2', image: require('../../assets/images/comunicate-sinbarreras.png'), title: t('slide2Title'), caption: t('slide2Caption') },
+    { id: '3', image: require('../../assets/images/alfabeto.png'),               title: t('slide3Title'), caption: t('slide3Caption') },
   ];
 
   const FEATURES = [
@@ -280,7 +280,7 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
 
             <View style={styles.lscImageCard}>
               <Image
-                source={require('../../assets/images/slide2.jpg')}
+                source={require('../../assets/images/historial.png')}
                 style={styles.lscImage}
                 resizeMode="cover"
               />
@@ -317,7 +317,7 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
 
             <View style={styles.lscBanner}>
               <Image
-                source={require('../../assets/images/slide3.jpg')}
+                source={require('../../assets/images/alfabeto.png')}
                 style={styles.lscBannerImage}
                 resizeMode="cover"
               />

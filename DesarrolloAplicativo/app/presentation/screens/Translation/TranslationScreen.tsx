@@ -50,9 +50,9 @@ export const TranslationScreen: React.FC = () => {
           const res = await requestPermission();
           if (!res.granted) {
             if (Platform.OS === 'web') {
-              alert('Se necesita acceso a la cámara para traducir señas.');
+              alert(t('cameraPermissionMsg'));
             } else {
-              Alert.alert('Permiso de cámara', 'Se necesita acceso a la cámara para traducir señas.');
+              Alert.alert(t('cameraPermissionTitle'), t('cameraPermissionMsg'));
             }
             return;
           }
@@ -88,7 +88,7 @@ export const TranslationScreen: React.FC = () => {
         <View style={[styles.innerWrapper, isTablet && styles.innerWrapperWide]}>
 
           {/* ── Toggle de modo ── */}
-          <View style={[styles.modeToggle, { backgroundColor: C.surface, borderColor: C.border }]}>
+          <View style={[styles.modeToggle, { backgroundColor: C.surface, borderColor: C.border, shadowColor: C.primary }]}>
             <TouchableOpacity style={[styles.modeBtn, mode === 'sena_texto' && styles.modeBtnActive]} onPress={() => switchMode('sena_texto')} activeOpacity={0.8}>
               {mode === 'sena_texto' && (
                 <LinearGradient colors={[C.primary + 'EE', C.primary]} style={StyleSheet.absoluteFill} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} />
@@ -108,7 +108,7 @@ export const TranslationScreen: React.FC = () => {
 
           {/* ── Área de cámara / entrada ── */}
           {mode === 'sena_texto' ? (
-            <View style={styles.cameraCard}>
+            <View style={[styles.cameraCard, { shadowColor: C.primary }]}>
               {/* Badge EN VIVO */}
               {isActive && (
                 <View style={styles.liveBadge}>
@@ -143,7 +143,7 @@ export const TranslationScreen: React.FC = () => {
               <View style={styles.cameraLabel}>
                 <Ionicons name="camera-outline" size={14} color="#fff" />
                 <Text style={styles.cameraLabelText}>
-                  {isActive ? 'Analizando señas...' : 'Toca Iniciar para activar la cámara'}
+                  {isActive ? t('analyzingSigns') : t('tapStartCamera')}
                 </Text>
               </View>
             </View>
@@ -151,19 +151,19 @@ export const TranslationScreen: React.FC = () => {
             <View style={[styles.inputCard, { backgroundColor: C.surface }]}>
               <View style={styles.inputCardHeader}>
                 <Ionicons name="create-outline" size={16} color={C.primary} />
-                <Text style={[styles.inputCardTitle, { color: C.textPrimary }]}>Escribe el texto a traducir</Text>
+                <Text style={[styles.inputCardTitle, { color: C.textPrimary }]}>{t('writeTextLabel')}</Text>
               </View>
               <TextInput
                 style={[styles.textArea, { color: C.textPrimary, backgroundColor: C.backgroundGray, borderColor: C.border }]}
                 value={text}
                 onChangeText={setText}
-                placeholder="Ej: Hola, ¿cómo estás?"
+                placeholder={t('textPlaceholder')}
                 placeholderTextColor={C.textHint}
                 multiline
                 textAlignVertical="top"
               />
               <View style={styles.charCount}>
-                <Text style={[styles.charCountText, { color: C.textHint }]}>{text.length} caracteres</Text>
+                <Text style={[styles.charCountText, { color: C.textHint }]}>{text.length} {t('characters')}</Text>
               </View>
             </View>
           )}
@@ -181,7 +181,7 @@ export const TranslationScreen: React.FC = () => {
           )}
 
           {/* ── Resultado ── */}
-          <View style={[styles.resultCard, { backgroundColor: C.surface, borderColor: C.border }]}>
+          <View style={[styles.resultCard, { backgroundColor: C.surface, borderColor: C.border, shadowColor: C.primary }]}>
             <View style={[styles.resultHeader, { borderBottomColor: C.border }]}>
               <LinearGradient colors={[C.primaryBg, C.primaryBg]} style={styles.resultIconBg}>
                 <Ionicons name="chatbubble-ellipses-outline" size={16} color={C.primary} />
@@ -194,7 +194,7 @@ export const TranslationScreen: React.FC = () => {
                 </View>
               ) : (
                 <View style={[styles.waitingBadge, { backgroundColor: C.inputBg }]}>
-                  <Text style={[styles.waitingText, { color: C.textHint }]}>En espera</Text>
+                  <Text style={[styles.waitingText, { color: C.textHint }]}>{t('waiting')}</Text>
                 </View>
               )}
             </View>
@@ -204,10 +204,10 @@ export const TranslationScreen: React.FC = () => {
                   <Text style={[styles.resultText, { color: C.textPrimary }]}>{result}</Text>
                   <TouchableOpacity
                     style={[styles.copyBtn, { backgroundColor: C.primaryBg }]}
-                    onPress={() => Alert.alert('Copiado', 'Texto copiado al portapapeles')}
+                    onPress={() => Alert.alert(t('copied'), t('copiedToClipboard'))}
                   >
                     <Ionicons name="copy-outline" size={14} color={C.primary} />
-                    <Text style={[styles.copyBtnText, { color: C.primary }]}>Copiar</Text>
+                    <Text style={[styles.copyBtnText, { color: C.primary }]}>{t('copy')}</Text>
                   </TouchableOpacity>
                 </>
               ) : (
@@ -215,8 +215,8 @@ export const TranslationScreen: React.FC = () => {
                   <Ionicons name="scan-outline" size={32} color={C.primaryLighter} />
                   <Text style={[styles.resultEmptyText, { color: C.textHint }]}>
                     {mode === 'sena_texto'
-                      ? 'La traducción aparecerá aquí al detectar una seña'
-                      : 'Escribe un texto y toca Traducir'}
+                      ? t('resultPlaceholderSigns')
+                      : t('resultPlaceholderText')}
                   </Text>
                 </View>
               )}
@@ -224,7 +224,7 @@ export const TranslationScreen: React.FC = () => {
           </View>
 
           {/* ── Botón principal ── */}
-          <TouchableOpacity onPress={handleAction} activeOpacity={0.85} disabled={loading} style={styles.actionBtnWrapper}>
+          <TouchableOpacity onPress={handleAction} activeOpacity={0.85} disabled={loading} style={[styles.actionBtnWrapper, { shadowColor: C.primary }]}>
             <LinearGradient
               colors={isActive ? ['#DC2626', '#B91C1C'] : [C.primary + 'EE', C.primary, C.primaryDark]}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
@@ -264,14 +264,14 @@ const styles = StyleSheet.create({
   innerWrapperWide: { maxWidth: 760, alignSelf: 'center' },
 
   // Toggle
-  modeToggle: { flexDirection: 'row', borderRadius: 18, borderWidth: 1.5, overflow: 'hidden', alignSelf: 'center', shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 4 },
+  modeToggle: { flexDirection: 'row', borderRadius: 18, borderWidth: 1.5, overflow: 'hidden', alignSelf: 'center', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 4 },
   modeBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 13, paddingHorizontal: 24, gap: 8, overflow: 'hidden' },
   modeBtnActive: {},
   modeBtnText: { fontSize: 14, fontWeight: '700', color: Colors.textSecondary },
   modeBtnTextActive: { color: '#fff' },
 
   // Cámara
-  cameraCard: { width: '100%', height: 280, borderRadius: 24, overflow: 'hidden', backgroundColor: '#1a1a2e', shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 20, elevation: 10 },
+  cameraCard: { width: '100%', height: 280, borderRadius: 24, overflow: 'hidden', backgroundColor: '#1a1a2e', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 20, elevation: 10 },
   cameraImage: { width: '100%', height: '100%' },
   cameraOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 100 },
   liveBadge: { position: 'absolute', top: 14, left: 14, zIndex: 10, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(220,38,38,0.9)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   tipText: { fontSize: 13, fontWeight: '500', flex: 1, lineHeight: 19 },
 
   // Resultado
-  resultCard: { borderRadius: 24, overflow: 'hidden', shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 16, elevation: 5, borderWidth: 1.5 },
+  resultCard: { borderRadius: 24, overflow: 'hidden', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 16, elevation: 5, borderWidth: 1.5 },
   resultHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16, borderBottomWidth: 1 },
   resultIconBg: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   resultTitle: { flex: 1, fontSize: 15, fontWeight: '700' },
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
   resultEmptyText: { fontSize: 13, textAlign: 'center', lineHeight: 21, maxWidth: 240 },
 
   // Botón principal
-  actionBtnWrapper: { borderRadius: 20, overflow: 'hidden', alignSelf: 'stretch', shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 10 },
+  actionBtnWrapper: { borderRadius: 20, overflow: 'hidden', alignSelf: 'stretch', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 10 },
   actionBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 18, paddingHorizontal: 36, gap: 10, borderRadius: 20 },
   actionBtnText: { color: '#fff', fontSize: 17, fontWeight: '800', letterSpacing: 0.3 },
 });

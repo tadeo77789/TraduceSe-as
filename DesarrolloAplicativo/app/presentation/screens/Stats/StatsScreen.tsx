@@ -23,34 +23,59 @@ const BarChart: React.FC<{
   data: { label: string; value: number }[];
   colors: [string, string];
   maxValue?: number;
-}> = ({ data, colors, maxValue }) => {
+  showAxes?: boolean;
+}> = ({ data, colors, maxValue, showAxes }) => {
   const C = useColors();
   const max = maxValue || Math.max(...data.map(d => d.value));
   const chartHeight = 100;
+  const axisWidth = showAxes ? 40 : 0;
+
+  // ticks for vertical axis
+  const ticks = 4;
+  const tickValues = Array.from({ length: ticks + 1 }, (_, i) => Math.round((max * (ticks - i)) / ticks));
 
   return (
     <View style={bar.container}>
-      <View style={bar.chart}>
-        {data.map((item, i) => (
-          <View key={i} style={bar.barGroup}>
-            <Text style={[bar.valueLabel, { color: C.textHint }]}>{item.value}</Text>
-            <View style={[bar.barWrap, { height: (item.value / max) * chartHeight }]}>
-              <LinearGradient colors={colors} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} style={bar.bar} />
-            </View>
-            <Text style={[bar.barLabel, { color: C.textHint }]}>{item.label}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+        {showAxes && (
+          <View style={{ width: axisWidth, alignItems: 'flex-end', paddingRight: 8 }}>
+            {tickValues.map((tv, i) => (
+              <Text key={i} style={[bar.axisLabel, { color: C.textHint, height: (chartHeight / ticks) }]}>{tv}</Text>
+            ))}
           </View>
-        ))}
+        )}
+
+        <View style={[bar.chart, showAxes ? { flex: 1 } : undefined, { height: chartHeight + 30 }]}>
+          {data.map((item, i) => (
+            <View key={i} style={bar.barGroup}>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={[bar.valueLabel, { color: C.textHint }]}>{item.value}</Text>
+                <View style={[bar.barWrap, { height: (item.value / max) * chartHeight }]}>
+                  <LinearGradient colors={colors} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} style={bar.bar} />
+                </View>
+              </View>
+              <Text style={[bar.barLabel, { color: C.textHint }]}>{item.label}</Text>
+            </View>
+          ))}
+        </View>
       </View>
+
+      {showAxes && (
+        <View style={{ flexDirection: 'row', marginTop: 4, marginLeft: showAxes ? axisWidth : 0 }}>
+          <View style={{ width: 0 }} />
+          <View style={{ flex: 1, borderTopWidth: 1, borderTopColor: C.border }} />
+        </View>
+      )}
     </View>
   );
 };
 
 // ─── Gráfica de línea ─────────────────────────────────────────────────────────
-const LineChart: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
+const LineChart: React.FC<{ data: number[]; color: string; labels?: string[]; showAxes?: boolean; height?: number }> = ({ data, color, labels, showAxes, height }) => {
   const [containerWidth, setContainerWidth] = useState(280);
   const max = Math.max(...data);
-  const chartHeight = 80;
-  const step = containerWidth / (data.length - 1);
+  const chartHeight = height || 80;
+  const step = containerWidth / (data.length - 1 || 1);
 
   const points = data.map((v, i) => ({
     x: i * step,
@@ -62,26 +87,51 @@ const LineChart: React.FC<{ data: number[]; color: string }> = ({ data, color })
     if (w > 0) setContainerWidth(w);
   };
 
+  // axis ticks
+  const ticks = 4;
+  const tickValues = Array.from({ length: ticks + 1 }, (_, i) => Math.round((max * (ticks - i)) / ticks));
+
   return (
-    <View style={[lineStyle.container, { height: chartHeight + 20 }]} onLayout={handleLayout}>
-      {points.slice(0, -1).map((pt, i) => {
-        const next = points[i + 1];
-        const dx = next.x - pt.x;
-        const dy = next.y - pt.y;
-        const length = Math.sqrt(dx * dx + dy * dy);
-        const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-        return (
-          <View
-            key={i}
-            style={[lineStyle.segment, { left: pt.x, top: pt.y + 5, width: length, transform: [{ rotate: `${angle}deg` }], backgroundColor: color + '50' }]}
-          />
-        );
-      })}
-      {points.map((pt, i) => (
-        <View key={i} style={[lineStyle.dot, { left: pt.x - 5, top: pt.y, backgroundColor: color }]}>
-          {i === points.length - 1 && <View style={[lineStyle.dotPulse, { borderColor: color }]} />}
+    <View style={[lineStyle.container, { height: chartHeight + (showAxes ? 40 : 20) }]} onLayout={handleLayout}>
+      {showAxes && (
+        <View style={{ position: 'absolute', left: 0, top: 0, bottom: showAxes ? 34 : 0, width: 42, justifyContent: 'space-between', paddingVertical: 4 }}>
+          {tickValues.map((tv, i) => (
+            <Text key={i} style={[lineStyle.axisLabel, { color: '#8a8a8a', fontSize: 10 }]}>{tv}</Text>
+          ))}
         </View>
-      ))}
+      )}
+
+      <View style={{ marginLeft: showAxes ? 48 : 0 }}>
+        {points.slice(0, -1).map((pt, i) => {
+          const next = points[i + 1];
+          const dx = next.x - pt.x;
+          const dy = next.y - pt.y;
+          const length = Math.sqrt(dx * dx + dy * dy);
+          const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+          return (
+            <View
+              key={i}
+              style={[lineStyle.segment, { left: pt.x, top: pt.y + 5, width: length, transform: [{ rotate: `${angle}deg` }], backgroundColor: color + '50' }]}
+            />
+          );
+        })}
+        {points.map((pt, i) => (
+          <View key={i} style={[lineStyle.dot, { left: pt.x - 5, top: pt.y, backgroundColor: color }]}>
+            {i === points.length - 1 && <View style={[lineStyle.dotPulse, { borderColor: color }]} />}
+          </View>
+        ))}
+
+        {showAxes && (
+          <View style={{ marginTop: 12 }}>
+            <View style={{ borderTopWidth: 1, borderTopColor: '#e0e0e0' }} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
+              {(labels || data.map((_, i) => String(i))).map((lab, i) => (
+                <Text key={i} style={{ fontSize: 11, color: '#8a8a8a' }}>{lab}</Text>
+              ))}
+            </View>
+          </View>
+        )}
+      </View>
     </View>
   );
 };
@@ -115,6 +165,7 @@ const bar = StyleSheet.create({
   barWrap: { width: '80%', borderRadius: 6, overflow: 'hidden' },
   bar: { flex: 1, borderRadius: 6 },
   barLabel: { fontSize: 9, marginTop: 5 },
+  axisLabel: { fontSize: 10, textAlign: 'right' },
 });
 
 const lineStyle = StyleSheet.create({
@@ -122,6 +173,7 @@ const lineStyle = StyleSheet.create({
   segment: { position: 'absolute', height: 2, borderRadius: 1, transformOrigin: 'left center' },
   dot: { position: 'absolute', width: 10, height: 10, borderRadius: 5, borderWidth: 2, borderColor: '#fff', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.2, shadowRadius: 2, elevation: 2 },
   dotPulse: { position: 'absolute', width: 18, height: 18, borderRadius: 9, borderWidth: 2, opacity: 0.35, top: -4, left: -4 },
+  axisLabel: { fontSize: 10, color: '#8a8a8a' },
 });
 
 const pie = StyleSheet.create({
@@ -159,8 +211,27 @@ const VOLUME_DATA = [
 // ─── Tabla de cardinalidades ──────────────────────────────────────────────────
 const CardinalityTable: React.FC<{
   rows: { label: string; value: string | number; color?: string }[];
-}> = ({ rows }) => {
+  compact?: boolean;
+}> = ({ rows, compact }) => {
   const C = useColors();
+
+  if (compact) {
+    const displayRows = rows.slice(0, 3);
+    return (
+      <View style={[tbl.compactContainer, { backgroundColor: C.inputBg }]}>
+        {displayRows.map((row, i) => (
+          <View key={i} style={[tbl.compactRow, i % 2 === 0 && { backgroundColor: C.surface }]}>
+            <View style={tbl.compactLeft}>
+              <View style={[tbl.compactDot, row.color ? { backgroundColor: row.color } : { backgroundColor: C.primary }]} />
+              <Text style={[tbl.compactLabel, { color: C.textPrimary }]} numberOfLines={1}>{row.label}</Text>
+            </View>
+            <Text style={[tbl.compactValue, { color: row.color || C.primary }]}>{row.value}</Text>
+          </View>
+        ))}
+      </View>
+    );
+  }
+
   return (
     <View style={[tbl.container, { backgroundColor: C.inputBg, borderColor: C.border }]}>
       <View style={[tbl.header, { borderBottomColor: C.border }]}>
@@ -169,9 +240,9 @@ const CardinalityTable: React.FC<{
       </View>
       {rows.map((row, i) => (
         <View key={i} style={[tbl.row, i % 2 === 0 && { backgroundColor: C.surface }, { borderBottomColor: C.border }]}>
-          <View style={[tbl.colorDot, row.color ? { backgroundColor: row.color } : { backgroundColor: Colors.primary }]} />
+          <View style={[tbl.colorDot, row.color ? { backgroundColor: row.color } : { backgroundColor: C.primary }]} />
           <Text style={[tbl.cell, { color: C.textPrimary, flex: 2 }]}>{row.label}</Text>
-          <Text style={[tbl.cellValue, { color: row.color || Colors.primary }]}>{row.value}</Text>
+          <Text style={[tbl.cellValue, { color: row.color || C.primary }]}>{row.value}</Text>
         </View>
       ))}
     </View>
@@ -186,6 +257,14 @@ const tbl = StyleSheet.create({
   colorDot: { width: 8, height: 8, borderRadius: 4 },
   cell: { fontSize: 13 },
   cellValue: { fontSize: 13, fontWeight: '700', width: 60, textAlign: 'right' },
+
+  /* compact (card) styles */
+  compactContainer: { borderRadius: 12, overflow: 'hidden', marginTop: 8 },
+  compactRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 10, paddingVertical: 6 },
+  compactLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
+  compactDot: { width: 8, height: 8, borderRadius: 4 },
+  compactLabel: { fontSize: 12, flex: 1 },
+  compactValue: { fontSize: 12, fontWeight: '700', width: 52, textAlign: 'right' },
 });
 
 // ─── StatCard ─────────────────────────────────────────────────────────────────
@@ -225,11 +304,13 @@ interface DetailModalProps {
 
 const DetailModal: React.FC<DetailModalProps> = ({ cardKey, onClose, sectionPie, titles, descriptions }) => {
   const C = useColors();
+  const { width } = useWindowDimensions();
+  const sheetMaxWidth = Math.min(960, Math.max(320, width - 80));
 
   if (!cardKey) return null;
 
-  const weeklyRows = WEEKLY_DATA.map(d => ({ label: d.label, value: d.value, color: '#7C3AED' }));
-  const monthlyRows = MONTHLY_LINE.map((v, i) => ({ label: MONTHLY_LABELS[i], value: v, color: Colors.primary }));
+  const weeklyRows = WEEKLY_DATA.map(d => ({ label: d.label, value: d.value, color: C.primary }));
+  const monthlyRows = MONTHLY_LINE.map((v, i) => ({ label: MONTHLY_LABELS[i], value: v, color: C.primary }));
   const volumeRows = VOLUME_DATA.map(d => ({ label: d.label, value: d.value, color: '#06B6D4' }));
   const sectionRows = sectionPie.map(d => ({ label: d.label, value: `${d.value}%`, color: d.color }));
 
@@ -238,21 +319,21 @@ const DetailModal: React.FC<DetailModalProps> = ({ cardKey, onClose, sectionPie,
       case 'weekly':
         return (
           <>
-            <BarChart data={WEEKLY_DATA} colors={['#A78BFA', '#7C3AED']} />
+            <BarChart data={WEEKLY_DATA} colors={[C.primaryLight, C.primary]} showAxes />
             <CardinalityTable rows={weeklyRows} />
           </>
         );
       case 'monthly':
         return (
           <>
-            <LineChart data={MONTHLY_LINE} color={Colors.primary} />
+            <LineChart data={MONTHLY_LINE} color={C.primary} labels={MONTHLY_LABELS} showAxes height={160} />
             <CardinalityTable rows={monthlyRows} />
           </>
         );
       case 'volume':
         return (
           <>
-            <BarChart data={VOLUME_DATA} colors={['#67E8F9', '#06B6D4']} />
+            <BarChart data={VOLUME_DATA} colors={['#67E8F9', '#06B6D4']} showAxes />
             <CardinalityTable rows={volumeRows} />
           </>
         );
@@ -271,7 +352,7 @@ const DetailModal: React.FC<DetailModalProps> = ({ cardKey, onClose, sectionPie,
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={modal.overlay}>
           <TouchableWithoutFeedback>
-            <View style={[modal.sheet, { backgroundColor: C.surface }]}>
+            <View style={[modal.sheet, { backgroundColor: C.surface, width: sheetMaxWidth }]}>
               {/* Header */}
               <View style={[modal.header, { borderBottomColor: C.border }]}>
                 <Text style={[modal.title, { color: C.textPrimary }]}>{titles[cardKey]}</Text>
@@ -313,13 +394,19 @@ export const StatsScreen: React.FC = () => {
   const [openCard, setOpenCard] = useState<CardKey | null>(null);
 
   const SECTION_PIE = [
-    { label: t('sectionTranslation'), value: 47, color: Colors.primary },
+    { label: t('sectionTranslation'), value: 47, color: C.primary },
     { label: t('sectionAlphabet'),    value: 29, color: '#06B6D4' },
     { label: t('sectionHistory'),     value: 24, color: '#10B981' },
   ];
 
+  // compact table rows for cards
+  const weeklyRows = WEEKLY_DATA.map(d => ({ label: d.label, value: d.value, color: C.primary }));
+  const monthlyRows = MONTHLY_LINE.map((v, i) => ({ label: MONTHLY_LABELS[i], value: v, color: C.primary }));
+  const volumeRows = VOLUME_DATA.map(d => ({ label: d.label, value: d.value, color: '#06B6D4' }));
+  const sectionRows = SECTION_PIE.map(d => ({ label: d.label, value: `${d.value}%`, color: d.color }));
+
   const KPI_CARDS = [
-    { label: t('kpiTranslations'),  value: '1,248', icon: 'swap-horizontal-outline' as const, gradient: ['#EDE9FE', '#DDD6FE'] as [string, string], darkGradient: ['#2D1F4E', '#1E183A'] as [string, string], color: Colors.primary },
+    { label: t('kpiTranslations'),  value: '1,248', icon: 'swap-horizontal-outline' as const, gradient: [C.primaryBg, C.primaryHeader] as [string, string], darkGradient: [C.primaryBg, C.primaryBg] as [string, string], color: C.primary },
     { label: t('kpiActiveUsers'),   value: '342',   icon: 'people-outline' as const,          gradient: ['#DBEAFE', '#BFDBFE'] as [string, string], darkGradient: ['#1A2744', '#111B35'] as [string, string], color: '#2563EB' },
     { label: t('kpiHoursLearned'),  value: '89h',   icon: 'school-outline' as const,          gradient: ['#D1FAE5', '#A7F3D0'] as [string, string], darkGradient: ['#0F2920', '#0A1E16'] as [string, string], color: '#059669' },
     { label: t('kpiSignsLearned'),  value: '84',    icon: 'hand-left-outline' as const,       gradient: ['#FEF3C7', '#FDE68A'] as [string, string], darkGradient: ['#2A1E0A', '#1C1508'] as [string, string], color: '#D97706' },
@@ -358,12 +445,12 @@ export const StatsScreen: React.FC = () => {
 
           {/* Stat Cards — toca para ver detalle */}
           <View style={[styles.cardsGrid, isTablet && styles.cardsGridTablet]}>
-            <StatCard title={t('statsWeeklyTitle')} accentColor={Colors.primary} description={t('statsWeeklyDesc')} onPress={() => setOpenCard('weekly')}>
-              <BarChart data={WEEKLY_DATA} colors={['#A78BFA', '#7C3AED']} />
+            <StatCard title={t('statsWeeklyTitle')} accentColor={C.primary} description={t('statsWeeklyDesc')} onPress={() => setOpenCard('weekly')}>
+              <BarChart data={WEEKLY_DATA} colors={[C.primaryLight, C.primary]} />
             </StatCard>
 
             <StatCard title={t('statsMonthlyTitle')} accentColor="#06B6D4" description={t('statsMonthlyDesc')} onPress={() => setOpenCard('monthly')}>
-              <LineChart data={MONTHLY_LINE} color={Colors.primary} />
+              <LineChart data={MONTHLY_LINE} color={C.primary} />
             </StatCard>
 
             <StatCard title={t('statsVolumeTitle')} accentColor="#10B981" description={t('statsVolumeDesc')} onPress={() => setOpenCard('volume')}>
