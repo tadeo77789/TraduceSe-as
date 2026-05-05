@@ -13,22 +13,46 @@ Define los valores fijos reutilizables en toda la aplicación: colores, tamaños
 
 ## Detalle de `colors.ts`
 
-Define la paleta visual del diseño **púrpura/lavanda** del mockup:
+El archivo expone **cuatro paletas** y se consume desde los componentes mediante el hook `useColors()` de `state/ThemeContext`, que devuelve la paleta correcta según el modo (claro/oscuro) y el acento (púrpura/verde) seleccionados por el usuario en Perfil:
 
-| Constante | Color | Uso |
-|---|---|---|
-| `primary` | `#7C3AED` | Botones principales, acentos, toggles activos |
-| `primaryLight` | `#A78BFA` | Iconos secundarios, estados hover |
-| `primaryLighter` | `#C4B5FD` | Bordes de toggle, dots de slider, avatar |
-| `primaryBg` | `#EDE9FE` | Fondo de pantallas de autenticación (Login, Registro) |
-| `primaryHeader` | `#C4B5FD` | Fondo de la barra de navegación |
-| `background` | `#FFFFFF` | Fondo general de todas las pantallas |
-| `backgroundGray` | `#F9FAFB` | Fondo exterior en versión web |
-| `inputBg` | `#F3F4F6` | Fondo de campos de texto |
-| `error` | `#EF4444` | Mensajes de error y botón de eliminar |
-| `toggleOn` | `#7C3AED` | Switch activo |
-| `toggleOff` | `#D1D5DB` | Switch inactivo |
-| `facebook` | `#1877F2` | Botón de Facebook en LoginScreen |
+| Paleta | Cuándo aplica |
+|---|---|
+| `Colors` | Modo claro + acento púrpura (default) |
+| `DarkColors` | Modo oscuro + acento púrpura |
+| `GreenColors` | Modo claro + acento verde |
+| `GreenDarkColors` | Modo oscuro + acento verde — superficies con sutil tinte verde para que el modo oscuro no se sienta púrpura/azulado |
+
+Tokens semánticos principales (valores del modo claro púrpura):
+
+| Token | Color púrpura | Color verde | Uso |
+|---|---|---|---|
+| `primary` | `#7C3AED` | `#4CAF82` | Botones principales, acentos, toggles activos |
+| `primaryLight` | `#ab82f2` | `#7DC8A0` | Iconos secundarios, estados hover |
+| `primaryLighter` | `#bd9ef2` | `#A8D8BC` | Bordes de toggle, dots, avatar |
+| `primaryBg` | `#EDE9FE` | `#E8F5EE` | Fondo de pantallas de auth (Login/Registro) |
+| `primaryHeader` | `#c6adf2` | `#C3E6D0` | Fondo de la barra de navegación |
+| `background` | `#FFFFFF` | `#FFFFFF` | Fondo general |
+| `backgroundGray` | `#F9FAFB` | `#F9FAFB` | Fondo exterior en versión web |
+| `inputBg` | `#F3F4F6` | `#F3F4F6` | Fondo de campos de texto |
+| `error` / `danger` | `#EF4444` | `#EF4444` | Errores y acciones destructivas |
+| `toggleOn` | `#7C3AED` | `#4CAF82` | Switch activo |
+| `toggleOff` | `#D1D5DB` | `#D1D5DB` | Switch inactivo |
+| `facebook` | `#1877F2` | `#1877F2` | Botón de Facebook (Login) |
+
+> El acento (púrpura/verde) **solo cambia las pantallas internas** (Translation, Alphabet, Stats, History, Profile, Términos, Privacidad y headers). Login/Registro/Landing mantienen el morado de marca.
+
+### Cómo usar la paleta en un componente
+
+```tsx
+import { useColors } from '../../../state/ThemeContext';
+
+const MyComponent = () => {
+  const C = useColors();
+  return <View style={{ backgroundColor: C.surface, borderColor: C.primary }} />;
+};
+```
+
+Evita importar `Colors` directamente para no filtrar morado cuando el usuario está en tema verde u oscuro.
 
 ## Detalle de `sizes.ts`
 

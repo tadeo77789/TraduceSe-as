@@ -28,6 +28,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient'; // Importa LinearGradient: componente que dibuja un degradado lineal de colores — de 'expo-linear-gradient'
 import { Colors } from '../../../constants/colors'; // Importa Colors: paleta de colores centralizada del design system — de app/constants/colors.ts
+import { useColors } from '../../../state/ThemeContext'; // Importa useColors: hook que retorna los colores del tema activo (claro/oscuro + acento) — de app/state/ThemeContext.tsx
 import { BorderRadius, ComponentSizes, FontWeight, Shadows } from '../../../constants/theme'; // Importa tokens de diseño: BorderRadius (radios de borde), ComponentSizes (alturas y paddings), FontWeight (pesos de fuente), Shadows (sombras) — de app/constants/theme.ts
 
 interface ButtonProps { // Define la interfaz TypeScript con todas las props que acepta el botón — inicio del bloque de tipos
@@ -56,6 +57,23 @@ function ButtonBase({ // Define el componente funcional interno ButtonBase (se e
   const isDisabled = disabled || loading; // Calcula si el botón debe estar deshabilitado: true cuando disabled=true O loading=true
   const sizeTokens = ComponentSizes.button[size]; // Obtiene los tokens de tamaño (height, paddingHorizontal) según la prop size desde el design system
   const scaleAnim = useRef(new Animated.Value(1)).current; // Crea un valor animado inicial en 1 (escala normal) usando useRef para persistirlo sin causar re-renders
+  const C = useColors(); // Obtiene los colores del tema activo (incluyendo el acento seleccionado)
+
+  // Colores dinámicos por variante — sobreescriben los valores estáticos del StyleSheet
+  const variantColorStyle: Record<string, object> = {
+    secondary: { backgroundColor: C.primaryBg, borderColor: C.primaryLighter },
+    outline:   { borderColor: C.primary },
+    ghost:     {},
+    danger:    {},
+    primary:   { backgroundColor: C.primary },
+  };
+  const variantTextColor: Record<string, object> = {
+    secondary: { color: C.primary },
+    outline:   { color: C.primary },
+    ghost:     { color: C.primary },
+    primary:   { color: '#fff' },
+    danger:    { color: '#fff' },
+  };
 
   const handlePressIn = useCallback(() => { // Define con useCallback la función que anima el botón al comenzar a presionar — memorizada para evitar recreación
     Animated.spring(scaleAnim, { // Inicia una animación tipo resorte sobre scaleAnim — da sensación de presión física
@@ -87,7 +105,7 @@ function ButtonBase({ // Define el componente funcional interno ButtonBase (se e
           style={[isDisabled && styles.disabled, style]} // Aplica opacidad reducida si está deshabilitado; fusiona con style externo
         >{/* Cierra apertura de TouchableOpacity */}
           <LinearGradient
-            colors={Colors.gradientPrimaryDeep} // Array de colores del degradado: tonos púrpura profundos desde Colors
+            colors={C.gradientPrimaryDeep} // Array de colores del degradado dinámico según el tema/acento activo
             start={{ x: 0, y: 0 }} // El degradado comienza en la esquina superior izquierda
             end={{ x: 1, y: 1 }} // El degradado termina en la esquina inferior derecha (diagonal)
             style={[ // Aplica estilos combinados al contenedor del gradiente
@@ -109,10 +127,11 @@ function ButtonBase({ // Define el componente funcional interno ButtonBase (se e
   return ( // Retorna el JSX para las variantes no-primary (secondary, danger, outline, ghost)
     <Animated.View style={[fullWidth && styles.fullWidth, { transform: [{ scale: scaleAnim }] }]}>{/* Contenedor animado: aplica width 100% si fullWidth=true y la animación de escala */}
       <TouchableOpacity
-        style={[ // Combina múltiples estilos en orden de precedencia
-          styles.base, // Estilo base: borderRadius, centrado
-          styles[variant], // Estilo específico de la variante (secondary/danger/outline/ghost)
-          { height: sizeTokens.height, paddingHorizontal: sizeTokens.paddingHorizontal }, // Dimensiones según el tamaño
+        style={[
+          styles.base,
+          styles[variant],
+          variantColorStyle[variant],
+          { height: sizeTokens.height, paddingHorizontal: sizeTokens.paddingHorizontal },
           fullWidth && styles.fullWidth, // width 100% si fullWidth=true
           isDisabled && styles.disabled, // Opacidad 0.5 si está deshabilitado
           style, // Estilos personalizados externos (mayor precedencia)
@@ -123,11 +142,11 @@ function ButtonBase({ // Define el componente funcional interno ButtonBase (se e
         disabled={isDisabled} // Deshabilita la interacción cuando isDisabled=true
         activeOpacity={0.9} // Opacidad 90% al presionar para retroalimentación visual sutil
       >{/* Cierra apertura de TouchableOpacity de variantes no-primary */}
-        {loading ? ( // Condición: spinner si loading=true, texto si loading=false
-          <ActivityIndicator color={Colors.primary} size="small" /> // Spinner en color primario (púrpura) para variantes que no son blancas
+        {loading ? (
+          <ActivityIndicator color={C.primary} size="small" />
         ) : (
-          <Text style={[styles.text, styles[`${variant}Text` as keyof typeof styles], textStyle]}>{/* Texto con estilo base, color dinámico según variante (ej: 'secondaryText') y estilos extra */}
-            {title}{/* Muestra el texto del botón recibido por prop */}
+          <Text style={[styles.text, styles[`${variant}Text` as keyof typeof styles], variantTextColor[variant], textStyle]}>
+            {title}
           </Text>
         )}
       </TouchableOpacity>{/* Cierra TouchableOpacity de variantes no-primary */}

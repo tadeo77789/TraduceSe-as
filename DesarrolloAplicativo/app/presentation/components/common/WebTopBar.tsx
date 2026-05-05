@@ -36,12 +36,12 @@ export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route })
   const goTo = (name: string) => navigation.navigate(name);
 
   return (
-    <View style={[styles.bar, { backgroundColor: C.primaryHeader, borderBottomColor: C.border }]}>
+    <View style={[styles.bar, { backgroundColor: C.primaryHeader, borderBottomColor: C.border, shadowColor: C.primary }]}>
       <View style={styles.inner}>
 
         {/* Logo */}
         <TouchableOpacity style={styles.logoRow} onPress={() => goTo('Translation')}>
-          <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.logoBox}>
+          <LinearGradient colors={C.gradientPrimary} style={styles.logoBox}>
             <Text style={styles.logoEmoji}>👌</Text>
           </LinearGradient>
           <Text style={[styles.appName, { color: C.textPrimary }]}>TraduceSeña</Text>
@@ -60,12 +60,12 @@ export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route })
                 <Ionicons
                   name={(focused ? tab.iconActive : tab.icon) as any}
                   size={15}
-                  color={focused ? Colors.primary : C.textSecondary}
+                  color={focused ? C.primary : C.textSecondary}
                 />
-                <Text style={[styles.linkText, { color: C.textSecondary }, focused && styles.linkTextActive]}>
+                <Text style={[styles.linkText, { color: C.textSecondary }, focused && { color: C.primary, fontWeight: '700' }]}>
                   {tab.label}
                 </Text>
-                {focused && <View style={styles.underline} />}
+                {focused && <View style={[styles.underline, { backgroundColor: C.primary }]} />}
               </TouchableOpacity>
             );
           })}
@@ -73,13 +73,13 @@ export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route })
 
         {/* Perfil */}
         <TouchableOpacity
-          style={[styles.avatarCircle, { backgroundColor: C.primaryBg }, currentTab === 'Profile' && styles.avatarActive]}
+          style={[styles.avatarCircle, { backgroundColor: C.primaryBg }, currentTab === 'Profile' && { backgroundColor: C.primary }]}
           onPress={() => goTo('Profile')}
         >
           <Ionicons
             name="person-outline"
             size={18}
-            color={currentTab === 'Profile' ? '#fff' : Colors.primary}
+            color={currentTab === 'Profile' ? '#fff' : C.primary}
           />
         </TouchableOpacity>
 
@@ -93,7 +93,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryHeader,
     borderBottomWidth: 1,
     borderBottomColor: Colors.primaryLighter,
-    shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
     shadowRadius: 10,

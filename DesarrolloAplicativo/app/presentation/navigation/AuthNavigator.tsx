@@ -27,9 +27,9 @@ export type AuthStackParams = { // Define y exporta el tipo TypeScript que mapea
   Landing: undefined; // Ruta 'Landing' no recibe parámetros de navegación
   Login: undefined; // Ruta 'Login' no recibe parámetros de navegación
   Register: undefined; // Ruta 'Register' no recibe parámetros de navegación
-  ForgotPassword: undefined; // Ruta 'ForgotPassword' no recibe parámetros de navegación
-  VerifyCode: undefined; // Ruta 'VerifyCode' no recibe parámetros de navegación
-  NewPassword: undefined; // Ruta 'NewPassword' no recibe parámetros de navegación
+  ForgotPassword: { fromProfile?: boolean } | undefined;
+  VerifyCode: { fromProfile?: boolean } | undefined;
+  NewPassword: { fromProfile?: boolean } | undefined;
 }; // Cierra la definición del tipo AuthStackParams
 
 const Stack = createNativeStackNavigator<AuthStackParams>(); // Crea la instancia del stack navigator tipada con AuthStackParams; expone Stack.Navigator y Stack.Screen

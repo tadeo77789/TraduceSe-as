@@ -76,10 +76,10 @@ export const HistoryScreen: React.FC = () => {
     sena_texto: {
       label: t('historySenaTexto'),
       icon: 'hand-left-outline',
-      gradient:     ['#EDE9FE', '#DDD6FE'],
-      darkGradient: ['#2D1F4E', '#1E183A'],
-      textColor:     Colors.primary,
-      darkTextColor: '#9F71ED',
+      gradient:     [C.primaryBg, C.primaryHeader],
+      darkGradient: [C.primaryBg, C.primaryBg],
+      textColor:     C.primary,
+      darkTextColor: C.primary,
     },
     texto_sena: {
       label: t('historyTextoSena'),
@@ -137,12 +137,12 @@ export const HistoryScreen: React.FC = () => {
           </View>
           <View style={styles.cardActions}>
             <TouchableOpacity style={[styles.actionBtn, { backgroundColor: C.primaryBg }]} onPress={() => handleReuse(item)}>
-              <Ionicons name="refresh-outline" size={15} color={Colors.primary} />
-              <Text style={[styles.actionText, { color: Colors.primary }]}>{t('historyReuseBtn')}</Text>
+              <Ionicons name="refresh-outline" size={15} color={C.primary} />
+              <Text style={[styles.actionText, { color: C.primary }]}>{t('historyReuseBtn')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.actionBtn, { backgroundColor: 'rgba(239,68,68,0.12)' }]} onPress={() => handleDelete(item.id_traduccion)}>
-              <Ionicons name="trash-outline" size={15} color={Colors.danger} />
-              <Text style={[styles.actionText, { color: Colors.danger }]}>{t('historyDeleteBtn')}</Text>
+              <Ionicons name="trash-outline" size={15} color={C.danger} />
+              <Text style={[styles.actionText, { color: C.danger }]}>{t('historyDeleteBtn')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -157,14 +157,14 @@ export const HistoryScreen: React.FC = () => {
         <View style={styles.headerRow}>
           <Text style={[styles.title, { color: C.textPrimary }]}>{t('historyTitle')}</Text>
           <View style={[styles.countBadge, { backgroundColor: C.primaryBg }]}>
-            <Text style={styles.countText}>{items.length} {t('historyRecords')}</Text>
+            <Text style={[styles.countText, { color: C.primary }]}>{items.length} {t('historyRecords')}</Text>
           </View>
         </View>
 
         {items.length === 0 ? (
           <View style={styles.empty}>
             <View style={[styles.emptyIcon, { backgroundColor: C.primaryBg }]}>
-              <Ionicons name="time-outline" size={40} color={Colors.primary} />
+              <Ionicons name="time-outline" size={40} color={C.primary} />
             </View>
             <Text style={[styles.emptyTitle, { color: C.textPrimary }]}>{t('historyEmpty')}</Text>
             <Text style={[styles.emptyText, { color: C.textSecondary }]}>{t('historyEmptyText')}</Text>

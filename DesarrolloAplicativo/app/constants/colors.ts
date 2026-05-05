@@ -111,3 +111,42 @@ export const DarkColors = { // Exporta el objeto de colores para el tema oscuro;
   shadow:         'rgba(0,0,0,0.3)', // Sombra en modo oscuro — negro con 30% de opacidad (más intensa que en claro)
   modeInactive:   '#1E1E2A', // Fondo de modo de traducción inactivo en modo oscuro — mismo color que surface
 }; // Cierre del objeto DarkColors con todos los tokens del tema oscuro
+
+// ─── Paleta verde pastel (tema alternativo) ──────────────────────────────────
+export const GreenColors = {
+  ...Colors,
+  primary:        '#4CAF82',
+  primaryDark:    '#2E8B57',
+  primaryLight:   '#7DC8A0',
+  primaryLighter: '#A8D8BC',
+  primaryBg:      '#E8F5EE',
+  primaryHeader:  '#C3E6D0',
+  gradientPrimary: ['#4CAF82', '#2E8B57'] as [string, string],
+  gradientPrimaryDeep: ['#5DBF8F', '#4CAF82', '#2E8B57'] as [string, string, string],
+  modeActive:  '#4CAF82',
+  toggleOn:    '#4CAF82',
+  textLink:    '#4CAF82',
+};
+
+export const GreenDarkColors = {
+  ...DarkColors,
+  primary:        '#4CAF82',
+  primaryDark:    '#2E8B57',
+  primaryLight:   '#7DC8A0',
+  primaryLighter: '#A8D8BC',
+  primaryBg:      '#0F2A1A',
+  primaryHeader:  '#0F2A1A',
+  // Superficies con sutil tinte verde para que el modo oscuro no se sienta morado/azulado
+  background:     '#0E140F',
+  backgroundGray: '#0E140F',
+  surface:        '#172019',
+  inputBg:        '#1E2820',
+  border:         '#243027',
+  modeInactive:   '#172019',
+  textHint:       '#5E7866',
+  gradientPrimary: ['#4CAF82', '#2E8B57'] as [string, string],
+  gradientPrimaryDeep: ['#5DBF8F', '#4CAF82', '#2E8B57'] as [string, string, string],
+  modeActive:  '#4CAF82',
+  toggleOn:    '#4CAF82',
+  textLink:    '#4CAF82',
+};

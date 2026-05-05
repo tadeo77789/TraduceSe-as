@@ -256,10 +256,11 @@ Pantalla → Hook → Service → Data → API backend
 | **Nueva contraseña** | `Auth/NewPasswordScreen.tsx` | Formulario de restablecimiento |
 | **Traducción** | `Translation/TranslationScreen.tsx` | Cámara + toggle texto↔señas |
 | **Alfabeto LSC** | `Alphabet/AlphabetScreen.tsx` | Modelo 3D interactivo + grilla A-Z |
-| **Alarmas** | `Alarms/AlarmsScreen.tsx` | Lista de alarmas visuales |
 | **Historial** | `History/HistoryScreen.tsx` | Traducciones anteriores |
 | **Estadísticas** | `Stats/StatsScreen.tsx` | KPIs y gráfica de uso |
-| **Perfil** | `Profile/ProfileScreen.tsx` | Datos del usuario, tema y configuración |
+| **Perfil** | `Profile/ProfileScreen.tsx` | Datos del usuario, acento de color, tema y configuración |
+| **Términos y condiciones** | `Profile/TermsScreen.tsx` | 9 secciones legales accesibles desde Perfil |
+| **Política de privacidad** | `Profile/PrivacyPolicyScreen.tsx` | 11 secciones (Ley 1581 de 2012) accesibles desde Perfil |
 
 ---
 
@@ -269,23 +270,46 @@ Todo el sistema visual está centralizado en `app/constants/`. Cambiar un valor 
 
 ### Colores principales — `colors.ts`
 
-| Token | Valor | Uso |
-|---|---|---|
-| `primary` | `#7C3AED` | Botones, acentos, badges, activos |
-| `primaryBg` | `#EDE9FE` | Fondos de pantallas de auth |
-| `background` | `#FFFFFF` | Fondo general |
-| `backgroundGray` | `#F9FAFB` | Fondo exterior web |
-| `textPrimary` | `#1F2937` | Títulos y cuerpo |
-| `textSecondary` | `#6B7280` | Labels, descripciones |
-| `success` | `#10B981` | Confirmaciones |
-| `error` | `#EF4444` | Errores, acciones destructivas |
+El archivo expone **cuatro paletas** que se seleccionan automáticamente según el modo y el acento que el usuario configure desde Perfil:
 
-Para cambiar el color primario de púrpura a azul:
-```ts
-// app/constants/colors.ts
-primary:        '#2563EB',
-primaryBg:      '#EFF6FF',
+| Paleta | Modo | Acento |
+|---|---|---|
+| `Colors` | Claro | Púrpura (default) |
+| `DarkColors` | Oscuro | Púrpura |
+| `GreenColors` | Claro | Verde |
+| `GreenDarkColors` | Oscuro | Verde — superficies con sutil tinte verde |
+
+Tokens semánticos (valores del modo claro púrpura):
+
+| Token | Valor púrpura | Valor verde | Uso |
+|---|---|---|---|
+| `primary` | `#7C3AED` | `#4CAF82` | Botones, acentos, badges, activos |
+| `primaryBg` | `#EDE9FE` | `#E8F5EE` | Fondos de pantallas de auth y badges suaves |
+| `background` | `#FFFFFF` | `#FFFFFF` | Fondo general |
+| `backgroundGray` | `#F9FAFB` | `#F9FAFB` | Fondo exterior web |
+| `textPrimary` | `#1F2937` | `#1F2937` | Títulos y cuerpo |
+| `textSecondary` | `#6B7280` | `#6B7280` | Labels, descripciones |
+| `success` | `#10B981` | `#10B981` | Confirmaciones |
+| `error` / `danger` | `#EF4444` | `#EF4444` | Errores, acciones destructivas |
+
+> El acento solo afecta a las **pantallas internas** (Translation, Alphabet, Stats, History, Profile, Términos, Privacidad). Login, Registro y Landing conservan el morado de marca.
+
+### Cómo consumir colores en un componente
+
+Siempre usa el hook `useColors()` para que el componente reaccione al tema:
+
+```tsx
+import { useColors } from '../../state/ThemeContext';
+
+const MyView = () => {
+  const C = useColors();
+  return <View style={{ backgroundColor: C.surface, borderColor: C.primary }} />;
+};
 ```
+
+> Importar `Colors` directamente filtra el morado al cambiar a verde u oscuro. Resérvalo solo para Login/Registro/Landing.
+
+Para cambiar el color primario púrpura por uno distinto, edita `PrimaryScale.DEFAULT` y los tokens semánticos en `Colors`. Para añadir un acento nuevo, crea otra paleta tipo `GreenColors`/`GreenDarkColors` y agrégala al `useColors()` de `state/ThemeContext.tsx`.
 
 ### Tamaños — `sizes.ts`
 
@@ -422,10 +446,12 @@ El ícono vive en dos lugares con roles distintos:
 
 | Archivo | Ubicación | Usado en |
 |---|---|---|
-| `slide1.jpg` | `app/assets/images/` | LandingScreen, LoginScreen (web), RegisterScreen (web) |
-| `slide2.jpg` | `app/assets/images/` | LandingScreen |
-| `slide3.jpg` | `app/assets/images/` | LandingScreen |
-| `testimonial.jpg` | `app/assets/images/` | LandingScreen |
+| `comunicate-sinbarreras.png` | `app/assets/images/` | LandingScreen — slide 1 del carrusel |
+| `traducion-real.png` | `app/assets/images/` | LandingScreen — slide 2 del carrusel |
+| `historial.png` | `app/assets/images/` | LandingScreen — slide 3 del carrusel |
+| `alfabeto.png` | `app/assets/images/` | LandingScreen — banner "Aprende el alfabeto dactilológico" |
+| `slide1.jpg` / `slide2.jpg` / `slide3.jpg` | `app/assets/images/` | LoginScreen / RegisterScreen (split-screen en web) y card "Reconocida oficialmente" del Landing |
+| `testimonial.jpg` | `app/assets/images/` | LandingScreen — avatar del testimonio |
 | `camera_placeholder.jpg` | `app/assets/images/` | TranslationScreen |
 | `signia_model.glb` | `app/assets/` | AlphabetScreen (modelo 3D del personaje) |
 | `model_viewer.html` | `app/assets/` | AlphabetScreen (visor Three.js cargado en WebView) |

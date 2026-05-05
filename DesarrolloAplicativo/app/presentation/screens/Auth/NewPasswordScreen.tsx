@@ -10,9 +10,9 @@ import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   ScrollView, KeyboardAvoidingView, Platform,
-  Alert, useWindowDimensions,
+  useWindowDimensions,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,9 +23,12 @@ import { useTranslation } from '../../../i18n';
 
 export const NewPasswordScreen: React.FC = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const fromProfile = (route.params as any)?.fromProfile ?? false;
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ password?: string; confirm?: string }>({});
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isWide = width >= 768;
@@ -35,22 +38,25 @@ export const NewPasswordScreen: React.FC = () => {
   const { t } = useTranslation();
 
   const handleConfirm = () => {
-    if (!password || password.length < 8) {
-      Alert.alert(t('error'), t('newPasswordErrorShort'));
+    const e: { password?: string; confirm?: string } = {};
+    if (!password || password.length < 8) e.password = t('newPasswordErrorShort');
+    if (!confirm || password !== confirm) e.confirm = t('newPasswordErrorMismatch');
+    if (Object.keys(e).length > 0) {
+      setErrors(e);
       return;
     }
-    if (password !== confirm) {
-      Alert.alert(t('error'), t('newPasswordErrorMismatch'));
-      return;
-    }
+    setErrors({});
     setLoading(true);
     // TODO: llamar al backend
     setTimeout(() => {
       setLoading(false);
-      // popToTop vuelve al primer screen del stack actual:
-      // en el flujo de perfil → ProfileScreen
-      // en el flujo de auth   → LandingScreen
-      (navigation as any).popToTop();
+      if (fromProfile) {
+        // Viene de Perfil → volver a MainTabs (tab Perfil sigue activo)
+        (navigation as any).popToTop();
+      } else {
+        // Viene de "Olvidé contraseña" → ir a Login
+        navigation.navigate('Login' as never);
+      }
     }, 1000);
   };
 
@@ -84,10 +90,12 @@ export const NewPasswordScreen: React.FC = () => {
           label={t('newPasswordNewLabel')}
           placeholder={t('newPasswordNewPlaceholder')}
           value={password}
-          onChangeText={setPassword}
+          onChangeText={v => { setPassword(v); setErrors(prev => ({ ...prev, password: undefined })); }}
           isPassword
           leftIcon="lock-closed-outline"
+          accentColor={Colors.primary}
           hint={t('newPasswordHint')}
+          error={errors.password}
           containerStyle={styles.inputSpacing}
         />
 
@@ -95,9 +103,11 @@ export const NewPasswordScreen: React.FC = () => {
           label={t('newPasswordConfirmLabel')}
           placeholder={t('newPasswordConfirmPlaceholder')}
           value={confirm}
-          onChangeText={setConfirm}
+          onChangeText={v => { setConfirm(v); setErrors(prev => ({ ...prev, confirm: undefined })); }}
           isPassword
           leftIcon="lock-closed-outline"
+          accentColor={Colors.primary}
+          error={errors.confirm}
           containerStyle={styles.inputSpacing}
         />
 

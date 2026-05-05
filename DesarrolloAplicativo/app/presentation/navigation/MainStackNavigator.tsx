@@ -16,9 +16,9 @@ import { NewPasswordScreen } from '../screens/Auth/NewPasswordScreen';
 
 export type MainStackParams = {
   MainTabs: undefined;
-  ForgotPassword: undefined;
-  VerifyCode: undefined;
-  NewPassword: undefined;
+  ForgotPassword: { fromProfile?: boolean } | undefined;
+  VerifyCode: { fromProfile?: boolean } | undefined;
+  NewPassword: { fromProfile?: boolean } | undefined;
 };
 
 const Stack = createNativeStackNavigator<MainStackParams>();

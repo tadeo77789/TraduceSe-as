@@ -43,6 +43,7 @@ interface InputProps extends TextInputProps { // Define la interfaz InputProps e
   isPassword?: boolean; // isPassword: si true muestra el toggle de ojo para mostrar/ocultar contraseña — opcional, default false
   containerStyle?: ViewStyle; // containerStyle: estilos adicionales para el contenedor externo View — opcional
   size?: 'sm' | 'md' | 'lg'; // size: controla la altura y padding del campo; sm=pequeño, md=mediano, lg=grande — opcional, default 'md'
+  accentColor?: string; // accentColor: color fijo del borde e ícono al enfocar; si se omite usa el acento del tema activo — opcional
 } // Cierra la interfaz InputProps
 
 function InputBase({ // Define el componente funcional interno InputBase (se exportará envuelto en React.memo) — inicio del componente
@@ -52,15 +53,17 @@ function InputBase({ // Define el componente funcional interno InputBase (se exp
   leftIcon, // Desestructura prop: ícono izquierdo
   rightIcon, // Desestructura prop: ícono derecho
   onRightIconPress, // Desestructura prop: acción del ícono derecho
-  isPassword = false, // Desestructura prop con valor por defecto: no es campo de contraseña
-  containerStyle, // Desestructura prop: estilos extra del contenedor
-  size = 'md', // Desestructura prop con valor por defecto: tamaño mediano
-  ...props // Captura el resto de props de TextInput (placeholder, value, onChangeText, etc.) para pasarlas al TextInput
-}: InputProps) { // Tipado del parámetro con la interfaz InputProps — cierra la firma del componente
-  const [showPassword, setShowPassword] = useState(false); // Estado local: controla si la contraseña se muestra (true) u oculta (false), inicia en false
-  const [focused, setFocused] = useState(false); // Estado local: controla si el campo tiene el foco activo, inicia en false
-  const C = useColors(); // Obtiene el objeto de colores del tema actual (claro/oscuro) desde el contexto de tema
-  const sizeTokens = ComponentSizes.input[size]; // Obtiene los tokens de tamaño (height, paddingHorizontal) según la prop size desde el design system
+  isPassword = false,
+  containerStyle,
+  size = 'md',
+  accentColor,
+  ...props
+}: InputProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const C = useColors();
+  const accent = accentColor ?? C.primary; // Usa el color fijo si se pasa, si no el acento del tema
+  const sizeTokens = ComponentSizes.input[size];
 
   return ( // Retorna el árbol JSX del componente Input
     <View style={[styles.container, containerStyle]}>{/* Contenedor externo: aplica marginBottom base y estilos personalizados opcionales */}
@@ -69,7 +72,7 @@ function InputBase({ // Define el componente funcional interno InputBase (se exp
         style={[ // Combina estilos condicionalmente
           styles.inputWrapper, // Estilo base: fila horizontal, centrado, fondo, borde y overflow
           { height: sizeTokens.height, backgroundColor: C.inputBg }, // Altura según tamaño y color de fondo del tema
-          focused && [styles.inputFocused, { backgroundColor: C.surface }], // Si focused=true: aplica borde púrpura, fondo surface del tema y sombra
+          focused && [styles.inputFocused, { backgroundColor: C.surface, borderColor: accent, shadowColor: accent }],
           error ? styles.inputError : null, // Si hay error: aplica borde rojo y fondo rosado claro
         ]}
       >{/* Cierra apertura del View wrapper del input */}
@@ -77,7 +80,7 @@ function InputBase({ // Define el componente funcional interno InputBase (se exp
           <Ionicons
             name={leftIcon} // Nombre del ícono Ionicons a renderizar (ej: 'person-outline', 'mail-outline')
             size={18} // Tamaño del ícono: 18px
-            color={focused ? Colors.primary : C.textSecondary} // Color dinámico: púrpura si tiene foco, gris secundario si no
+            color={focused ? accent : C.textSecondary}
             style={styles.leftIcon} // Aplica margen izquierdo y centrado vertical al ícono
           />
         )}{/* Cierra bloque condicional del leftIcon */}
@@ -91,7 +94,6 @@ function InputBase({ // Define el componente funcional interno InputBase (se exp
           secureTextEntry={isPassword && !showPassword} // Oculta el texto como puntos si isPassword=true Y showPassword=false
           autoCapitalize="none" // Desactiva la capitalización automática (importante para emails y contraseñas)
           textAlignVertical="center" // Centra el texto verticalmente dentro del campo (especialmente en Android)
-          includeFontPadding={false} // Elimina el padding de fuente extra de Android para alineación vertical precisa
           onFocus={() => setFocused(true)} // Cuando el campo recibe foco: activa el estado focused para cambiar estilos
           onBlur={() => setFocused(false)} // Cuando el campo pierde el foco: desactiva el estado focused
           {...props} // Pasa todas las props restantes de TextInput (placeholder, value, onChangeText, keyboardType, etc.)
@@ -101,7 +103,7 @@ function InputBase({ // Define el componente funcional interno InputBase (se exp
             <Ionicons
               name={showPassword ? 'eye-off-outline' : 'eye-outline'} // Ícono dinámico: ojo cerrado si showPassword=true (contraseña visible), ojo abierto si showPassword=false
               size={20} // Tamaño del ícono de visibilidad: 20px
-              color={focused ? Colors.primary : C.textSecondary} // Color dinámico: púrpura con foco, gris sin foco
+              color={focused ? accent : C.textSecondary}
             />
           </TouchableOpacity> // Cierra TouchableOpacity del toggle de contraseña
         )}{/* Cierra bloque condicional de isPassword */}

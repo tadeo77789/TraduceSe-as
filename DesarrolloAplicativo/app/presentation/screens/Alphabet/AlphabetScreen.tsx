@@ -115,7 +115,9 @@ export const AlphabetScreen: React.FC = () => {
   const C = useColors();
   const { isDark } = useTheme();
   const { t } = useTranslation();
-  const PALETTE = isDark ? DARK_ACCENTS : ACCENTS;
+  const PALETTE = isDark
+    ? [{ bg: C.primaryBg, fg: C.primary }, ...DARK_ACCENTS.slice(1)]
+    : [{ bg: C.primaryBg, fg: C.primary }, ...ACCENTS.slice(1)];
   const webViewRef    = useRef<WebView>(null);
   const webViewLoaded = useRef(false);
   const backdropAnim  = useRef(new Animated.Value(0)).current;
@@ -324,7 +326,7 @@ export const AlphabetScreen: React.FC = () => {
           <Text style={[styles.sectionSub, { color: C.textSecondary }]}>{t('appTagline')}</Text>
         </View>
         <View style={[styles.countBadge, { backgroundColor: C.primaryBg }]}>
-          <Text style={styles.countText}>26 {t('alphabetLetters')}</Text>
+          <Text style={[styles.countText, { color: C.primary }]}>26 {t('alphabetLetters')}</Text>
         </View>
       </View>
 
@@ -356,7 +358,7 @@ export const AlphabetScreen: React.FC = () => {
           <Animated.View
             style={[
               styles.sheet,
-              { transform: [{ translateY: sheetAnim }], backgroundColor: C.surface },
+              { transform: [{ translateY: sheetAnim }], backgroundColor: C.surface, shadowColor: C.primary },
             ]}
           >
           {/* ── Header del sheet ──────────────────────────────────────────── */}
@@ -409,7 +411,7 @@ export const AlphabetScreen: React.FC = () => {
           </LinearGradient>
 
           {/* ── Visor 3D ──────────────────────────────────────────────────── */}
-          <View style={[styles.viewerWrap, { height: VIEWER_H, backgroundColor: C.inputBg }]}>
+          <View style={[styles.viewerWrap, { height: VIEWER_H, backgroundColor: C.inputBg, shadowColor: C.primary }]}>
             {viewerUri ? (
               <WebView
                 ref={webViewRef}
@@ -429,9 +431,9 @@ export const AlphabetScreen: React.FC = () => {
             {/* Overlay de carga */}
             {!modelReady && (
               <View style={[styles.loadingOverlay, { backgroundColor: C.inputBg }]}>
-                <View style={[styles.loadingPill, { backgroundColor: C.surface }]}>
-                  <ActivityIndicator size="small" color={Colors.primary} />
-                  <Text style={styles.loadingText}>{t('loading')}</Text>
+                <View style={[styles.loadingPill, { backgroundColor: C.surface, shadowColor: C.primary }]}>
+                  <ActivityIndicator size="small" color={C.primary} />
+                  <Text style={[styles.loadingText, { color: C.primary }]}>{t('loading')}</Text>
                 </View>
               </View>
             )}
@@ -544,7 +546,6 @@ const styles = StyleSheet.create({
     width: 320,
     backgroundColor: '#fff',
     borderRadius: 28,
-    shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 16 },
     shadowOpacity: 0.22,
     shadowRadius: 32,
