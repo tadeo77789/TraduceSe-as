@@ -163,7 +163,7 @@ const styles = StyleSheet.create({ // Crea la hoja de estilos optimizada nativa 
     paddingLeft: 6, // Línea 160 — agrega 6px de padding izquierdo extra para separar el texto del ícono izquierdo
   }, // Cierra estilo inputWithLeft
   leftIcon: { // Estilo del ícono izquierdo dentro del campo
-    marginLeft: 14, // Línea 163 — margen izquierdo de 14px para separar el ícono del borde del contenedor
+    marginLeft: 9, // Margen izquierdo de 9px (antes 14px, ajustado -5px para acercar el ícono al borde)
     alignSelf: 'center', // Línea 164 — centra verticalmente el ícono respecto al campo
   }, // Cierra estilo leftIcon
   rightIcon: { // Estilo del botón/ícono derecho (tanto el toggle de contraseña como rightIcon personalizado)

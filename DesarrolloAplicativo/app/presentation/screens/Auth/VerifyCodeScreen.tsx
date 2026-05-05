@@ -267,6 +267,12 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     borderWidth: 1,
     borderColor: Colors.border,
+    textAlign: 'center', // Centra el dígito horizontalmente (en web el prop textAlign no siempre se aplica al <input> nativo)
+    textAlignVertical: 'center', // Centra el dígito verticalmente en Android
+    paddingVertical: 0, // Elimina el padding vertical default del <input> en web que descentra el texto
+    paddingHorizontal: 0, // Elimina el padding horizontal default del <input> en web
+    lineHeight: Platform.OS === 'web' ? 50 : undefined, // En web fuerza la altura de línea ≈ height para centrar verticalmente
+    includeFontPadding: false, // Quita el padding extra de fuente en Android
   },
   otpFilled: {
     borderColor: Colors.primary,
