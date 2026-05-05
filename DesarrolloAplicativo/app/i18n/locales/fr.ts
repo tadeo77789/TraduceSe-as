@@ -60,6 +60,8 @@ const fr: typeof es = {
   slide2Caption: 'Connectez-vous avec des personnes sourdes grâce à la langue des signes colombienne.',
   slide3Title: "Apprenez l'alphabet LSC",
   slide3Caption: "Maîtrisez l'alphabet et enrichissez votre vocabulaire étape par étape.",
+  slide4Title: 'Revue de votre historique',
+  slide4Caption: 'Consultez vos traductions passées et suivez votre progression.',
   testimonialQuote: "\"L'application a facilité ma communication avec mes camarades de classe. Il est incroyable qu'une application puisse autant changer la vie d'une personne.\"",
   testimonialName: 'Juan Pérez',
   testimonialRole: 'Étudiant universitaire',
