@@ -84,7 +84,6 @@ export const Strings = {
   themeLight: 'Claro',
   themeDark: 'Oscuro',
   notifications: 'Notificaciones',
-  alarms: 'Alarmas',
   privacyPolicy: 'Política de privacidad',
   termsConditions: 'Términos y condiciones',
   about: 'Acerca de',
@@ -92,11 +91,6 @@ export const Strings = {
   // Notificaciones
   noNotifications: 'No tienes notificaciones',
   markAsRead: 'Marcar como leída',
-  addAlarm: 'Agregar alarma',
-  alarmTime: 'Hora de la alarma',
-  alarmMessage: 'Mensaje',
-  activateAlarm: 'Activar',
-  deactivateAlarm: 'Desactivar',
 
   // Errores
   requiredField: 'Este campo es obligatorio',

@@ -12,9 +12,12 @@
  * @note El modo oscuro está disponible en estado pero aún no se aplica
  *       a las pantallas individuales.
  */
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react'; // Importa React y los hooks: createContext (crear contexto), useContext (consumir contexto), useState (estado local), useCallback (memorizar funciones), useMemo (memorizar valores) — fuente: node_modules/react
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'; // Importa React y los hooks necesarios, incluido useEffect para restaurar el tema guardado al montar — fuente: node_modules/react
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Importa AsyncStorage para persistir el tema seleccionado entre reinicios de la app — fuente: node_modules/@react-native-async-storage/async-storage
 import { ThemeMode } from '../types'; // Importa el tipo ThemeMode ('light' | 'dark') que restringe los valores válidos del tema — fuente: app/types/index.ts
 import { Colors, DarkColors } from '../constants/colors'; // Importa las paletas de colores: Colors para el tema claro y DarkColors para el tema oscuro — fuente: app/constants/colors.ts
+
+const THEME_STORAGE_KEY = '@app_theme';
 
 interface ThemeContextType { // Define la interfaz que describe la forma del contexto de tema visual
   mode: ThemeMode; // Modo actual del tema: acepta solo 'light' o 'dark' (restringido por el tipo ThemeMode)
@@ -28,12 +31,23 @@ const ThemeContext = createContext<ThemeContextType | null>(null); // Crea el ob
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => { // Declara y exporta el componente proveedor del tema; acepta children para envolver la app y proveer el contexto de tema
   const [mode, setMode] = useState<ThemeMode>('light'); // Estado del modo de tema: controla si la app muestra el tema claro ('light') u oscuro ('dark'); valor inicial 'light'
 
+  useEffect(() => { // Al montar el proveedor, intenta restaurar el tema guardado en AsyncStorage
+    AsyncStorage.getItem(THEME_STORAGE_KEY).then(stored => {
+      if (stored === 'light' || stored === 'dark') setMode(stored);
+    });
+  }, []); // Solo se ejecuta una vez al montar
+
   const toggleTheme = useCallback(() => { // Define la función de alternancia de tema memorizada con useCallback; se recrea solo si cambian sus dependencias
-    setMode(prev => (prev === 'light' ? 'dark' : 'light')); // Alterna el modo: si era 'light' lo cambia a 'dark' y viceversa, usando el valor previo del estado para evitar lecturas desactualizadas
+    setMode(prev => {
+      const next: ThemeMode = prev === 'light' ? 'dark' : 'light';
+      AsyncStorage.setItem(THEME_STORAGE_KEY, next); // Persiste el nuevo tema cada vez que se alterna
+      return next;
+    });
   }, []); // Array de dependencias vacío: toggleTheme no depende de ningún valor reactivo externo
 
   const resetTheme = useCallback(() => { // Define la función de restablecimiento del tema memorizada con useCallback
     setMode('light'); // Fuerza el modo a 'light' independientemente del modo actual, restableciendo el tema claro
+    AsyncStorage.setItem(THEME_STORAGE_KEY, 'light'); // Persiste el restablecimiento al tema claro
   }, []); // Array de dependencias vacío: resetTheme no depende de ningún valor reactivo externo
 
   const value = useMemo<ThemeContextType>( // Crea el valor del contexto memorizado con useMemo para evitar re-renders innecesarios en los consumidores del contexto

@@ -19,18 +19,19 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
 import { useColors } from '../../../state/ThemeContext';
-
-const TAB_ITEMS: { name: string; label: string; icon: string; iconActive: string }[] = [
-  { name: 'Translation', label: 'Traducción',  icon: 'language-outline',  iconActive: 'language'  },
-  { name: 'Alarms',      label: 'Alarmas',     icon: 'alarm-outline',      iconActive: 'alarm'     },
-  { name: 'Alphabet',    label: 'Alfabeto',    icon: 'hand-left-outline',  iconActive: 'hand-left' },
-  { name: 'Stats',       label: 'Estadística', icon: 'bar-chart-outline',  iconActive: 'bar-chart' },
-  { name: 'History',     label: 'Historial',   icon: 'time-outline',       iconActive: 'time'      },
-];
+import { useTranslation } from '../../../i18n';
 
 export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route }) => {
   const currentTab = route.name;
   const C = useColors();
+  const { t } = useTranslation();
+
+  const TAB_ITEMS: { name: string; label: string; icon: string; iconActive: string }[] = [
+    { name: 'Translation', label: t('tabTranslation'), icon: 'language-outline',  iconActive: 'language'  },
+    { name: 'Alphabet',    label: t('tabAlphabet'),    icon: 'hand-left-outline',  iconActive: 'hand-left' },
+    { name: 'Stats',       label: t('tabStats'),       icon: 'bar-chart-outline',  iconActive: 'bar-chart' },
+    { name: 'History',     label: t('tabHistory'),     icon: 'time-outline',       iconActive: 'time'      },
+  ];
 
   const goTo = (name: string) => navigation.navigate(name);
 

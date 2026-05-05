@@ -22,8 +22,8 @@ export const AppNavigator: React.FC = () => { // Define y exporta el componente 
 
   if (isLoading) { // Rama condicional: se ejecuta solo mientras la sesión se está restaurando del almacenamiento local
     return ( // Retorna la pantalla de carga antes de saber si el usuario está autenticado
-      <View style={styles.loading}> {/* Contenedor centrado que ocupa toda la pantalla mientras carga */}
-        <ActivityIndicator size="large" color={Colors.primary} /> {/* Spinner de carga grande con el color primario de la app (#7C3AED) */}
+      <View style={styles.loading}>{/* Contenedor centrado que ocupa toda la pantalla mientras carga */}
+        <ActivityIndicator size="large" color={Colors.primary} />{/* Spinner de carga grande con el color primario de la app (#7C3AED) */}
       </View> // Cierra el View de pantalla de carga
     ); // Cierra el return del bloque isLoading
   } // Cierra el bloque condicional de carga
@@ -32,7 +32,7 @@ export const AppNavigator: React.FC = () => { // Define y exporta el componente 
     <NavigationContainer // Contenedor raíz obligatorio de React Navigation; gestiona el estado de la pila de navegación
       documentTitle={{ formatter: () => 'Traduce Señas' }}
     >
-      {isAuthenticated ? <MainStackNavigator /> : <AuthNavigator />} {/* Condicional: si hay sesión activa muestra la app principal (MainStackNavigator), si no muestra el flujo de auth (AuthNavigator) */}
+      {isAuthenticated ? <MainStackNavigator /> : <AuthNavigator />}{/* Condicional: si hay sesión activa muestra la app principal (MainStackNavigator), si no muestra el flujo de auth (AuthNavigator) */}
     </NavigationContainer> // Cierra el NavigationContainer raíz
   ); // Cierra el return principal del componente
 }; // Cierra la definición del componente AppNavigator

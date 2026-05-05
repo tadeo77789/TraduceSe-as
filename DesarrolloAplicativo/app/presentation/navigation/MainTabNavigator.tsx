@@ -6,7 +6,7 @@
  * En **móvil**: muestra una barra de tabs inferior con íconos Ionicons.
  * En **web**: oculta la barra inferior y usa `WebTopBar` como header superior.
  *
- * Tabs disponibles: Translation, Alarms, Alphabet, Stats, History, Profile.
+ * Tabs disponibles: Translation, Alphabet, Stats, History, Profile.
  * El tipo `MainTabParams` define los nombres de ruta para tipado estricto.
  */
 import React from 'react'; // Importa React; necesario para usar JSX — fuente: node_modules/react
@@ -14,7 +14,6 @@ import { Platform, StyleSheet, useWindowDimensions } from 'react-native'; // Imp
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'; // Importa la función que crea un navegador de pestañas en la parte inferior de la pantalla — fuente: node_modules/@react-navigation/bottom-tabs
 import { Ionicons } from '@expo/vector-icons'; // Importa la librería de íconos vectoriales Ionicons usada en la barra de tabs — fuente: node_modules/@expo/vector-icons
 import { TranslationScreen } from '../screens/Translation/TranslationScreen'; // Importa la pantalla principal de traducción de señas — fuente: app/presentation/screens/Translation/TranslationScreen.tsx
-import { AlarmsScreen } from '../screens/Alarms/AlarmsScreen'; // Importa la pantalla de gestión de alarmas — fuente: app/presentation/screens/Alarms/AlarmsScreen.tsx
 import { AlphabetScreen } from '../screens/Alphabet/AlphabetScreen'; // Importa la pantalla del alfabeto de señas — fuente: app/presentation/screens/Alphabet/AlphabetScreen.tsx
 import { StatsScreen } from '../screens/Stats/StatsScreen'; // Importa la pantalla de estadísticas de uso — fuente: app/presentation/screens/Stats/StatsScreen.tsx
 import { HistoryScreen } from '../screens/History/HistoryScreen'; // Importa la pantalla del historial de traducciones — fuente: app/presentation/screens/History/HistoryScreen.tsx
@@ -22,10 +21,10 @@ import { ProfileStackNavigator } from './ProfileStackNavigator'; // Importa el s
 import { WebTopBar } from '../components/common/WebTopBar'; // Importa la barra de navegación superior usada en web en lugar de la barra de tabs inferior — fuente: app/presentation/components/common/WebTopBar.tsx
 import { Colors } from '../../constants/colors'; // Importa la paleta de colores estáticos de la app — fuente: app/constants/colors.ts
 import { useColors } from '../../state/ThemeContext'; // Importa el hook que provee los colores reactivos según el tema (claro/oscuro) activo — fuente: app/state/ThemeContext.tsx
+import { useTranslation } from '../../i18n';
 
 export type MainTabParams = { // Define y exporta el tipo TypeScript que mapea cada tab con sus parámetros esperados
   Translation: undefined; // Ruta 'Translation' no recibe parámetros de navegación
-  Alarms: undefined; // Ruta 'Alarms' no recibe parámetros de navegación
   Alphabet: undefined; // Ruta 'Alphabet' no recibe parámetros de navegación
   Stats: undefined; // Ruta 'Stats' no recibe parámetros de navegación
   History: undefined; // Ruta 'History' no recibe parámetros de navegación
@@ -37,6 +36,7 @@ const Tab = createBottomTabNavigator<MainTabParams>(); // Crea la instancia del 
 export const MainTabNavigator: React.FC = () => { // Define y exporta el componente funcional MainTabNavigator; gestiona todas las pestañas de la app autenticada
   const { width } = useWindowDimensions(); // Obtiene el ancho actual del viewport; se actualiza automáticamente si el usuario rota el dispositivo o redimensiona la ventana
   const C = useColors(); // Obtiene los tokens de color reactivos del tema activo (claro u oscuro)
+  const { t } = useTranslation();
   // Muestra la barra superior solo en web con viewport ancho (≥ 1024 px)
   // En móvil real y en web con viewport estrecho usa la barra de tabs inferior
   const isWide = Platform.OS === 'web' && width >= 1024; // Calcula si la pantalla es web de escritorio (≥1024px); true activa la barra superior WebTopBar y oculta la barra inferior
@@ -63,7 +63,6 @@ export const MainTabNavigator: React.FC = () => { // Define y exporta el compone
       tabBarIcon: ({ focused, color }) => { // Función que renderiza el ícono de cada tab; recibe si está enfocado y el color correspondiente
         const icons: Record<string, [string, string]> = { // Mapa que asocia cada nombre de ruta con su par de íconos [inactivo, activo] de Ionicons
           Translation: ['language-outline', 'language'], // Íconos para el tab de traducción: outline (inactivo) y sólido (activo)
-          Alarms:      ['alarm-outline',    'alarm'], // Íconos para el tab de alarmas: outline (inactivo) y sólido (activo)
           Alphabet:    ['hand-left-outline','hand-left'], // Íconos para el tab de alfabeto: outline (inactivo) y sólido (activo)
           Stats:       ['bar-chart-outline','bar-chart'], // Íconos para el tab de estadísticas: outline (inactivo) y sólido (activo)
           History:     ['time-outline',     'time'], // Íconos para el tab de historial: outline (inactivo) y sólido (activo)
@@ -72,18 +71,16 @@ export const MainTabNavigator: React.FC = () => { // Define y exporta el compone
         const [inactive, active] = icons[route.name] || ['ellipse-outline', 'ellipse']; // Extrae el par de íconos para la ruta actual; usa íconos genéricos si la ruta no está en el mapa
         return <Ionicons name={(focused ? active : inactive) as any} size={22} color={color} />; // Renderiza el ícono Ionicons: usa el ícono activo si el tab está seleccionado, inactivo si no; tamaño 22px con el color provisto por el navigator
       }, // Cierra la función tabBarIcon
-      tabBarLabel: ({ // Objeto que mapea cada nombre de ruta a su etiqueta traducida al español; se selecciona por route.name
-        Translation: 'Traducción', // Etiqueta en español para el tab Translation
-        Alarms:      'Alarmas', // Etiqueta en español para el tab Alarms
-        Alphabet:    'Alfabeto', // Etiqueta en español para el tab Alphabet
-        Stats:       'Estadística', // Etiqueta en español para el tab Stats
-        History:     'Historial', // Etiqueta en español para el tab History
-        Profile:     'Perfil', // Etiqueta en español para el tab Profile
-      } as Record<string, string>)[route.name] || route.name, // Accede al mapa con el nombre de ruta actual; si no se encuentra usa el nombre de ruta original como fallback
+      tabBarLabel: ({
+        Translation: t('tabTranslation'),
+        Alphabet:    t('tabAlphabet'),
+        Stats:       t('tabStats'),
+        History:     t('tabHistory'),
+        Profile:     t('tabProfile'),
+      } as Record<string, string>)[route.name] || route.name,
     })} // Cierra el objeto retornado por screenOptions y la prop screenOptions
   >
     <Tab.Screen name="Translation" component={TranslationScreen} />
-    <Tab.Screen name="Alarms"      component={AlarmsScreen}      />
     <Tab.Screen name="Alphabet"    component={AlphabetScreen}    />
     <Tab.Screen name="Stats"       component={StatsScreen}       />
     <Tab.Screen name="History"     component={HistoryScreen}     />

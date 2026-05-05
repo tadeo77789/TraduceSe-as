@@ -34,20 +34,22 @@ import { Ionicons } from '@expo/vector-icons'; // Importa Ionicons de '@expo/vec
 import { AppHeader } from '../../components/common/AppHeader'; // Importa AppHeader desde app/presentation/components/common/AppHeader: encabezado superior reutilizable de la app
 import { Colors } from '../../../constants/colors'; // Importa Colors desde app/constants/colors: paleta de colores centralizada del proyecto
 import { useColors } from '../../../state/ThemeContext'; // Importa useColors desde app/state/ThemeContext: hook que devuelve los colores según el tema (claro/oscuro) activo
+import { useTranslation } from '../../../i18n';
 
 type Mode = 'sena_texto' | 'texto_sena'; // Define el tipo Mode: unión de los dos modos de traducción disponibles en la pantalla
-
-const TIPS = [ // Define el array TIPS: lista de consejos que se muestran en modo Seña→Texto (dato estático, no proviene del backend)
-  { icon: 'hand-left-outline' as const, text: 'Mantén la mano centrada en cámara' }, // Tip 1: ícono de mano y texto de consejo sobre posicionamiento
-  { icon: 'sunny-outline' as const, text: 'Asegura buena iluminación' }, // Tip 2: ícono de sol y consejo sobre iluminación
-  { icon: 'reload-outline' as const, text: 'Repite la seña si no es detectada' }, // Tip 3: ícono de recarga y consejo para reintentar la seña
-]; // Cierra el array TIPS
 
 export const TranslationScreen: React.FC = () => { // Define y exporta el componente funcional TranslationScreen: es la pantalla principal de traducción
   const { width } = useWindowDimensions(); // Obtiene el ancho actual de la ventana para cálculos de layout responsivo
   const isTablet = width >= 768; // Booleano que indica si el dispositivo tiene ancho de tablet (≥ 768 px)
   const isDesktop = width >= 1024; // Booleano que indica si el dispositivo tiene ancho de escritorio (≥ 1024 px)
   const C = useColors(); // Obtiene el objeto de colores dinámicos según el tema activo (claro u oscuro)
+  const { t } = useTranslation();
+
+  const TIPS = [
+    { icon: 'hand-left-outline' as const, text: t('tip1') },
+    { icon: 'sunny-outline' as const, text: t('tip2') },
+    { icon: 'reload-outline' as const, text: t('tip3') },
+  ];
 
   const [mode, setMode] = useState<Mode>('sena_texto'); // Estado del modo de traducción activo: 'sena_texto' activa la cámara, 'texto_sena' activa el campo de texto
   const [text, setText] = useState(''); // Estado del texto escrito por el usuario en el modo Texto→Seña
@@ -60,10 +62,10 @@ export const TranslationScreen: React.FC = () => { // Define y exporta el compon
       setIsActive(prev => !prev); // Alterna el estado activo de la cámara (inicia o detiene)
       if (isActive) setResult(''); // Si la cámara estaba activa y se detiene, limpia el resultado anterior
     } else { // Si el modo es Texto→Seña
-      if (!text.trim()) { Alert.alert('', 'Escribe algo para traducir'); return; } // Valida que el campo de texto no esté vacío; muestra alerta si está vacío y cancela
+      if (!text.trim()) { Alert.alert('', t('textEmptyAlert')); return; } // Valida que el campo de texto no esté vacío; muestra alerta si está vacío y cancela
       setLoading(true); // Activa el estado de carga para mostrar el indicador "Traduciendo..."
       setTimeout(() => { // Simula una llamada asíncrona al backend con un retardo de 1200 ms (temporal, debe reemplazarse con llamada real)
-        setResult('Traducción simulada: ' + text); // Establece el resultado con texto de prueba concatenado con la entrada del usuario
+        setResult(t('translationResult') + text); // Establece el resultado con texto de prueba concatenado con la entrada del usuario
         setLoading(false); // Desactiva el estado de carga una vez finalizada la simulación
       }, 1200); // Retardo de 1200 milisegundos que simula el tiempo de respuesta del servidor
     } // Cierra el bloque else del modo texto_sena
@@ -77,17 +79,17 @@ export const TranslationScreen: React.FC = () => { // Define y exporta el compon
   }, []); // Sin dependencias: la función no depende de ningún estado externo
 
   return ( // Inicia el retorno del JSX del componente TranslationScreen
-    <View style={[styles.root, { backgroundColor: C.backgroundGray }]}> {/* Contenedor raíz que ocupa toda la pantalla con color de fondo según el tema */}
-      <AppHeader /> {/* Renderiza el encabezado superior de la aplicación con título y controles globales */}
+    <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>{/* Contenedor raíz que ocupa toda la pantalla con color de fondo según el tema */}
+      <AppHeader />{/* Renderiza el encabezado superior de la aplicación con título y controles globales */}
       <ScrollView // Contenedor con scroll vertical para el contenido de la pantalla
         style={styles.scroll} // Estilo base del ScrollView: ocupa todo el espacio disponible
         contentContainerStyle={[styles.content, isDesktop && styles.contentDesktop]} // Estilo del contenido interior: aplica padding adicional en desktop
         showsVerticalScrollIndicator={false} // Oculta la barra de scroll vertical para una interfaz más limpia
       >
-        <View style={[styles.innerWrapper, isTablet && styles.innerWrapperWide]}> {/* Contenedor interno que centra y limita el ancho del contenido en tablet/desktop */}
+        <View style={[styles.innerWrapper, isTablet && styles.innerWrapperWide]}>{/* Contenedor interno que centra y limita el ancho del contenido en tablet/desktop */}
 
         {/* ── Toggle de modo ── */}
-        <View style={[styles.modeToggle, { backgroundColor: C.surface, borderColor: C.border }]}> {/* Contenedor del selector de modo con fondo de superficie y borde según tema */}
+        <View style={[styles.modeToggle, { backgroundColor: C.surface, borderColor: C.border }]}>{/* Contenedor del selector de modo con fondo de superficie y borde según tema */}
           <TouchableOpacity // Botón táctil para seleccionar el modo Seña→Texto
             style={[styles.modeBtn, mode === 'sena_texto' && styles.modeBtnActive]} // Aplica estilo activo si el modo actual es sena_texto
             onPress={() => switchMode('sena_texto')} // Al presionar, cambia el modo a sena_texto y limpia los estados
@@ -100,12 +102,12 @@ export const TranslationScreen: React.FC = () => { // Define y exporta el compon
                 start={{ x: 0, y: 0 }} // Punto de inicio del degradado: esquina superior izquierda
                 end={{ x: 1, y: 0 }} // Punto final del degradado: esquina superior derecha (horizontal)
               />
-            )} {/* Cierra el condicional del degradado del botón Seña→Texto */}
-            <Ionicons name="hand-left-outline" size={18} color={mode === 'sena_texto' ? '#fff' : C.textSecondary} /> {/* Ícono de mano: blanco si está activo, color secundario si inactivo */}
-            <Text style={[styles.modeBtnText, mode === 'sena_texto' && styles.modeBtnTextActive]}> {/* Texto del botón: aplica estilo blanco si el modo está activo */}
-              Seña → Texto {/* Etiqueta del primer modo de traducción */}
+            )}{/* Cierra el condicional del degradado del botón Seña→Texto */}
+            <Ionicons name="hand-left-outline" size={18} color={mode === 'sena_texto' ? '#fff' : C.textSecondary} />{/* Ícono de mano: blanco si está activo, color secundario si inactivo */}
+            <Text style={[styles.modeBtnText, mode === 'sena_texto' && styles.modeBtnTextActive]}>{/* Texto del botón: aplica estilo blanco si el modo está activo */}
+              {t('modeCamera')}
             </Text>
-          </TouchableOpacity> {/* Cierra el botón táctil del modo Seña→Texto */}
+          </TouchableOpacity>{/* Cierra el botón táctil del modo Seña→Texto */}
 
           <TouchableOpacity // Botón táctil para seleccionar el modo Texto→Seña
             style={[styles.modeBtn, mode === 'texto_sena' && styles.modeBtnActive]} // Aplica estilo activo si el modo actual es texto_sena
@@ -119,24 +121,24 @@ export const TranslationScreen: React.FC = () => { // Define y exporta el compon
                 start={{ x: 0, y: 0 }} // Punto de inicio del degradado: esquina superior izquierda
                 end={{ x: 1, y: 0 }} // Punto final del degradado: esquina superior derecha (horizontal)
               />
-            )} {/* Cierra el condicional del degradado del botón Texto→Seña */}
-            <Ionicons name="text-outline" size={18} color={mode === 'texto_sena' ? '#fff' : C.textSecondary} /> {/* Ícono de texto: blanco si está activo, color secundario si inactivo */}
-            <Text style={[styles.modeBtnText, mode === 'texto_sena' && styles.modeBtnTextActive]}> {/* Texto del botón: aplica estilo blanco si el modo está activo */}
-              Texto → Seña {/* Etiqueta del segundo modo de traducción */}
+            )}{/* Cierra el condicional del degradado del botón Texto→Seña */}
+            <Ionicons name="text-outline" size={18} color={mode === 'texto_sena' ? '#fff' : C.textSecondary} />{/* Ícono de texto: blanco si está activo, color secundario si inactivo */}
+            <Text style={[styles.modeBtnText, mode === 'texto_sena' && styles.modeBtnTextActive]}>{/* Texto del botón: aplica estilo blanco si el modo está activo */}
+              {t('modeText')}
             </Text>
-          </TouchableOpacity> {/* Cierra el botón táctil del modo Texto→Seña */}
-        </View> {/* Cierra el contenedor del toggle de modo */}
+          </TouchableOpacity>{/* Cierra el botón táctil del modo Texto→Seña */}
+        </View>{/* Cierra el contenedor del toggle de modo */}
 
         {/* ── Área de cámara / entrada ── */}
         {mode === 'sena_texto' ? ( // Renderiza el área de cámara si el modo es Seña→Texto, o el campo de texto si es Texto→Seña
-          <View style={styles.cameraCard}> {/* Contenedor de la tarjeta de cámara con bordes redondeados y sombra morada */}
+          <View style={styles.cameraCard}>{/* Contenedor de la tarjeta de cámara con bordes redondeados y sombra morada */}
             {/* Badge EN VIVO */}
             {isActive && ( // Muestra el badge "En vivo" solo cuando la cámara está activa
-              <View style={styles.liveBadge}> {/* Contenedor del badge "En vivo" posicionado en la esquina superior izquierda */}
-                <View style={styles.liveDot} /> {/* Punto blanco circular que indica estado de grabación activa */}
-                <Text style={styles.liveText}>En vivo</Text> {/* Texto "En vivo" en color blanco con letras espaciadas */}
+              <View style={styles.liveBadge}>{/* Contenedor del badge "En vivo" posicionado en la esquina superior izquierda */}
+                <View style={styles.liveDot} />{/* Punto blanco circular que indica estado de grabación activa */}
+                <Text style={styles.liveText}>{t('live')}</Text>{/* Texto "En vivo" en color blanco con letras espaciadas */}
               </View> // Cierra el contenedor del badge "En vivo"
-            )} {/* Cierra el condicional del badge "En vivo" */}
+            )}{/* Cierra el condicional del badge "En vivo" */}
 
             {/* Imagen de cámara */}
             <Image // Imagen placeholder que simula la vista de la cámara
@@ -152,27 +154,27 @@ export const TranslationScreen: React.FC = () => { // Define y exporta el compon
             />
 
             {/* Marco de detección */}
-            <View style={styles.detectionFrame}> {/* Contenedor del marco de detección posicionado en el centro de la imagen */}
-              <View style={[styles.corner, styles.cornerTL]} /> {/* Esquina superior izquierda del marco de detección */}
-              <View style={[styles.corner, styles.cornerTR]} /> {/* Esquina superior derecha del marco de detección */}
-              <View style={[styles.corner, styles.cornerBL]} /> {/* Esquina inferior izquierda del marco de detección */}
-              <View style={[styles.corner, styles.cornerBR]} /> {/* Esquina inferior derecha del marco de detección */}
-            </View> {/* Cierra el contenedor del marco de detección */}
+            <View style={styles.detectionFrame}>{/* Contenedor del marco de detección posicionado en el centro de la imagen */}
+              <View style={[styles.corner, styles.cornerTL]} />{/* Esquina superior izquierda del marco de detección */}
+              <View style={[styles.corner, styles.cornerTR]} />{/* Esquina superior derecha del marco de detección */}
+              <View style={[styles.corner, styles.cornerBL]} />{/* Esquina inferior izquierda del marco de detección */}
+              <View style={[styles.corner, styles.cornerBR]} />{/* Esquina inferior derecha del marco de detección */}
+            </View>{/* Cierra el contenedor del marco de detección */}
 
             {/* Label inferior */}
-            <View style={styles.cameraLabel}> {/* Contenedor de la etiqueta inferior centrada sobre el degradado de la cámara */}
-              <Ionicons name="camera-outline" size={14} color="#fff" /> {/* Ícono de cámara en blanco dentro de la etiqueta inferior */}
-              <Text style={styles.cameraLabelText}> {/* Texto instructivo que cambia según si la cámara está activa o no */}
-                {isActive ? 'Analizando señas...' : 'Toca Iniciar para activar la cámara'} {/* Muestra estado activo o instrucción para iniciar según isActive */}
+            <View style={styles.cameraLabel}>{/* Contenedor de la etiqueta inferior centrada sobre el degradado de la cámara */}
+              <Ionicons name="camera-outline" size={14} color="#fff" />{/* Ícono de cámara en blanco dentro de la etiqueta inferior */}
+              <Text style={styles.cameraLabelText}>{/* Texto instructivo que cambia según si la cámara está activa o no */}
+                {isActive ? 'Analizando señas...' : 'Toca Iniciar para activar la cámara'}{/* Muestra estado activo o instrucción para iniciar según isActive */}
               </Text>
-            </View> {/* Cierra el contenedor de la etiqueta inferior de cámara */}
+            </View>{/* Cierra el contenedor de la etiqueta inferior de cámara */}
           </View> // Cierra la tarjeta de cámara (modo sena_texto)
         ) : ( // Rama else: renderiza el campo de texto cuando el modo es texto_sena
-          <View style={[styles.inputCard, { backgroundColor: C.surface }]}> {/* Tarjeta de entrada de texto con fondo de superficie del tema activo */}
-            <View style={styles.inputCardHeader}> {/* Contenedor del encabezado de la tarjeta de texto con ícono y título */}
-              <Ionicons name="create-outline" size={16} color={Colors.primary} /> {/* Ícono de edición en color primario morado */}
-              <Text style={[styles.inputCardTitle, { color: C.textPrimary }]}>Escribe el texto a traducir</Text> {/* Título del campo de entrada con color de texto primario del tema */}
-            </View> {/* Cierra el encabezado de la tarjeta de texto */}
+          <View style={[styles.inputCard, { backgroundColor: C.surface }]}>{/* Tarjeta de entrada de texto con fondo de superficie del tema activo */}
+            <View style={styles.inputCardHeader}>{/* Contenedor del encabezado de la tarjeta de texto con ícono y título */}
+              <Ionicons name="create-outline" size={16} color={Colors.primary} />{/* Ícono de edición en color primario morado */}
+              <Text style={[styles.inputCardTitle, { color: C.textPrimary }]}>Escribe el texto a traducir</Text>{/* Título del campo de entrada con color de texto primario del tema */}
+            </View>{/* Cierra el encabezado de la tarjeta de texto */}
             <TextInput // Campo de texto multilínea donde el usuario escribe el texto a traducir
               style={[styles.textArea, { color: C.textPrimary, backgroundColor: C.backgroundGray, borderColor: C.border }]} // Estilos del área de texto con colores adaptados al tema
               value={text} // Valor controlado del campo de texto: refleja el estado 'text'
@@ -182,69 +184,69 @@ export const TranslationScreen: React.FC = () => { // Define y exporta el compon
               multiline // Permite entrada de texto en múltiples líneas
               textAlignVertical="top" // Alinea el cursor al inicio (arriba) en modo multilínea
             />
-            <View style={styles.charCount}> {/* Contenedor del contador de caracteres alineado a la derecha */}
-              <Text style={[styles.charCountText, { color: C.textHint }]}>{text.length} caracteres</Text> {/* Muestra la cantidad de caracteres escritos en tiempo real */}
-            </View> {/* Cierra el contenedor del contador de caracteres */}
+            <View style={styles.charCount}>{/* Contenedor del contador de caracteres alineado a la derecha */}
+              <Text style={[styles.charCountText, { color: C.textHint }]}>{text.length} caracteres</Text>{/* Muestra la cantidad de caracteres escritos en tiempo real */}
+            </View>{/* Cierra el contenedor del contador de caracteres */}
           </View> // Cierra la tarjeta de entrada de texto (modo texto_sena)
-        )} {/* Cierra el condicional del área de cámara / entrada */}
+        )}{/* Cierra el condicional del área de cámara / entrada */}
 
         {/* ── Tips (solo modo seña) ── */}
         {mode === 'sena_texto' && ( // Muestra los tips solo cuando el modo activo es Seña→Texto
-          <View style={styles.tipsRow}> {/* Contenedor vertical de los chips de tips */}
+          <View style={styles.tipsRow}>{/* Contenedor vertical de los chips de tips */}
             {TIPS.map((tip, i) => ( // Itera sobre el array TIPS para renderizar un chip por cada consejo
-              <View key={i} style={[styles.tipChip, { backgroundColor: C.primaryBg }]}> {/* Chip de tip con fondo morado claro adaptado al tema */}
-                <Ionicons name={tip.icon} size={13} color={Colors.primary} /> {/* Ícono del tip en color morado primario */}
-                <Text style={styles.tipText}>{tip.text}</Text> {/* Texto del consejo dentro del chip */}
+              <View key={i} style={[styles.tipChip, { backgroundColor: C.primaryBg }]}>{/* Chip de tip con fondo morado claro adaptado al tema */}
+                <Ionicons name={tip.icon} size={13} color={Colors.primary} />{/* Ícono del tip en color morado primario */}
+                <Text style={styles.tipText}>{tip.text}</Text>{/* Texto del consejo dentro del chip */}
               </View> // Cierra el chip de tip individual
-            ))} {/* Cierra el map de tips */}
+            ))}{/* Cierra el map de tips */}
           </View> // Cierra el contenedor de la fila de tips
-        )} {/* Cierra el condicional de tips */}
+        )}{/* Cierra el condicional de tips */}
 
         {/* ── Resultado ── */}
-        <View style={[styles.resultCard, { backgroundColor: C.surface, borderColor: C.border }]}> {/* Tarjeta que muestra el resultado de la traducción con borde según el tema */}
+        <View style={[styles.resultCard, { backgroundColor: C.surface, borderColor: C.border }]}>{/* Tarjeta que muestra el resultado de la traducción con borde según el tema */}
           {/* Header del resultado */}
-          <View style={[styles.resultHeader, { borderBottomColor: C.border }]}> {/* Encabezado de la tarjeta de resultado con separador inferior */}
-            <LinearGradient colors={[C.primaryBg, C.primaryBg]} style={styles.resultIconBg}> {/* Fondo cuadrado con degradado morado claro para el ícono del resultado */}
-              <Ionicons name="chatbubble-ellipses-outline" size={16} color={Colors.primary} /> {/* Ícono de burbuja de chat en color morado primario */}
+          <View style={[styles.resultHeader, { borderBottomColor: C.border }]}>{/* Encabezado de la tarjeta de resultado con separador inferior */}
+            <LinearGradient colors={[C.primaryBg, C.primaryBg]} style={styles.resultIconBg}>{/* Fondo cuadrado con degradado morado claro para el ícono del resultado */}
+              <Ionicons name="chatbubble-ellipses-outline" size={16} color={Colors.primary} />{/* Ícono de burbuja de chat en color morado primario */}
             </LinearGradient>
-            <Text style={[styles.resultTitle, { color: C.textPrimary }]}>Traducción</Text> {/* Título "Traducción" de la tarjeta de resultado */}
+            <Text style={[styles.resultTitle, { color: C.textPrimary }]}>{t('sectionTranslation')}</Text>{/* Título "Traducción" de la tarjeta de resultado */}
             {result ? ( // Muestra el badge "Listo" si hay resultado, o "En espera" si no hay
-              <View style={styles.detectedBadge}> {/* Badge verde que indica que se detectó y procesó una traducción */}
-                <View style={styles.detectedDot} /> {/* Punto verde que indica éxito en la detección */}
-                <Text style={styles.detectedText}>Listo</Text> {/* Texto "Listo" en color verde */}
+              <View style={styles.detectedBadge}>{/* Badge verde que indica que se detectó y procesó una traducción */}
+                <View style={styles.detectedDot} />{/* Punto verde que indica éxito en la detección */}
+                <Text style={styles.detectedText}>{t('done')}</Text>{/* Texto "Listo" en color verde */}
               </View> // Cierra el badge de resultado disponible
             ) : ( // Si no hay resultado, muestra el badge de espera
-              <View style={[styles.waitingBadge, { backgroundColor: C.inputBg }]}> {/* Badge gris que indica que no hay traducción disponible aún */}
-                <Text style={[styles.waitingText, { color: C.textHint }]}>En espera</Text> {/* Texto "En espera" en color de sugerencia del tema */}
+              <View style={[styles.waitingBadge, { backgroundColor: C.inputBg }]}>{/* Badge gris que indica que no hay traducción disponible aún */}
+                <Text style={[styles.waitingText, { color: C.textHint }]}>En espera</Text>{/* Texto "En espera" en color de sugerencia del tema */}
               </View> // Cierra el badge de espera
-            )} {/* Cierra el condicional del badge de estado */}
-          </View> {/* Cierra el encabezado de la tarjeta de resultado */}
+            )}{/* Cierra el condicional del badge de estado */}
+          </View>{/* Cierra el encabezado de la tarjeta de resultado */}
 
           {/* Contenido */}
-          <View style={styles.resultBody}> {/* Cuerpo de la tarjeta de resultado con altura mínima garantizada */}
+          <View style={styles.resultBody}>{/* Cuerpo de la tarjeta de resultado con altura mínima garantizada */}
             {result ? ( // Muestra el texto del resultado si existe, o el estado vacío si no
-              <> {/* Fragmento que agrupa el texto del resultado y el botón de copiar */}
-                <Text style={[styles.resultText, { color: C.textPrimary }]}>{result}</Text> {/* Texto de la traducción obtenida en tamaño y peso destacado */}
+              <>{/* Fragmento que agrupa el texto del resultado y el botón de copiar */}
+                <Text style={[styles.resultText, { color: C.textPrimary }]}>{result}</Text>{/* Texto de la traducción obtenida en tamaño y peso destacado */}
                 <TouchableOpacity // Botón para copiar el texto de la traducción al portapapeles
                   style={[styles.copyBtn, { backgroundColor: C.primaryBg }]} // Estilo del botón de copiar con fondo morado claro
                   onPress={() => Alert.alert('Copiado', 'Texto copiado al portapapeles')} // Al presionar muestra un Alert confirmando la acción de copiar (simulado)
                 >
-                  <Ionicons name="copy-outline" size={14} color={Colors.primary} /> {/* Ícono de copiar en color morado primario */}
-                  <Text style={styles.copyBtnText}>Copiar</Text> {/* Texto "Copiar" del botón de copia */}
-                </TouchableOpacity> {/* Cierra el botón de copiar */}
+                  <Ionicons name="copy-outline" size={14} color={Colors.primary} />{/* Ícono de copiar en color morado primario */}
+                  <Text style={styles.copyBtnText}>Copiar</Text>{/* Texto "Copiar" del botón de copia */}
+                </TouchableOpacity>{/* Cierra el botón de copiar */}
               </> // Cierra el fragmento del contenido con resultado
             ) : ( // Si no hay resultado, muestra el estado vacío con instrucción
-              <View style={styles.resultEmpty}> {/* Contenedor del estado vacío centrado vertical y horizontalmente */}
-                <Ionicons name="scan-outline" size={32} color={Colors.primaryLighter} /> {/* Ícono de escaneo grande en color morado claro como indicador visual de espera */}
-                <Text style={[styles.resultEmptyText, { color: C.textHint }]}> {/* Texto de instrucción cuando no hay resultado disponible */}
+              <View style={styles.resultEmpty}>{/* Contenedor del estado vacío centrado vertical y horizontalmente */}
+                <Ionicons name="scan-outline" size={32} color={Colors.primaryLighter} />{/* Ícono de escaneo grande en color morado claro como indicador visual de espera */}
+                <Text style={[styles.resultEmptyText, { color: C.textHint }]}>{/* Texto de instrucción cuando no hay resultado disponible */}
                   {mode === 'sena_texto' // Selecciona el mensaje según el modo activo
                     ? 'La traducción aparecerá aquí al detectar una seña' // Mensaje para el modo Seña→Texto
-                    : 'Escribe un texto y toca Traducir'} {/* Mensaje para el modo Texto→Seña */}
+                    : 'Escribe un texto y toca Traducir'}{/* Mensaje para el modo Texto→Seña */}
                 </Text>
               </View> // Cierra el contenedor del estado vacío
-            )} {/* Cierra el condicional de contenido del resultado */}
-          </View> {/* Cierra el cuerpo de la tarjeta de resultado */}
-        </View> {/* Cierra la tarjeta de resultado */}
+            )}{/* Cierra el condicional de contenido del resultado */}
+          </View>{/* Cierra el cuerpo de la tarjeta de resultado */}
+        </View>{/* Cierra la tarjeta de resultado */}
 
         {/* ── Botón principal ── */}
         <TouchableOpacity // Botón principal de acción: inicia/detiene la cámara o ejecuta la traducción
@@ -260,23 +262,23 @@ export const TranslationScreen: React.FC = () => { // Define y exporta el compon
             style={styles.actionBtn} // Estilo del botón: flex row, padding generoso, bordes redondeados
           >
             {loading ? ( // Si hay carga muestra solo el texto "Traduciendo..."
-              <Text style={styles.actionBtnText}>Traduciendo...</Text> // Texto de estado durante la traducción simulada
+              <Text style={styles.actionBtnText}>{t('translating')}</Text> // Texto de estado durante la traducción simulada
             ) : mode === 'sena_texto' ? ( // Si no hay carga, verifica el modo para mostrar el ícono y texto correctos
-              <> {/* Fragmento para el modo Seña→Texto: muestra ícono de play/stop y etiqueta */}
-                <Ionicons name={isActive ? 'stop-circle-outline' : 'play-circle-outline'} size={22} color="#fff" /> {/* Ícono stop si está activo, play si inactivo */}
-                <Text style={styles.actionBtnText}>{isActive ? 'Detener' : 'Iniciar traducción'}</Text> {/* Etiqueta que cambia según el estado de la cámara */}
+              <>{/* Fragmento para el modo Seña→Texto: muestra ícono de play/stop y etiqueta */}
+                <Ionicons name={isActive ? 'stop-circle-outline' : 'play-circle-outline'} size={22} color="#fff" />{/* Ícono stop si está activo, play si inactivo */}
+                <Text style={styles.actionBtnText}>{isActive ? t('stopCamera') : t('startCamera')}</Text>{/* Etiqueta que cambia según el estado de la cámara */}
               </> // Cierra el fragmento del modo Seña→Texto
             ) : ( // Modo Texto→Seña: muestra ícono de idioma y texto "Traducir a señas"
-              <> {/* Fragmento para el modo Texto→Seña */}
-                <Ionicons name="language-outline" size={22} color="#fff" /> {/* Ícono de idioma/lenguaje en color blanco */}
-                <Text style={styles.actionBtnText}>Traducir a señas</Text> {/* Etiqueta del botón en modo Texto→Seña */}
+              <>{/* Fragmento para el modo Texto→Seña */}
+                <Ionicons name="language-outline" size={22} color="#fff" />{/* Ícono de idioma/lenguaje en color blanco */}
+                <Text style={styles.actionBtnText}>{t('translate')}</Text>{/* Etiqueta del botón en modo Texto→Seña */}
               </> // Cierra el fragmento del modo Texto→Seña
-            )} {/* Cierra el condicional del contenido del botón */}
-          </LinearGradient> {/* Cierra el degradado del botón principal */}
-        </TouchableOpacity> {/* Cierra el botón táctil principal */}
+            )}{/* Cierra el condicional del contenido del botón */}
+          </LinearGradient>{/* Cierra el degradado del botón principal */}
+        </TouchableOpacity>{/* Cierra el botón táctil principal */}
 
-        </View> {/* Cierra el contenedor interno (innerWrapper) */}
-      </ScrollView> {/* Cierra el ScrollView de la pantalla */}
+        </View>{/* Cierra el contenedor interno (innerWrapper) */}
+      </ScrollView>{/* Cierra el ScrollView de la pantalla */}
     </View> // Cierra el contenedor raíz de la pantalla
   ); // Cierra el return del componente TranslationScreen
 }; // Cierra la definición del componente funcional TranslationScreen

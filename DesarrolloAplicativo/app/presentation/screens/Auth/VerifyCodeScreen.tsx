@@ -21,6 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
 import { useColors, useTheme } from '../../../state/ThemeContext';
+import { useTranslation } from '../../../i18n';
 
 const CODE_LENGTH = 6;
 
@@ -35,6 +36,7 @@ export const VerifyCodeScreen: React.FC = () => {
   const C = useColors();
   const { isDark } = useTheme();
   const rootBg = isDark ? '#0F0B1A' : '#EDE9FE';
+  const { t } = useTranslation();
 
   const handleChange = (text: string, index: number) => {
     const newCode = [...code];
@@ -54,7 +56,7 @@ export const VerifyCodeScreen: React.FC = () => {
   const handleConfirm = () => {
     const fullCode = code.join('');
     if (fullCode.length < CODE_LENGTH) {
-      Alert.alert('Error', 'Ingresa el código completo');
+      Alert.alert(t('error'), t('verifyErrorIncomplete'));
       return;
     }
     setLoading(true);
@@ -88,9 +90,9 @@ export const VerifyCodeScreen: React.FC = () => {
     >
       <View style={styles.formInner}>
       <View style={[styles.card, { backgroundColor: C.surface }]}>
-        <Text style={[styles.title, { color: C.textPrimary }]}>Verifica tu identidad</Text>
+        <Text style={[styles.title, { color: C.textPrimary }]}>{t('verifyTitle')}</Text>
         <Text style={[styles.subtitle, { color: C.textSecondary }]}>
-          Te enviamos un código de 6 dígitos a tu correo electrónico. Ingrésalo para continuar.
+          {t('verifySubtitle')}
         </Text>
 
         {/* OTP inputs */}
@@ -121,7 +123,7 @@ export const VerifyCodeScreen: React.FC = () => {
             disabled={loading}
           >
             <Text style={styles.submitBtnText}>
-              {loading ? 'Verificando...' : 'Confirmar'}
+              {loading ? t('verifyBtnLoading') : t('verifyBtn')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -132,8 +134,8 @@ export const VerifyCodeScreen: React.FC = () => {
         style={styles.linkRow}
       >
         <Text style={[styles.linkText, { color: C.textSecondary }]}>
-          ¿No recibiste el código?{' '}
-          <Text style={styles.linkAccent}>Reenviar</Text>
+          {t('verifyResend')}{' '}
+          <Text style={styles.linkAccent}>{t('verifyResendLink')}</Text>
         </Text>
       </TouchableOpacity>
       </View>

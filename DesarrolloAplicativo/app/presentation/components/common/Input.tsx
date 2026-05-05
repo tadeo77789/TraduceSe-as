@@ -63,8 +63,8 @@ function InputBase({ // Define el componente funcional interno InputBase (se exp
   const sizeTokens = ComponentSizes.input[size]; // Obtiene los tokens de tamaño (height, paddingHorizontal) según la prop size desde el design system
 
   return ( // Retorna el árbol JSX del componente Input
-    <View style={[styles.container, containerStyle]}> {/* Contenedor externo: aplica marginBottom base y estilos personalizados opcionales */}
-      {label && <Text style={[styles.label, { color: C.textSecondary }]}>{label}</Text>} {/* Muestra la etiqueta encima del campo solo si la prop label existe; usa color secundario del tema actual */}
+    <View style={[styles.container, containerStyle]}>{/* Contenedor externo: aplica marginBottom base y estilos personalizados opcionales */}
+      {label && <Text style={[styles.label, { color: C.textSecondary }]}>{label}</Text>}{/* Muestra la etiqueta encima del campo solo si la prop label existe; usa color secundario del tema actual */}
       <View // Contenedor del campo de texto con íconos
         style={[ // Combina estilos condicionalmente
           styles.inputWrapper, // Estilo base: fila horizontal, centrado, fondo, borde y overflow
@@ -72,7 +72,7 @@ function InputBase({ // Define el componente funcional interno InputBase (se exp
           focused && [styles.inputFocused, { backgroundColor: C.surface }], // Si focused=true: aplica borde púrpura, fondo surface del tema y sombra
           error ? styles.inputError : null, // Si hay error: aplica borde rojo y fondo rosado claro
         ]}
-      > {/* Cierra apertura del View wrapper del input */}
+      >{/* Cierra apertura del View wrapper del input */}
         {leftIcon && ( // Renderiza el ícono izquierdo solo si la prop leftIcon existe
           <Ionicons
             name={leftIcon} // Nombre del ícono Ionicons a renderizar (ej: 'person-outline', 'mail-outline')
@@ -80,7 +80,7 @@ function InputBase({ // Define el componente funcional interno InputBase (se exp
             color={focused ? Colors.primary : C.textSecondary} // Color dinámico: púrpura si tiene foco, gris secundario si no
             style={styles.leftIcon} // Aplica margen izquierdo y centrado vertical al ícono
           />
-        )} {/* Cierra bloque condicional del leftIcon */}
+        )}{/* Cierra bloque condicional del leftIcon */}
         <TextInput
           style={[ // Combina estilos del campo de texto
             styles.input, // Estilo base: flex 1, stretch vertical, fontSize 15
@@ -95,24 +95,24 @@ function InputBase({ // Define el componente funcional interno InputBase (se exp
           onFocus={() => setFocused(true)} // Cuando el campo recibe foco: activa el estado focused para cambiar estilos
           onBlur={() => setFocused(false)} // Cuando el campo pierde el foco: desactiva el estado focused
           {...props} // Pasa todas las props restantes de TextInput (placeholder, value, onChangeText, keyboardType, etc.)
-        /> {/* Cierra TextInput */}
+        />{/* Cierra TextInput */}
         {isPassword && ( // Renderiza el toggle de visibilidad solo si isPassword=true
-          <TouchableOpacity onPress={() => setShowPassword(v => !v)} style={styles.rightIcon}> {/* Botón táctil: alterna showPassword entre true/false al presionar; usa padding estilo rightIcon */}
+          <TouchableOpacity onPress={() => setShowPassword(v => !v)} style={styles.rightIcon}>{/* Botón táctil: alterna showPassword entre true/false al presionar; usa padding estilo rightIcon */}
             <Ionicons
               name={showPassword ? 'eye-off-outline' : 'eye-outline'} // Ícono dinámico: ojo cerrado si showPassword=true (contraseña visible), ojo abierto si showPassword=false
               size={20} // Tamaño del ícono de visibilidad: 20px
               color={focused ? Colors.primary : C.textSecondary} // Color dinámico: púrpura con foco, gris sin foco
             />
           </TouchableOpacity> // Cierra TouchableOpacity del toggle de contraseña
-        )} {/* Cierra bloque condicional de isPassword */}
+        )}{/* Cierra bloque condicional de isPassword */}
         {rightIcon && !isPassword && ( // Renderiza el ícono derecho personalizado solo si rightIcon existe Y no es campo de contraseña (evita conflicto con el toggle)
-          <TouchableOpacity onPress={onRightIconPress} style={styles.rightIcon}> {/* Botón táctil: ejecuta onRightIconPress al presionar; usa padding estilo rightIcon */}
-            <Ionicons name={rightIcon} size={20} color={C.textSecondary} /> {/* Muestra el ícono derecho personalizado en color secundario del tema */}
+          <TouchableOpacity onPress={onRightIconPress} style={styles.rightIcon}>{/* Botón táctil: ejecuta onRightIconPress al presionar; usa padding estilo rightIcon */}
+            <Ionicons name={rightIcon} size={20} color={C.textSecondary} />{/* Muestra el ícono derecho personalizado en color secundario del tema */}
           </TouchableOpacity> // Cierra TouchableOpacity del rightIcon personalizado
-        )} {/* Cierra bloque condicional de rightIcon */}
-      </View> {/* Cierra View wrapper del input */}
-      {hint && !error && <Text style={styles.hint}>{hint}</Text>} {/* Muestra el texto de ayuda solo si hint existe Y no hay error (el error tiene prioridad visual) */}
-      {error && <Text style={styles.errorText}>{error}</Text>} {/* Muestra el mensaje de error debajo del campo solo si error existe */}
+        )}{/* Cierra bloque condicional de rightIcon */}
+      </View>{/* Cierra View wrapper del input */}
+      {hint && !error && <Text style={styles.hint}>{hint}</Text>}{/* Muestra el texto de ayuda solo si hint existe Y no hay error (el error tiene prioridad visual) */}
+      {error && <Text style={styles.errorText}>{error}</Text>}{/* Muestra el mensaje de error debajo del campo solo si error existe */}
     </View> // Cierra View contenedor principal del componente
   );
 } // Cierra la función InputBase

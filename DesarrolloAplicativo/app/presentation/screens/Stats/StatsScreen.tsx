@@ -27,6 +27,7 @@ import {
 import { AppHeader } from '../../components/common/AppHeader'; // Importa AppHeader desde app/presentation/components/common/AppHeader: encabezado superior reutilizable
 import { Colors } from '../../../constants/colors'; // Importa Colors desde app/constants/colors: paleta de colores del proyecto
 import { useColors, useTheme } from '../../../state/ThemeContext'; // Importa useColors y useTheme desde app/state/ThemeContext: hooks para colores dinámicos y estado del tema
+import { useTranslation } from '../../../i18n';
 import { LinearGradient } from 'expo-linear-gradient'; // Importa LinearGradient de 'expo-linear-gradient': componente para degradados de color
 import { Ionicons } from '@expo/vector-icons'; // Importa Ionicons de '@expo/vector-icons': librería de íconos vectoriales de Expo
 
@@ -41,23 +42,23 @@ const BarChart: React.FC<{ // Define el componente funcional BarChart: renderiza
   const chartHeight = 100; // Altura fija de 100 px usada como referencia para escalar las barras proporcionalmente
 
   return ( // Inicia el retorno del JSX del componente BarChart
-    <View style={bar.container}> {/* Contenedor principal de la gráfica de barras con margen vertical */}
-      <View style={bar.chart}> {/* Contenedor flex-row que alinea las barras desde la base */}
+    <View style={bar.container}>{/* Contenedor principal de la gráfica de barras con margen vertical */}
+      <View style={bar.chart}>{/* Contenedor flex-row que alinea las barras desde la base */}
         {data.map((item, i) => ( // Itera sobre cada elemento del array de datos para renderizar una barra
-          <View key={i} style={bar.barGroup}> {/* Grupo de una barra individual: centra la etiqueta, la barra y el valor */}
-            <Text style={[bar.valueLabel, { color: C.textHint }]}>{item.value}</Text> {/* Etiqueta numérica sobre la barra con color de sugerencia del tema */}
-            <View style={[bar.barWrap, { height: (item.value / max) * chartHeight }]}> {/* Contenedor de la barra: su altura se calcula proporcionalmente al valor máximo */}
+          <View key={i} style={bar.barGroup}>{/* Grupo de una barra individual: centra la etiqueta, la barra y el valor */}
+            <Text style={[bar.valueLabel, { color: C.textHint }]}>{item.value}</Text>{/* Etiqueta numérica sobre la barra con color de sugerencia del tema */}
+            <View style={[bar.barWrap, { height: (item.value / max) * chartHeight }]}>{/* Contenedor de la barra: su altura se calcula proporcionalmente al valor máximo */}
               <LinearGradient // Barra con degradado de color de abajo hacia arriba
                 colors={colors} // Usa los colores de degradado recibidos como prop
                 start={{ x: 0, y: 1 }} // El degradado comienza desde la parte inferior de la barra
                 end={{ x: 0, y: 0 }} // El degradado termina en la parte superior de la barra
                 style={bar.bar} // Estilo que hace que el degradado llene completamente la barra
               />
-            </View> {/* Cierra el contenedor proporcional de la barra */}
-            <Text style={[bar.barLabel, { color: C.textHint }]}>{item.label}</Text> {/* Etiqueta del eje X debajo de la barra con color de sugerencia del tema */}
+            </View>{/* Cierra el contenedor proporcional de la barra */}
+            <Text style={[bar.barLabel, { color: C.textHint }]}>{item.label}</Text>{/* Etiqueta del eje X debajo de la barra con color de sugerencia del tema */}
           </View> // Cierra el grupo de la barra individual
-        ))} {/* Cierra el map de barras */}
-      </View> {/* Cierra el contenedor flex-row de la gráfica */}
+        ))}{/* Cierra el map de barras */}
+      </View>{/* Cierra el contenedor flex-row de la gráfica */}
     </View> // Cierra el contenedor principal del BarChart
   ); // Cierra el return del BarChart
 }; // Cierra la definición del componente BarChart
@@ -107,7 +108,7 @@ const LineChart: React.FC<{ data: number[]; color: string }> = ({ data, color })
             ]}
           />
         ); // Cierra el return del segmento de línea
-      })} {/* Cierra el map de segmentos de línea */}
+      })}{/* Cierra el map de segmentos de línea */}
       {/* Puntos */}
       {points.map((pt, i) => ( // Itera sobre todos los puntos para renderizar los círculos
         <View // View circular que representa un punto de datos en la gráfica
@@ -116,9 +117,9 @@ const LineChart: React.FC<{ data: number[]; color: string }> = ({ data, color })
         >
           {i === points.length - 1 && ( // Solo el último punto tiene el anillo de pulso visual
             <View style={[lineStyle.dotPulse, { borderColor: color }]} /> // Anillo semitransparente alrededor del último punto para destacarlo como el más reciente
-          )} {/* Cierra el condicional del anillo de pulso */}
+          )}{/* Cierra el condicional del anillo de pulso */}
         </View> // Cierra el punto de datos
-      ))} {/* Cierra el map de puntos */}
+      ))}{/* Cierra el map de puntos */}
     </View> // Cierra el contenedor principal del LineChart
   ); // Cierra el return del LineChart
 }; // Cierra la definición del componente LineChart
@@ -129,19 +130,19 @@ const PieChart: React.FC<{ // Define el componente PieChart: muestra una leyenda
 }> = ({ data }) => { // Desestructura la prop data del componente PieChart
   const C = useColors(); // Obtiene los colores dinámicos del tema activo
   return ( // Inicia el retorno del JSX del PieChart
-    <View style={pie.container}> {/* Contenedor principal del PieChart con separación entre filas */}
-      <View style={pie.legend}> {/* Contenedor de la leyenda con separación entre elementos */}
+    <View style={pie.container}>{/* Contenedor principal del PieChart con separación entre filas */}
+      <View style={pie.legend}>{/* Contenedor de la leyenda con separación entre elementos */}
         {data.map((item, i) => ( // Itera sobre cada sección para renderizar su fila de leyenda
-          <View key={i} style={pie.legendRow}> {/* Fila de leyenda: punto de color, etiqueta, barra de progreso y porcentaje */}
-            <View style={[pie.dot, { backgroundColor: item.color }]} /> {/* Punto circular con el color de la sección para identificarla visualmente */}
-            <Text style={[pie.legendLabel, { color: C.textSecondary }]}>{item.label}</Text> {/* Etiqueta de la sección con color secundario del tema */}
-            <View style={[pie.barTrack, { backgroundColor: C.border }]}> {/* Pista de la barra de progreso con color de borde del tema */}
-              <View style={[pie.barFill, { width: `${item.value}%` as any, backgroundColor: item.color }]} /> {/* Relleno de la barra proporcional al porcentaje de la sección, con el color de la misma */}
-            </View> {/* Cierra la pista de la barra de progreso */}
-            <Text style={[pie.legendValue, { color: item.color }]}>{item.value}%</Text> {/* Porcentaje de uso de la sección con el color correspondiente */}
+          <View key={i} style={pie.legendRow}>{/* Fila de leyenda: punto de color, etiqueta, barra de progreso y porcentaje */}
+            <View style={[pie.dot, { backgroundColor: item.color }]} />{/* Punto circular con el color de la sección para identificarla visualmente */}
+            <Text style={[pie.legendLabel, { color: C.textSecondary }]}>{item.label}</Text>{/* Etiqueta de la sección con color secundario del tema */}
+            <View style={[pie.barTrack, { backgroundColor: C.border }]}>{/* Pista de la barra de progreso con color de borde del tema */}
+              <View style={[pie.barFill, { width: `${item.value}%` as any, backgroundColor: item.color }]} />{/* Relleno de la barra proporcional al porcentaje de la sección, con el color de la misma */}
+            </View>{/* Cierra la pista de la barra de progreso */}
+            <Text style={[pie.legendValue, { color: item.color }]}>{item.value}%</Text>{/* Porcentaje de uso de la sección con el color correspondiente */}
           </View> // Cierra la fila de leyenda individual
-        ))} {/* Cierra el map de filas de leyenda */}
-      </View> {/* Cierra el contenedor de leyenda */}
+        ))}{/* Cierra el map de filas de leyenda */}
+      </View>{/* Cierra el contenedor de leyenda */}
     </View> // Cierra el contenedor principal del PieChart
   ); // Cierra el return del PieChart
 }; // Cierra la definición del componente PieChart
@@ -203,19 +204,6 @@ const WEEKLY_DATA = [ // Array mock de actividad semanal (dato temporal, debe co
 
 const MONTHLY_LINE = [10, 15, 20, 28, 35, 42, 50, 55, 62, 68, 74, 80]; // Array mock de crecimiento mensual de usuarios en 12 meses (dato temporal, debe conectarse con ENDPOINTS.stats)
 
-const SECTION_PIE = [ // Array mock de distribución de uso por sección de la app (dato temporal, debe conectarse con ENDPOINTS.stats)
-  { label: 'Traducción', value: 40, color: Colors.primary }, // Sección mock: Traducción ocupa el 40% del uso total con color morado primario
-  { label: 'Alfabeto', value: 25, color: '#06B6D4' }, // Sección mock: Alfabeto ocupa el 25% del uso total con color cian
-  { label: 'Historial', value: 20, color: '#10B981' }, // Sección mock: Historial ocupa el 20% del uso total con color verde
-  { label: 'Alarmas', value: 15, color: '#F59E0B' }, // Sección mock: Alarmas ocupa el 15% del uso total con color amarillo/ámbar
-]; // Cierra el array SECTION_PIE
-
-const KPI_CARDS = [ // Array mock de tarjetas KPI (Key Performance Indicators) con métricas de uso (datos temporales)
-  { label: 'Traducciones',    value: '1,248', icon: 'swap-horizontal-outline' as const, gradient: ['#EDE9FE', '#DDD6FE'] as [string, string], darkGradient: ['#2D1F4E', '#1E183A'] as [string, string], color: Colors.primary }, // KPI mock de traducciones totales: valor 1,248 con ícono de intercambio y degradado morado
-  { label: 'Usuarios activos', value: '342',  icon: 'people-outline' as const,          gradient: ['#DBEAFE', '#BFDBFE'] as [string, string], darkGradient: ['#1A2744', '#111B35'] as [string, string], color: '#2563EB' }, // KPI mock de usuarios activos: valor 342 con ícono de personas y degradado azul
-  { label: 'Horas aprendidas', value: '89h',  icon: 'school-outline' as const,          gradient: ['#D1FAE5', '#A7F3D0'] as [string, string], darkGradient: ['#0F2920', '#0A1E16'] as [string, string], color: '#059669' }, // KPI mock de horas aprendidas: valor 89h con ícono de escuela y degradado verde
-  { label: 'Señas aprendidas', value: '84',   icon: 'hand-left-outline' as const,       gradient: ['#FEF3C7', '#FDE68A'] as [string, string], darkGradient: ['#2A1E0A', '#1C1508'] as [string, string], color: '#D97706' }, // KPI mock de señas aprendidas: valor 84 con ícono de mano y degradado amarillo
-]; // Cierra el array KPI_CARDS
 
 // ─── StatCard ─────────────────────────────────────────────────────────────────
 interface StatCardProps { // Define la interfaz de props del componente StatCard
@@ -228,13 +216,13 @@ interface StatCardProps { // Define la interfaz de props del componente StatCard
 const StatCard: React.FC<StatCardProps> = ({ title, description, accentColor, children }) => { // Define el componente StatCard: contenedor reutilizable con título, acento y descripción para gráficas
   const C = useColors(); // Obtiene los colores dinámicos del tema activo
   return ( // Inicia el retorno del JSX del StatCard
-    <View style={[styles.card, { backgroundColor: C.surface }]}> {/* Tarjeta con fondo de superficie del tema activo */}
-      <View style={styles.cardHeader}> {/* Encabezado de la tarjeta con línea de acento y título */}
-        <View style={[styles.cardAccent, { backgroundColor: accentColor }]} /> {/* Línea vertical de acento con el color recibido como prop */}
-        <Text style={[styles.cardTitle, { color: C.textPrimary }]}>{title}</Text> {/* Título de la tarjeta con color de texto primario del tema */}
-      </View> {/* Cierra el encabezado del StatCard */}
-      {children} {/* Renderiza el contenido interior de la tarjeta (gráficas) */}
-      <Text style={[styles.cardDesc, { color: C.textSecondary }]}>{description}</Text> {/* Descripción al pie de la tarjeta con color de texto secundario */}
+    <View style={[styles.card, { backgroundColor: C.surface }]}>{/* Tarjeta con fondo de superficie del tema activo */}
+      <View style={styles.cardHeader}>{/* Encabezado de la tarjeta con línea de acento y título */}
+        <View style={[styles.cardAccent, { backgroundColor: accentColor }]} />{/* Línea vertical de acento con el color recibido como prop */}
+        <Text style={[styles.cardTitle, { color: C.textPrimary }]}>{title}</Text>{/* Título de la tarjeta con color de texto primario del tema */}
+      </View>{/* Cierra el encabezado del StatCard */}
+      {children}{/* Renderiza el contenido interior de la tarjeta (gráficas) */}
+      <Text style={[styles.cardDesc, { color: C.textSecondary }]}>{description}</Text>{/* Descripción al pie de la tarjeta con color de texto secundario */}
     </View> // Cierra la tarjeta StatCard
   ); // Cierra el return del StatCard
 }; // Cierra la definición del componente StatCard
@@ -246,50 +234,64 @@ export const StatsScreen: React.FC = () => { // Define y exporta el componente f
   const isDesktop = width >= 1024; // Booleano que indica si el dispositivo tiene ancho de escritorio (≥ 1024 px)
   const C = useColors(); // Obtiene el objeto de colores dinámicos según el tema activo
   const { isDark } = useTheme(); // Obtiene el estado del tema: isDark es true cuando está activado el modo oscuro
+  const { t } = useTranslation();
+
+  const SECTION_PIE = [
+    { label: t('sectionTranslation'), value: 47, color: Colors.primary },
+    { label: t('sectionAlphabet'),    value: 29, color: '#06B6D4' },
+    { label: t('sectionHistory'),     value: 24, color: '#10B981' },
+  ];
+
+  const KPI_CARDS = [
+    { label: t('kpiTranslations'),  value: '1,248', icon: 'swap-horizontal-outline' as const, gradient: ['#EDE9FE', '#DDD6FE'] as [string, string], darkGradient: ['#2D1F4E', '#1E183A'] as [string, string], color: Colors.primary },
+    { label: t('kpiActiveUsers'),   value: '342',   icon: 'people-outline' as const,          gradient: ['#DBEAFE', '#BFDBFE'] as [string, string], darkGradient: ['#1A2744', '#111B35'] as [string, string], color: '#2563EB' },
+    { label: t('kpiHoursLearned'),  value: '89h',   icon: 'school-outline' as const,          gradient: ['#D1FAE5', '#A7F3D0'] as [string, string], darkGradient: ['#0F2920', '#0A1E16'] as [string, string], color: '#059669' },
+    { label: t('kpiSignsLearned'),  value: '84',    icon: 'hand-left-outline' as const,       gradient: ['#FEF3C7', '#FDE68A'] as [string, string], darkGradient: ['#2A1E0A', '#1C1508'] as [string, string], color: '#D97706' },
+  ];
 
   return ( // Inicia el retorno del JSX del componente StatsScreen
-    <View style={[styles.root, { backgroundColor: C.backgroundGray }]}> {/* Contenedor raíz que ocupa toda la pantalla con color de fondo del tema */}
-      <AppHeader /> {/* Renderiza el encabezado superior de la aplicación */}
+    <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>{/* Contenedor raíz que ocupa toda la pantalla con color de fondo del tema */}
+      <AppHeader />{/* Renderiza el encabezado superior de la aplicación */}
       <ScrollView // Contenedor con scroll vertical para el contenido de estadísticas
         style={styles.scroll} // Estilo base del ScrollView: ocupa todo el espacio disponible
         contentContainerStyle={[styles.content, isDesktop && styles.contentDesktop]} // Padding adicional en desktop para pantallas anchas
         showsVerticalScrollIndicator={false} // Oculta la barra de scroll vertical para una interfaz más limpia
       >
-        <View style={[styles.innerWrapper, isDesktop && styles.innerWrapperWide]}> {/* Contenedor interno con ancho máximo en desktop */}
+        <View style={[styles.innerWrapper, isDesktop && styles.innerWrapperWide]}>{/* Contenedor interno con ancho máximo en desktop */}
 
           {/* KPI Cards — 4 cols en desktop, 2 en tablet/mobile */}
-          <View style={[styles.kpiGrid, isDesktop && styles.kpiGridDesktop]}> {/* Grilla de tarjetas KPI: flex wrap en tablet/mobile, sin wrap en desktop */}
+          <View style={[styles.kpiGrid, isDesktop && styles.kpiGridDesktop]}>{/* Grilla de tarjetas KPI: flex wrap en tablet/mobile, sin wrap en desktop */}
             {KPI_CARDS.map((kpi, i) => ( // Itera sobre las tarjetas KPI para renderizarlas
-              <LinearGradient key={i} colors={isDark ? kpi.darkGradient : kpi.gradient} style={[styles.kpiCard, isDesktop && styles.kpiCardDesktop]}> {/* Tarjeta KPI con degradado que cambia según el tema (claro/oscuro) */}
-                <Ionicons name={kpi.icon} size={20} color={kpi.color} /> {/* Ícono de la métrica KPI con el color correspondiente a la categoría */}
-                <Text style={[styles.kpiValue, { color: kpi.color }]}>{kpi.value}</Text> {/* Valor numérico grande de la KPI con color de la categoría */}
-                <Text style={[styles.kpiLabel, { color: C.textSecondary }]}>{kpi.label}</Text> {/* Etiqueta descriptiva de la KPI con color secundario del tema */}
+              <LinearGradient key={i} colors={isDark ? kpi.darkGradient : kpi.gradient} style={[styles.kpiCard, isDesktop && styles.kpiCardDesktop]}>{/* Tarjeta KPI con degradado que cambia según el tema (claro/oscuro) */}
+                <Ionicons name={kpi.icon} size={20} color={kpi.color} />{/* Ícono de la métrica KPI con el color correspondiente a la categoría */}
+                <Text style={[styles.kpiValue, { color: kpi.color }]}>{kpi.value}</Text>{/* Valor numérico grande de la KPI con color de la categoría */}
+                <Text style={[styles.kpiLabel, { color: C.textSecondary }]}>{kpi.label}</Text>{/* Etiqueta descriptiva de la KPI con color secundario del tema */}
               </LinearGradient> // Cierra la tarjeta KPI con degradado
-            ))} {/* Cierra el map de tarjetas KPI */}
-          </View> {/* Cierra la grilla de tarjetas KPI */}
+            ))}{/* Cierra el map de tarjetas KPI */}
+          </View>{/* Cierra la grilla de tarjetas KPI */}
 
           {/* Stat Cards */}
-          <View style={[styles.cardsGrid, isTablet && styles.cardsGridTablet]}> {/* Grilla de StatCards: columna en móvil, flex wrap en tablet */}
-            <StatCard // Primera tarjeta de estadísticas: actividad semanal
-              title="Actividad semanal" // Título de la tarjeta de actividad semanal
-              accentColor={Colors.primary} // Color de acento morado para la línea izquierda de la tarjeta
-              description="La actividad presenta un incremento progresivo hacia el fin de semana, alcanzando su punto más alto el sábado." // Descripción de la tendencia de los datos
+          <View style={[styles.cardsGrid, isTablet && styles.cardsGridTablet]}>{/* Grilla de StatCards: columna en móvil, flex wrap en tablet */}
+            <StatCard
+              title={t('statsWeeklyTitle')}
+              accentColor={Colors.primary}
+              description={t('statsWeeklyDesc')}
             >
-              <BarChart data={WEEKLY_DATA} colors={['#A78BFA', '#7C3AED']} /> {/* Gráfica de barras con datos semanales mock y degradado morado */}
-            </StatCard> {/* Cierra la primera StatCard */}
+              <BarChart data={WEEKLY_DATA} colors={['#A78BFA', '#7C3AED']} />{/* Gráfica de barras con datos semanales mock y degradado morado */}
+            </StatCard>{/* Cierra la primera StatCard */}
 
-            <StatCard // Segunda tarjeta de estadísticas: crecimiento mensual de usuarios
-              title="Crecimiento mensual de usuarios" // Título de la tarjeta de crecimiento mensual
-              accentColor="#06B6D4" // Color de acento cian para la línea izquierda de la tarjeta
-              description="Crecimiento constante en la cantidad de usuarios, con un aumento cercano al 80% al finalizar el período." // Descripción del patrón de crecimiento
+            <StatCard
+              title={t('statsMonthlyTitle')}
+              accentColor="#06B6D4"
+              description={t('statsMonthlyDesc')}
             >
-              <LineChart data={MONTHLY_LINE} color={Colors.primary} /> {/* Gráfica de líneas con datos mensuales mock y color morado */}
-            </StatCard> {/* Cierra la segunda StatCard */}
+              <LineChart data={MONTHLY_LINE} color={Colors.primary} />{/* Gráfica de líneas con datos mensuales mock y color morado */}
+            </StatCard>{/* Cierra la segunda StatCard */}
 
-            <StatCard // Tercera tarjeta de estadísticas: volumen de traducciones por semana
-              title="Volumen de traducciones por semana" // Título de la tarjeta de volumen de traducciones
-              accentColor="#10B981" // Color de acento verde para la línea izquierda de la tarjeta
-              description="El volumen de traducciones crece semana a semana, alcanzando su punto máximo en la semana 4." // Descripción de la tendencia de crecimiento
+            <StatCard
+              title={t('statsVolumeTitle')}
+              accentColor="#10B981"
+              description={t('statsVolumeDesc')}
             >
               <BarChart // Gráfica de barras con datos semanales mock y degradado cian
                 data={[ // Array inline de datos semanales mock para la gráfica de volumen
@@ -300,19 +302,19 @@ export const StatsScreen: React.FC = () => { // Define y exporta el componente f
                 ]} // Cierra el array de datos inline
                 colors={['#67E8F9', '#06B6D4']} // Degradado cian claro a cian oscuro para las barras
               />
-            </StatCard> {/* Cierra la tercera StatCard */}
+            </StatCard>{/* Cierra la tercera StatCard */}
 
-            <StatCard // Cuarta tarjeta de estadísticas: uso por sección
-              title="Uso por sección" // Título de la tarjeta de distribución por sección
-              accentColor="#F59E0B" // Color de acento ámbar para la línea izquierda de la tarjeta
-              description="Traducción concentra el 40% del uso total, posicionándose como la funcionalidad principal de la app." // Descripción del dominio de la sección de traducción
+            <StatCard
+              title={t('statsSectionTitle')}
+              accentColor="#F59E0B"
+              description={t('statsSectionDesc')}
             >
-              <PieChart data={SECTION_PIE} /> {/* Leyenda de distribución por sección con datos mock */}
-            </StatCard> {/* Cierra la cuarta StatCard */}
-          </View> {/* Cierra la grilla de StatCards */}
+              <PieChart data={SECTION_PIE} />{/* Leyenda de distribución por sección con datos mock */}
+            </StatCard>{/* Cierra la cuarta StatCard */}
+          </View>{/* Cierra la grilla de StatCards */}
 
-        </View> {/* Cierra el contenedor interno (innerWrapper) */}
-      </ScrollView> {/* Cierra el ScrollView de la pantalla */}
+        </View>{/* Cierra el contenedor interno (innerWrapper) */}
+      </ScrollView>{/* Cierra el ScrollView de la pantalla */}
     </View> // Cierra el contenedor raíz de la pantalla
   ); // Cierra el return del componente StatsScreen
 }; // Cierra la definición del componente funcional StatsScreen

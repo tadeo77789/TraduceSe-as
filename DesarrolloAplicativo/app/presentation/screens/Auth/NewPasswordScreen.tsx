@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
 import { Input } from '../../components/common/Input';
 import { useColors, useTheme } from '../../../state/ThemeContext';
+import { useTranslation } from '../../../i18n';
 
 export const NewPasswordScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -31,14 +32,15 @@ export const NewPasswordScreen: React.FC = () => {
   const C = useColors();
   const { isDark } = useTheme();
   const rootBg = isDark ? '#0F0B1A' : '#EDE9FE';
+  const { t } = useTranslation();
 
   const handleConfirm = () => {
     if (!password || password.length < 8) {
-      Alert.alert('Error', 'La contraseña debe tener mínimo 8 caracteres');
+      Alert.alert(t('error'), t('newPasswordErrorShort'));
       return;
     }
     if (password !== confirm) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
+      Alert.alert(t('error'), t('newPasswordErrorMismatch'));
       return;
     }
     setLoading(true);
@@ -76,22 +78,22 @@ export const NewPasswordScreen: React.FC = () => {
     >
       <View style={styles.formInner}>
       <View style={[styles.card, { backgroundColor: C.surface }]}>
-        <Text style={[styles.title, { color: C.textPrimary }]}>Nueva contraseña</Text>
+        <Text style={[styles.title, { color: C.textPrimary }]}>{t('newPasswordTitle')}</Text>
 
         <Input
-          label="Nueva contraseña"
-          placeholder="Nueva contraseña"
+          label={t('newPasswordNewLabel')}
+          placeholder={t('newPasswordNewPlaceholder')}
           value={password}
           onChangeText={setPassword}
           isPassword
           leftIcon="lock-closed-outline"
-          hint="Mínimo 8 caracteres"
+          hint={t('newPasswordHint')}
           containerStyle={styles.inputSpacing}
         />
 
         <Input
-          label="Confirmar contraseña"
-          placeholder="Repite tu contraseña"
+          label={t('newPasswordConfirmLabel')}
+          placeholder={t('newPasswordConfirmPlaceholder')}
           value={confirm}
           onChangeText={setConfirm}
           isPassword
@@ -106,7 +108,7 @@ export const NewPasswordScreen: React.FC = () => {
             disabled={loading}
           >
             <Text style={styles.submitBtnText}>
-              {loading ? 'Guardando...' : 'Guardar contraseña'}
+              {loading ? t('newPasswordBtnLoading') : t('newPasswordBtn')}
             </Text>
           </TouchableOpacity>
         </View>

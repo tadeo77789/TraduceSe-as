@@ -30,6 +30,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
 import { Input } from '../../components/common/Input';
 import { useRegisterForm } from '../../../hooks/useRegisterForm';
+import { useTranslation } from '../../../i18n';
 
 export const RegisterScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -37,6 +38,7 @@ export const RegisterScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isWide = width >= 768;
+  const { t } = useTranslation();
 
   const FormPanel = (
     <ScrollView
@@ -49,12 +51,11 @@ export const RegisterScreen: React.FC = () => {
       <View style={styles.formInner}>
       {/* Card formulario */}
       <View style={styles.card}>
-        {/* Título */}
-        <Text style={styles.title}>Crea tu Cuenta</Text>
+        <Text style={styles.title}>{t('registerTitle')}</Text>
 
         <Input
-          label="Nombre"
-          placeholder="Escribe tu nombre completo"
+          label={t('registerNameLabel')}
+          placeholder={t('registerNamePlaceholder')}
           value={form.nombre}
           onChangeText={v => setField('nombre', v)}
           leftIcon="person-outline"
@@ -63,8 +64,8 @@ export const RegisterScreen: React.FC = () => {
         />
 
         <Input
-          label="Correo"
-          placeholder="Introduce tu correo electrónico"
+          label={t('email')}
+          placeholder={t('registerEmailPlaceholder')}
           value={form.correo}
           onChangeText={v => setField('correo', v)}
           keyboardType="email-address"
@@ -74,13 +75,13 @@ export const RegisterScreen: React.FC = () => {
         />
 
         <Input
-          label="Contraseña"
-          placeholder="Crea tu contraseña"
+          label={t('password')}
+          placeholder={t('registerPasswordPlaceholder')}
           value={form.password}
           onChangeText={v => setField('password', v)}
           isPassword
           leftIcon="lock-closed-outline"
-          hint="Mínimo 8 caracteres"
+          hint={t('registerPasswordHint')}
           error={errors.password}
           containerStyle={styles.inputSpacing}
         />
@@ -95,9 +96,9 @@ export const RegisterScreen: React.FC = () => {
             {form.terminos && <Ionicons name="checkmark" size={13} color="#fff" />}
           </View>
           <Text style={styles.termsText}>
-            Acepto los{' '}
-            <Text style={styles.termsLink}>términos y condiciones</Text>
-            {' '}de esta aplicación
+            {t('registerTerms')}
+            <Text style={styles.termsLink}>{t('registerTermsLink')}</Text>
+            {t('registerTermsEnd')}
           </Text>
         </TouchableOpacity>
         {errors.terminos ? <Text style={styles.errorText}>{errors.terminos}</Text> : null}
@@ -109,7 +110,7 @@ export const RegisterScreen: React.FC = () => {
             onPress={handleRegister}
             disabled={loading}
           >
-            <Text style={styles.registerBtnText}>{loading ? 'Creando...' : 'Registrarse'}</Text>
+            <Text style={styles.registerBtnText}>{loading ? t('registerBtnLoading') : t('registerBtn')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -120,8 +121,8 @@ export const RegisterScreen: React.FC = () => {
         style={styles.loginRow}
       >
         <Text style={styles.loginText}>
-          ¿Ya tienes cuenta?{' '}
-          <Text style={styles.loginLink}>Inicia sesión</Text>
+          {t('registerHasAccount')}{' '}
+          <Text style={styles.loginLink}>{t('registerLoginLink')}</Text>
         </Text>
       </TouchableOpacity>
       </View>
