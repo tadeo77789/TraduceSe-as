@@ -60,6 +60,8 @@ const en: typeof es = {
   slide2Caption: 'Connect with deaf people using Colombian Sign Language.',
   slide3Title: 'Learn the LSC alphabet',
   slide3Caption: 'Master the alphabet and expand your vocabulary step by step.',
+  slide4Title: 'Review your history',
+  slide4Caption: 'Consult your past translations and track your progress.',
   testimonialQuote: '"The app has made it easier to communicate with my classmates. It\'s incredible how an app can change a person\'s life so much."',
   testimonialName: 'Juan Pérez',
   testimonialRole: 'University student',
