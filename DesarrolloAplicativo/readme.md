@@ -523,3 +523,4 @@ El ícono vive en dos lugares con roles distintos:
 | `.claude/` | Configuración del agente de desarrollo |
 
 > **Regla:** si un archivo se puede regenerar automáticamente o contiene datos privados de tu máquina, va en `.gitignore`.
+
