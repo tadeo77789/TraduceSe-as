@@ -9,7 +9,6 @@ screens/
 ├── LandingScreen.tsx      → Pantalla de bienvenida (carrusel de imágenes, testimonios, botones de acción)
 ├── Auth/                  → Flujo de autenticación
 ├── Translation/           → Pantalla principal de traducción
-├── Alarms/                → Gestión de alarmas visuales
 ├── Alphabet/              → Alfabeto de señas colombianas
 ├── Stats/                 → Estadísticas de uso
 ├── History/               → Historial de traducciones
@@ -37,11 +36,6 @@ Flujo completo de autenticación con 5 pantallas encadenadas:
 |---|---|
 | `TranslationScreen.tsx` | Pantalla principal con toggle **Seña ↔ Texto**. En modo *Seña→Texto* activa la cámara para detectar señas. En modo *Texto→Seña* muestra un avatar 3D con la representación de la seña |
 
-### `Alarms/`
-| Pantalla | Descripción |
-|---|---|
-| `AlarmsScreen.tsx` | Lista de alarmas activas/inactivas con toggle. Incluye un selector de hora con reloj analógico para crear nuevas alarmas |
-
 ### `Alphabet/`
 | Pantalla | Descripción |
 |---|---|
@@ -60,4 +54,8 @@ Flujo completo de autenticación con 5 pantallas encadenadas:
 ### `Profile/`
 | Pantalla | Descripción |
 |---|---|
-| `ProfileScreen.tsx` | Muestra correo y contraseña del usuario. Permite cambiar tema claro/oscuro, seleccionar idioma de la interfaz, cerrar sesión y eliminar la cuenta |
+| `ProfileScreen.tsx` | Muestra correo y contraseña del usuario. Permite alternar el **acento de color** (Morado / Verde), cambiar tema claro/oscuro, seleccionar idioma de la interfaz, cerrar sesión y eliminar la cuenta. Da acceso a `Terms` y `PrivacyPolicy` |
+| `TermsScreen.tsx` | Términos y condiciones de uso (9 secciones legales). Se accede desde Perfil → Términos y condiciones |
+| `PrivacyPolicyScreen.tsx` | Política de privacidad alineada con la Ley 1581 de 2012 (11 secciones). Se accede desde Perfil → Política de privacidad |
+
+> Las pantallas internas usan `useColors()` del `ThemeContext` para que cualquier acento (púrpura/verde) o modo (claro/oscuro) se aplique sin filtraciones de morado.

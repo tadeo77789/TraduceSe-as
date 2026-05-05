@@ -1,3 +1,4 @@
+// Archivo: app/presentation/screens/Translation/TranslationScreen.tsx
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -8,327 +9,315 @@ import {
   ScrollView,
   Image,
   Alert,
+  Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { AppHeader } from '../../components/common/AppHeader';
-import { Button } from '../../components/common/Button';
 import { Colors } from '../../../constants/colors';
+import { useColors } from '../../../state/ThemeContext';
+import { useTranslation } from '../../../i18n';
 
 type Mode = 'sena_texto' | 'texto_sena';
 
 export const TranslationScreen: React.FC = () => {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const isDesktop = width >= 1024;
+  const C = useColors();
+  const { t } = useTranslation();
+  const [permission, requestPermission] = useCameraPermissions();
+
+  const TIPS = [
+    { icon: 'hand-left-outline' as const, text: t('tip1') },
+    { icon: 'sunny-outline' as const, text: t('tip2') },
+    { icon: 'reload-outline' as const, text: t('tip3') },
+  ];
+
   const [mode, setMode] = useState<Mode>('sena_texto');
   const [text, setText] = useState('');
   const [result, setResult] = useState('');
   const [isActive, setIsActive] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleAction = useCallback(() => {
+  const handleAction = useCallback(async () => {
     if (mode === 'sena_texto') {
-      setIsActive(prev => !prev);
+      if (!isActive) {
+        // Solicitar permiso de cámara si no está concedido
+        if (!permission?.granted) {
+          const res = await requestPermission();
+          if (!res.granted) {
+            if (Platform.OS === 'web') {
+              alert(t('cameraPermissionMsg'));
+            } else {
+              Alert.alert(t('cameraPermissionTitle'), t('cameraPermissionMsg'));
+            }
+            return;
+          }
+        }
+        setIsActive(true);
+      } else {
+        setIsActive(false);
+        setResult('');
+      }
     } else {
-      if (!text.trim()) { Alert.alert('', 'Escribe algo para traducir'); return; }
+      if (!text.trim()) { Alert.alert('', t('textEmptyAlert')); return; }
       setLoading(true);
-      // TODO: llamar al backend IA
       setTimeout(() => {
-        setResult('Traducción simulada: ' + text);
+        setResult(t('translationResult') + text);
         setLoading(false);
       }, 1200);
     }
-  }, [mode, text]);
+  }, [mode, text, isActive, permission, requestPermission, t]);
+
+  const switchMode = useCallback((m: Mode) => {
+    setMode(m);
+    setResult('');
+    setText('');
+    setIsActive(false);
+  }, []);
+
+  const cameraGranted = permission?.granted ?? false;
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>
       <AppHeader />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+      <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, isDesktop && styles.contentDesktop]} showsVerticalScrollIndicator={false}>
+        <View style={[styles.innerWrapper, isTablet && styles.innerWrapperWide]}>
 
-        {/* Toggle Seña / Texto */}
-        <View style={styles.toggleContainer}>
-          <TouchableOpacity
-            style={[styles.toggleBtn, mode === 'sena_texto' && styles.toggleBtnActive]}
-            onPress={() => { setMode('sena_texto'); setResult(''); setText(''); }}
-            activeOpacity={0.8}
-          >
-            {mode === 'sena_texto' && (
-              <LinearGradient
-                colors={['#9333EA', '#7C3AED']}
-                style={StyleSheet.absoluteFill}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-              />
-            )}
-            <Ionicons
-              name="hand-left-outline"
-              size={16}
-              color={mode === 'sena_texto' ? '#fff' : Colors.textSecondary}
-            />
-            <Text style={[styles.toggleText, mode === 'sena_texto' && styles.toggleTextActive]}>
-              Seña
-            </Text>
-          </TouchableOpacity>
+          {/* ── Toggle de modo ── */}
+          <View style={[styles.modeToggle, { backgroundColor: C.surface, borderColor: C.border, shadowColor: C.primary }]}>
+            <TouchableOpacity style={[styles.modeBtn, mode === 'sena_texto' && styles.modeBtnActive]} onPress={() => switchMode('sena_texto')} activeOpacity={0.8}>
+              {mode === 'sena_texto' && (
+                <LinearGradient colors={[C.primary + 'EE', C.primary]} style={StyleSheet.absoluteFill} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} />
+              )}
+              <Ionicons name="hand-left-outline" size={18} color={mode === 'sena_texto' ? '#fff' : C.textSecondary} />
+              <Text style={[styles.modeBtnText, mode === 'sena_texto' && styles.modeBtnTextActive]}>{t('modeCamera')}</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.toggleBtn, mode === 'texto_sena' && styles.toggleBtnActive]}
-            onPress={() => { setMode('texto_sena'); setResult(''); setIsActive(false); }}
-            activeOpacity={0.8}
-          >
-            {mode === 'texto_sena' && (
-              <LinearGradient
-                colors={['#9333EA', '#7C3AED']}
-                style={StyleSheet.absoluteFill}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-              />
-            )}
-            <Ionicons
-              name="text-outline"
-              size={16}
-              color={mode === 'texto_sena' ? '#fff' : Colors.textSecondary}
-            />
-            <Text style={[styles.toggleText, mode === 'texto_sena' && styles.toggleTextActive]}>
-              Texto
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Área central */}
-        <View style={styles.centerArea}>
-          {/* Imagen / cámara */}
-          <View style={styles.imageBox}>
-            {isActive && (
-              <View style={styles.activeBadge}>
-                <View style={styles.activeDot} />
-                <Text style={styles.activeText}>EN VIVO</Text>
-              </View>
-            )}
-            {mode === 'sena_texto' ? (
-              <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400' }}
-                style={styles.cameraImage}
-                resizeMode="cover"
-              />
-            ) : (
-              <Image
-                source={{ uri: 'https://img.freepik.com/free-vector/sign-language-concept-illustration_114360-7724.jpg?w=400' }}
-                style={styles.cameraImage}
-                resizeMode="cover"
-              />
-            )}
-            <LinearGradient
-              colors={['transparent', 'rgba(0,0,0,0.3)']}
-              style={styles.imageOverlay}
-            />
+            <TouchableOpacity style={[styles.modeBtn, mode === 'texto_sena' && styles.modeBtnActive]} onPress={() => switchMode('texto_sena')} activeOpacity={0.8}>
+              {mode === 'texto_sena' && (
+                <LinearGradient colors={[C.primary + 'EE', C.primary]} style={StyleSheet.absoluteFill} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} />
+              )}
+              <Ionicons name="text-outline" size={18} color={mode === 'texto_sena' ? '#fff' : C.textSecondary} />
+              <Text style={[styles.modeBtnText, mode === 'texto_sena' && styles.modeBtnTextActive]}>{t('modeText')}</Text>
+            </TouchableOpacity>
           </View>
 
-          {/* Instrucciones o entrada */}
+          {/* ── Área de cámara / entrada ── */}
           {mode === 'sena_texto' ? (
-            <View style={styles.instructionBox}>
-              <View style={styles.instructionHeader}>
-                <Ionicons name="information-circle" size={18} color={Colors.primary} />
-                <Text style={styles.instructionTitle}>Cómo usar</Text>
+            <View style={[styles.cameraCard, { shadowColor: C.primary }]}>
+              {/* Badge EN VIVO */}
+              {isActive && (
+                <View style={styles.liveBadge}>
+                  <View style={styles.liveDot} />
+                  <Text style={styles.liveText}>{t('live')}</Text>
+                </View>
+              )}
+
+              {/* Cámara real o placeholder */}
+              {isActive && cameraGranted ? (
+                <CameraView style={styles.cameraImage} facing="front" />
+              ) : (
+                <Image
+                  source={require('../../../assets/images/camera_placeholder.jpg')}
+                  style={styles.cameraImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Overlay degradado */}
+              <LinearGradient colors={['transparent', 'rgba(0,0,0,0.55)']} style={styles.cameraOverlay} />
+
+              {/* Marco de detección */}
+              <View style={styles.detectionFrame}>
+                <View style={[styles.corner, styles.cornerTL]} />
+                <View style={[styles.corner, styles.cornerTR]} />
+                <View style={[styles.corner, styles.cornerBL]} />
+                <View style={[styles.corner, styles.cornerBR]} />
               </View>
-              <Text style={styles.instructionText}>
-                Realiza las señas de forma clara y tranquila.{'\n\n'}
-                Si la traducción no es exacta, intenta repetir la seña.
-              </Text>
-              <Text style={styles.instructionHighlight}>💜 La tecnología aprende contigo</Text>
+
+              {/* Label inferior */}
+              <View style={styles.cameraLabel}>
+                <Ionicons name="camera-outline" size={14} color="#fff" />
+                <Text style={styles.cameraLabelText}>
+                  {isActive ? t('analyzingSigns') : t('tapStartCamera')}
+                </Text>
+              </View>
             </View>
           ) : (
-            <View style={styles.textInputArea}>
-              <Text style={styles.inputLabel}>Escribe para traducir</Text>
+            <View style={[styles.inputCard, { backgroundColor: C.surface }]}>
+              <View style={styles.inputCardHeader}>
+                <Ionicons name="create-outline" size={16} color={C.primary} />
+                <Text style={[styles.inputCardTitle, { color: C.textPrimary }]}>{t('writeTextLabel')}</Text>
+              </View>
               <TextInput
-                style={styles.textArea}
+                style={[styles.textArea, { color: C.textPrimary, backgroundColor: C.backgroundGray, borderColor: C.border }]}
                 value={text}
                 onChangeText={setText}
-                placeholder="hola me llamo..."
-                placeholderTextColor={Colors.textHint}
+                placeholder={t('textPlaceholder')}
+                placeholderTextColor={C.textHint}
                 multiline
+                textAlignVertical="top"
               />
+              <View style={styles.charCount}>
+                <Text style={[styles.charCountText, { color: C.textHint }]}>{text.length} {t('characters')}</Text>
+              </View>
             </View>
           )}
-        </View>
 
-        {/* Resultado seña→texto */}
-        {mode === 'sena_texto' && (
-          <View style={styles.resultSection}>
-            <Text style={styles.resultLabel}>Traducción detectada</Text>
-            <View style={styles.resultBox}>
-              <Ionicons name="chatbubble-outline" size={16} color={Colors.primary} style={{ marginBottom: 6 }} />
-              <Text style={styles.resultText}>{result || 'hola me llamo'}</Text>
+          {/* ── Tips (solo modo seña) ── */}
+          {mode === 'sena_texto' && (
+            <View style={styles.tipsRow}>
+              {TIPS.map((tip, i) => (
+                <View key={i} style={[styles.tipChip, { backgroundColor: C.primaryBg }]}>
+                  <Ionicons name={tip.icon} size={13} color={C.primary} />
+                  <Text style={[styles.tipText, { color: C.primary }]}>{tip.text}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {/* ── Resultado ── */}
+          <View style={[styles.resultCard, { backgroundColor: C.surface, borderColor: C.border, shadowColor: C.primary }]}>
+            <View style={[styles.resultHeader, { borderBottomColor: C.border }]}>
+              <LinearGradient colors={[C.primaryBg, C.primaryBg]} style={styles.resultIconBg}>
+                <Ionicons name="chatbubble-ellipses-outline" size={16} color={C.primary} />
+              </LinearGradient>
+              <Text style={[styles.resultTitle, { color: C.textPrimary }]}>{t('sectionTranslation')}</Text>
+              {result ? (
+                <View style={styles.detectedBadge}>
+                  <View style={styles.detectedDot} />
+                  <Text style={styles.detectedText}>{t('done')}</Text>
+                </View>
+              ) : (
+                <View style={[styles.waitingBadge, { backgroundColor: C.inputBg }]}>
+                  <Text style={[styles.waitingText, { color: C.textHint }]}>{t('waiting')}</Text>
+                </View>
+              )}
+            </View>
+            <View style={styles.resultBody}>
+              {result ? (
+                <>
+                  <Text style={[styles.resultText, { color: C.textPrimary }]}>{result}</Text>
+                  <TouchableOpacity
+                    style={[styles.copyBtn, { backgroundColor: C.primaryBg }]}
+                    onPress={() => Alert.alert(t('copied'), t('copiedToClipboard'))}
+                  >
+                    <Ionicons name="copy-outline" size={14} color={C.primary} />
+                    <Text style={[styles.copyBtnText, { color: C.primary }]}>{t('copy')}</Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <View style={styles.resultEmpty}>
+                  <Ionicons name="scan-outline" size={32} color={C.primaryLighter} />
+                  <Text style={[styles.resultEmptyText, { color: C.textHint }]}>
+                    {mode === 'sena_texto'
+                      ? t('resultPlaceholderSigns')
+                      : t('resultPlaceholderText')}
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
-        )}
 
-        {/* Botón de acción */}
-        <View style={styles.actionRow}>
-          <Button
-            title={
-              mode === 'sena_texto'
-                ? isActive ? '⏹ Detener' : '▶ Empezar'
-                : 'Traducir'
-            }
-            onPress={handleAction}
-            loading={loading}
-            style={styles.actionBtn}
-          />
+          {/* ── Botón principal ── */}
+          <TouchableOpacity onPress={handleAction} activeOpacity={0.85} disabled={loading} style={[styles.actionBtnWrapper, { shadowColor: C.primary }]}>
+            <LinearGradient
+              colors={isActive ? ['#DC2626', '#B91C1C'] : [C.primary + 'EE', C.primary, C.primaryDark]}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+              style={styles.actionBtn}
+            >
+              {loading ? (
+                <Text style={styles.actionBtnText}>{t('translating')}</Text>
+              ) : mode === 'sena_texto' ? (
+                <>
+                  <Ionicons name={isActive ? 'stop-circle-outline' : 'play-circle-outline'} size={22} color="#fff" />
+                  <Text style={styles.actionBtnText}>{isActive ? t('stopCamera') : t('startCamera')}</Text>
+                </>
+              ) : (
+                <>
+                  <Ionicons name="language-outline" size={22} color="#fff" />
+                  <Text style={styles.actionBtnText}>{t('translate')}</Text>
+                </>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
+
         </View>
       </ScrollView>
     </View>
   );
 };
 
+const CORNER_SIZE = 20;
+const CORNER_WIDTH = 3;
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.backgroundGray },
   scroll: { flex: 1 },
-  content: { padding: 20, paddingBottom: 36 },
+  content: { paddingHorizontal: 20, paddingVertical: 20, paddingBottom: 40, alignItems: 'center' },
+  contentDesktop: { paddingHorizontal: 48, paddingVertical: 32 },
+  innerWrapper: { width: '100%', gap: 18 },
+  innerWrapperWide: { maxWidth: 760, alignSelf: 'center' },
 
   // Toggle
-  toggleContainer: {
-    flexDirection: 'row',
-    marginBottom: 24,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: Colors.primaryLighter,
-    alignSelf: 'flex-start',
-    overflow: 'hidden',
-    backgroundColor: '#fff',
-  },
-  toggleBtn: {
-    flexDirection: 'row',
-    paddingHorizontal: 22,
-    paddingVertical: 11,
-    alignItems: 'center',
-    gap: 7,
-    overflow: 'hidden',
-  },
-  toggleBtnActive: {},
-  toggleText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    fontWeight: '600',
-  },
-  toggleTextActive: {
-    color: '#fff',
-    fontWeight: '700',
-  },
+  modeToggle: { flexDirection: 'row', borderRadius: 18, borderWidth: 1.5, overflow: 'hidden', alignSelf: 'center', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 4 },
+  modeBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 13, paddingHorizontal: 24, gap: 8, overflow: 'hidden' },
+  modeBtnActive: {},
+  modeBtnText: { fontSize: 14, fontWeight: '700', color: Colors.textSecondary },
+  modeBtnTextActive: { color: '#fff' },
 
-  // Centro
-  centerArea: {
-    flexDirection: 'row',
-    gap: 14,
-    marginBottom: 20,
-    alignItems: 'flex-start',
-  },
-  imageBox: {
-    width: 155,
-    height: 185,
-    borderRadius: 16,
-    overflow: 'hidden',
-    backgroundColor: Colors.inputBg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 5,
-  },
+  // Cámara
+  cameraCard: { width: '100%', height: 280, borderRadius: 24, overflow: 'hidden', backgroundColor: '#1a1a2e', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 20, elevation: 10 },
   cameraImage: { width: '100%', height: '100%' },
-  imageOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-  },
-  activeBadge: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    zIndex: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: 'rgba(239,68,68,0.9)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 20,
-  },
-  activeDot: {
-    width: 6, height: 6, borderRadius: 3, backgroundColor: '#fff',
-  },
-  activeText: { color: '#fff', fontSize: 10, fontWeight: '800', letterSpacing: 0.5 },
+  cameraOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 100 },
+  liveBadge: { position: 'absolute', top: 14, left: 14, zIndex: 10, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(220,38,38,0.9)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
+  liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#fff' },
+  liveText: { color: '#fff', fontSize: 11, fontWeight: '800', letterSpacing: 1 },
+  detectionFrame: { position: 'absolute', top: '20%', left: '25%', right: '25%', bottom: '25%', zIndex: 5 },
+  corner: { position: 'absolute', width: CORNER_SIZE, height: CORNER_SIZE, borderColor: 'rgba(255,255,255,0.85)' },
+  cornerTL: { top: 0, left: 0, borderTopWidth: CORNER_WIDTH, borderLeftWidth: CORNER_WIDTH, borderTopLeftRadius: 4 },
+  cornerTR: { top: 0, right: 0, borderTopWidth: CORNER_WIDTH, borderRightWidth: CORNER_WIDTH, borderTopRightRadius: 4 },
+  cornerBL: { bottom: 0, left: 0, borderBottomWidth: CORNER_WIDTH, borderLeftWidth: CORNER_WIDTH, borderBottomLeftRadius: 4 },
+  cornerBR: { bottom: 0, right: 0, borderBottomWidth: CORNER_WIDTH, borderRightWidth: CORNER_WIDTH, borderBottomRightRadius: 4 },
+  cameraLabel: { position: 'absolute', bottom: 14, left: 0, right: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, zIndex: 10 },
+  cameraLabelText: { color: 'rgba(255,255,255,0.9)', fontSize: 13, fontWeight: '500' },
 
-  // Instrucciones
-  instructionBox: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  instructionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
-  instructionTitle: { fontSize: 13, fontWeight: '700', color: Colors.textPrimary },
-  instructionText: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    lineHeight: 21,
-  },
-  instructionHighlight: {
-    marginTop: 12,
-    fontSize: 12,
-    color: Colors.primary,
-    fontWeight: '600',
-  },
+  // Input card
+  inputCard: { borderRadius: 24, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 14, elevation: 4 },
+  inputCardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
+  inputCardTitle: { fontSize: 15, fontWeight: '700' },
+  textArea: { fontSize: 15, minHeight: 120, borderRadius: 14, padding: 14, borderWidth: 1, lineHeight: 23 },
+  charCount: { alignItems: 'flex-end', marginTop: 10 },
+  charCountText: { fontSize: 11 },
 
-  // Input texto
-  textInputArea: { flex: 1 },
-  inputLabel: { fontSize: 12, color: Colors.textSecondary, marginBottom: 8, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
-  textArea: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
-    fontSize: 14,
-    color: Colors.textPrimary,
-    minHeight: 120,
-    textAlignVertical: 'top',
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
+  // Tips
+  tipsRow: { gap: 10 },
+  tipChip: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14 },
+  tipText: { fontSize: 13, fontWeight: '500', flex: 1, lineHeight: 19 },
 
   // Resultado
-  resultSection: { marginBottom: 20 },
-  resultLabel: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 8,
-  },
-  resultBox: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1.5,
-    borderColor: Colors.primaryLighter,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  resultText: { fontSize: 16, color: Colors.textPrimary, fontWeight: '500' },
+  resultCard: { borderRadius: 24, overflow: 'hidden', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 16, elevation: 5, borderWidth: 1.5 },
+  resultHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16, borderBottomWidth: 1 },
+  resultIconBg: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  resultTitle: { flex: 1, fontSize: 15, fontWeight: '700' },
+  detectedBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#D1FAE5', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
+  detectedDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#059669' },
+  detectedText: { fontSize: 11, color: '#059669', fontWeight: '700' },
+  waitingBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
+  waitingText: { fontSize: 11, fontWeight: '600' },
+  resultBody: { padding: 18, minHeight: 96 },
+  resultText: { fontSize: 17, fontWeight: '600', lineHeight: 27 },
+  copyBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', marginTop: 14, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
+  copyBtnText: { fontSize: 13, fontWeight: '600' },
+  resultEmpty: { alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 12 },
+  resultEmptyText: { fontSize: 13, textAlign: 'center', lineHeight: 21, maxWidth: 240 },
 
-  // Botón
-  actionRow: { alignItems: 'flex-end' },
-  actionBtn: { paddingHorizontal: 32 },
+  // Botón principal
+  actionBtnWrapper: { borderRadius: 20, overflow: 'hidden', alignSelf: 'stretch', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 10 },
+  actionBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 18, paddingHorizontal: 36, gap: 10, borderRadius: 20 },
+  actionBtnText: { color: '#fff', fontSize: 17, fontWeight: '800', letterSpacing: 0.3 },
 });

@@ -23,7 +23,6 @@ ENDPOINTS     // Objeto con todas las rutas de la API organizadas por módulo
 | **Auth** | login, register, logout, forgot-password, verify-code, reset-password |
 | **Traducciones** | translate, history, deleteTranslation |
 | **Léxico** | lexicon, lexiconSearch |
-| **Alarmas** | alarms, createAlarm, updateAlarm, deleteAlarm |
 | **Estadísticas** | stats |
 | **Perfil** | profile, updateProfile, deleteAccount |
 

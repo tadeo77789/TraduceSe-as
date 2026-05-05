@@ -6,7 +6,7 @@ Define todas las interfaces y tipos compartidos en la aplicación para garantiza
 
 | Archivo | Descripción |
 |---|---|
-| `index.ts` | Tipos principales del dominio: usuario, traducción, léxico, alarmas, notificaciones |
+| `index.ts` | Tipos principales del dominio: usuario, traducción, léxico, notificaciones |
 
 ## Tipos definidos en `index.ts`
 
@@ -22,7 +22,6 @@ Define todas las interfaces y tipos compartidos en la aplicación para garantiza
 | `LexicoSena` | Entrada del léxico: palabra, tipo, letra, idioma, recursos multimedia |
 | `RecursoMultimedia` | Archivo asociado a una seña: tipo, url, mime_type, orden |
 | `Notificacion` | Notificación push: título, cuerpo, leída, fecha |
-| `Alarma` | Alarma visual: hora, mensaje, activa/desactiva |
 | `ThemeMode` | Unión: `'light' \| 'dark'` |
 | `ApiResponse<T>` | Envoltorio genérico de respuestas del backend |
 | `PaginatedResponse<T>` | Respuesta paginada con items, total, página y límite |

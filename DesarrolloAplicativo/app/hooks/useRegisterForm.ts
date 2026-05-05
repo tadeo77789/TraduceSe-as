@@ -1,6 +1,18 @@
+/**
+ * @file useRegisterForm.ts
+ * @description Hook personalizado para el formulario de registro de usuario.
+ *
+ * Gestiona el estado del formulario (`nombre`, `correo`, `password`, `terminos`),
+ * la validación de cada campo (nombre requerido, formato de correo, mínimo 8
+ * caracteres en contraseña, aceptación de términos) y el estado de carga.
+ * Llama a `AuthContext.register` al enviar.
+ *
+ * @returns form, setField, loading, errors, handleRegister
+ */
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { useAuth } from '../state/AuthContext';
+import { useTranslation } from '../i18n';
 
 interface RegisterForm {
   nombre: string;
@@ -13,6 +25,7 @@ type RegisterErrors = Partial<Record<keyof RegisterForm, string>>;
 
 export function useRegisterForm() {
   const { register } = useAuth();
+  const { t } = useTranslation();
   const [form, setForm] = useState<RegisterForm>({
     nombre: '',
     correo: '',
@@ -28,15 +41,15 @@ export function useRegisterForm() {
 
   const validate = useCallback((): boolean => {
     const e: RegisterErrors = {};
-    if (!form.nombre.trim()) e.nombre = 'El nombre es obligatorio';
-    if (!form.correo) e.correo = 'El correo es obligatorio';
-    else if (!/\S+@\S+\.\S+/.test(form.correo)) e.correo = 'Correo inválido';
-    if (!form.password) e.password = 'La contraseña es obligatoria';
-    else if (form.password.length < 8) e.password = 'Mínimo 8 caracteres';
-    if (!form.terminos) e.terminos = 'Debes aceptar los términos';
+    if (!form.nombre.trim()) e.nombre = t('registerNameRequired');
+    if (!form.correo) e.correo = t('registerEmailRequired');
+    else if (!/\S+@\S+\.\S+/.test(form.correo)) e.correo = t('registerEmailInvalid');
+    if (!form.password) e.password = t('registerPasswordRequired');
+    else if (form.password.length < 8) e.password = t('registerPasswordShort');
+    if (!form.terminos) e.terminos = t('registerTermsRequired');
     setErrors(e);
     return Object.keys(e).length === 0;
-  }, [form]);
+  }, [form, t]);
 
   const handleRegister = useCallback(async () => {
     if (!validate()) return;
@@ -50,11 +63,11 @@ export function useRegisterForm() {
         termino_acept: form.terminos,
       });
     } catch {
-      Alert.alert('Error', 'No se pudo crear la cuenta. Intenta de nuevo.');
+      Alert.alert(t('error'), t('registerErrorMsg'));
     } finally {
       setLoading(false);
     }
-  }, [validate, register, form]);
+  }, [validate, register, form, t]);
 
   return { form, setField, loading, errors, handleRegister };
 }

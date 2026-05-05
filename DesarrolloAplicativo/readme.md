@@ -1,369 +1,525 @@
-# DesarrolloAplicativo
+# DesarrolloAplicativo 
 
-Carpeta raíz del desarrollo del sistema **Traduce Señas**. Contiene las tres capas principales del proyecto.
+Carpeta raíz del desarrollo de Traduce Señas, una aplicación móvil y web para la traducción del lenguaje de señas colombiano (LSC). Contiene las tres capas principales del proyecto más el modelo 3D interactivo.
 
-## Estructura
+---
+
+## Estructura general
 
 ```
 DesarrolloAplicativo/
 ├── app/        → Aplicación móvil y web (React Native + Expo)
-├── backend/    → Servidor API REST (Node.js + Express)
-└── BD/         → Scripts y modelo de base de datos (PostgresSQL)
+├── backend/    → Servidor API REST (Node.js + Express + PostgreSQL)
+└── readme.md   → Este archivo
 ```
 
 ---
 
-## Por qué existe el archivo `.gitignore`
+## Requisitos previos
 
-El archivo `.gitignore` (ubicado en la raíz del repositorio) le indica a Git qué archivos y carpetas **no debe subir a GitHub**.
+| Herramienta | Versión mínima | Descarga | Para qué se usa |
+|---|---|---|---|
+| **Node.js** | 18+ | https://nodejs.org | Ejecutar la app y el servidor |
+| **Git** | cualquiera | https://git-scm.com | Control de versiones |
+| **Visual Studio Code** | cualquiera | https://code.visualstudio.com | Editor recomendado |
+| **Docker Desktop** | cualquiera | https://www.docker.com/products/docker-desktop | Base de datos PostgreSQL |
+| **Expo Go** | SDK 54 | App Store / Play Store | Ver la app en celular físico |
+| **Blender** | 4.x+ | https://www.blender.org | Editar el modelo 3D del alfabeto |
 
-### `node_modules/` — el caso más importante
-
-Cuando ejecutas `npm install`, npm descarga todos los paquetes del proyecto dentro de la carpeta `node_modules/`. Esta carpeta:
-
-- Puede pesar **más de 500 MB** y contener **miles de archivos**
-- Es **generada automáticamente** a partir de `package.json`
-- Es **específica de cada máquina** (rutas internas, binarios compilados)
-- Ya está documentada en `package.json` y `package-lock.json`
-
-**Subir `node_modules/` a GitHub sería como subir todos los libros de una biblioteca en lugar del índice.** Cualquier persona que clone el repositorio solo necesita ejecutar `npm install` para regenerarla en segundos.
-
-### `.expo/` — caché de desarrollo
-
-Expo genera esta carpeta al iniciar el servidor. Contiene configuración y caché local de la máquina que no tiene sentido compartir.
-
-### `.env` — datos sensibles
-
-Los archivos de variables de entorno contienen claves de API, contraseñas de base de datos y otros secretos. **Nunca deben subirse a un repositorio**, especialmente si es público.
-
-### Regla general
-
-> Si un archivo puede **regenerarse automáticamente** o contiene **información privada de tu máquina o equipo**, va en `.gitignore`.
-
----
-
-## Cómo inicializar y ejecutar el proyecto
-
-### Requisitos previos
-
-Instala estas herramientas antes de comenzar:
-
-| Herramienta | Descarga | Para qué se usa |
-|---|---|---|
-| **Node.js** (versión 18 o superior) | https://nodejs.org | Ejecutar el servidor y la app |
-| **Git** | https://git-scm.com | Control de versiones |
-| **Visual Studio Code** | https://code.visualstudio.com | Editor de código recomendado |
-| **Expo Go** (opcional) | App Store / Play Store | Ver la app en tu celular físico |
-
-Verifica que Node.js esté instalado abriendo una terminal y ejecutando:
+Verifica Node.js en la terminal:
 ```bash
-node --version    # debe mostrar v18 o superior
-npm --version     # debe mostrar 9 o superior
+node --version    # v18 o superior
+npm --version     # 9 o superior
 ```
 
 ---
 
-### Paso 1 — Abrir el proyecto en Visual Studio Code
+## Instalación y ejecución
 
-1. Abre **Visual Studio Code**
-2. Ve a **Archivo → Abrir carpeta**
-3. Selecciona la carpeta `DesarrolloAplicativo`
-4. Abre la terminal integrada con **Ctrl + `** (tecla de acento grave)
+### Paso 1 — Abrir en VS Code
 
----
+1. Abre VS Code → **Archivo → Abrir carpeta** → selecciona `DesarrolloAplicativo`
+2. Abre la terminal integrada con **Ctrl + `**
 
 ### Paso 2 — Instalar dependencias de la app
-
-En la terminal integrada de VS Code, ejecuta:
 
 ```bash
 cd app
 npm install
 ```
 
-Esto descarga todos los paquetes necesarios en la carpeta `node_modules/`. Solo se hace **una vez** (o cuando se agreguen nuevos paquetes).
+Esto descarga todos los paquetes, incluyendo `react-native-webview` (necesario para el visor 3D del alfabeto).
+
+### Paso 3 — Levantar la base de datos con Docker
+
+```bash
+docker run -d \
+  --name postgres-signia \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=tu_password \
+  -e POSTGRES_DB=traduce_senas \
+  -p 5433:5432 \
+  -v postgres_data:/var/lib/postgresql/data \
+  postgres:16
+```
+
+Verificar que corre: `docker ps`
+
+### Paso 4 — Configurar variables de entorno del backend
+
+Crea `backend/.env` (nunca subir a GitHub):
+
+```env
+DB_HOST=localhost
+DB_PORT=5433
+DB_USER=postgres
+DB_PASSWORD=tu_password
+DB_NAME=traduce_senas
+JWT_SECRET=tu_clave_secreta
+PORT=3000
+```
+
+### Paso 5 — Instalar dependencias del backend
+
+```bash
+cd backend
+npm install
+```
+
+### Paso 6 — Ejecutar la app
+
+```bash
+# Navegador web (recomendado para desarrollo rápido)
+cd app && npx expo start --web --port 8082
+
+# Celular físico (escanear QR con Expo Go)
+cd app && npx expo start
+
+# Emulador Android
+cd app && npx expo start --android
+
+# Simulador iOS (solo Mac + Xcode)
+cd app && npx expo start --ios
+```
 
 ---
 
-### Paso 3 — Ejecutar la app
+## Módulo 3D — Alfabeto LSC
 
-#### Ver en el navegador web (más rápido para desarrollo)
+La pantalla de **Alfabeto** integra un modelo 3D animado que reproduce la seña de cada letra en tiempo real. Es la funcionalidad más destacada del proyecto.
 
-```bash
-cd app
-npx expo start --web --port 8082
-```
+### Archivos del módulo
 
-Luego abre tu navegador en: **`http://localhost:8082`**
-
-#### Ver en celular físico (Android o iPhone)
-
-```bash
-cd app
-npx expo start
-```
-
-1. Instala la app **Expo Go** en tu celular desde la tienda de aplicaciones
-2. Escanea el código QR que aparece en la terminal con la cámara del celular
-3. La app abrirá automáticamente en Expo Go
-
-#### Ver en emulador Android (requiere Android Studio instalado)
-
-```bash
-cd app
-npx expo start --android
-```
-
-#### Ver en simulador iPhone (solo en Mac, requiere Xcode)
-
-```bash
-cd app
-npx expo start --ios
-```
-
----
-
-### Extensiones recomendadas para Visual Studio Code
-
-Instálalas desde el panel de extensiones (**Ctrl + Shift + X**):
-
-| Extensión | ID | Para qué sirve |
+| Archivo | Ubicación | Descripción |
 |---|---|---|
-| **ES7+ React/Redux/React-Native snippets** | `dsznajder.es7-react-js-snippets` | Autocompletado de componentes React |
-| **Prettier - Code formatter** | `esbenp.prettier-vscode` | Formatea el código automáticamente al guardar |
-| **TypeScript Importer** | `pmneo.tsimporter` | Agrega imports automáticamente |
-| **Expo Tools** | `expo.vscode-expo-tools` | Soporte oficial de Expo en VS Code |
-| **React Native Tools** | `msjsdiag.vscode-react-native` | Depuración de apps React Native |
-| **PlantUML** | `jebbs.plantuml` | Ver los diagramas `.puml` del proyecto |
-| **GitLens** | `eamodio.gitlens` | Ver historial de cambios por línea |
+| `signia_model.glb` | `app/assets/` | Modelo 3D del personaje con 26 animaciones del alfabeto exportado desde Blender |
+| `model_viewer.html` | `app/assets/` | Visor Three.js: fondo gradiente, spinner de carga, barra de progreso, auto-rotación, animación de entrada, aro de luz en el suelo |
+| `AlphabetScreen.tsx` | `app/presentation/screens/Alphabet/` | Pantalla con grilla A-Z + modal centrado con visor 3D, navegación prev/next y botón Repetir |
 
----
+### Diseño de la pantalla
 
-### Ejecutar desde Visual Studio Code con un clic (tareas configuradas)
+La pantalla tiene dos capas:
 
-Crea el archivo `.vscode/tasks.json` dentro de la carpeta `app/` con este contenido para ejecutar la app directamente desde VS Code con **Ctrl + Shift + B**:
+1. **Grilla de letras (A–Z):** 26 cartas con imagen de la seña y badge de color. Ocupa toda la pantalla. El número de columnas se adapta al ancho: 5 cols en móvil, 7 en tablet, 9 en desktop.
+2. **Modal centrado (al tocar una letra):** una tarjeta animada aparece centrada sobre un fondo oscuro semitransparente, mostrando el visor 3D con la animación de la seña seleccionada. Incluye flechas para navegar entre letras sin cerrar el modal. Se cierra tocando fuera o el botón ✕.
 
-```json
-{
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "Iniciar app web",
-      "type": "shell",
-      "command": "npx expo start --web --port 8082",
-      "options": { "cwd": "${workspaceFolder}/app" },
-      "group": { "kind": "build", "isDefault": true },
-      "presentation": { "reveal": "always", "panel": "new" }
-    },
-    {
-      "label": "Iniciar app móvil",
-      "type": "shell",
-      "command": "npx expo start",
-      "options": { "cwd": "${workspaceFolder}/app" },
-      "presentation": { "reveal": "always", "panel": "new" }
-    }
-  ]
-}
+```
+┌────────────────────────┐
+│  Alfabeto LSC   26 let.│  ← Cabecera
+├──┬──┬──┬──┬────────────┤
+│A │B │C │D │ E  ...     │  ← Grilla de cartas
+│  │  │  │  │            │
+│F │G │H │I │ J  ...     │
+│  ...                   │
+└────────────────────────┘
+          ↓ (al tocar una carta)
+     ┌──────────────────┐
+     │[‹][A] Seña: A[›][✕]│  ← Header con gradiente + nav prev/next
+     ├──────────────────┤
+     │                  │
+     │    Visor 3D      │  ← WebView con Three.js (250 px)
+     │    (WebView)     │
+     ├──────────────────┤
+     │  [↺ Repetir]     │  ← Botón para repetir la animación
+     ├──────────────────┤
+     │  Tip de seña     │
+     │  Toca fuera      │
+     └──────────────────┘
 ```
 
-Con esto, **Ctrl + Shift + B** en VS Code abre directamente la app en el navegador.
+### Cómo funciona
+
+```
+Usuario toca letra  →  AlphabetScreen  →  postMessage al WebView
+                                               ↓
+                                        model_viewer.html (Three.js)
+                                               ↓
+                                        signia_model.glb reproduce
+                                        la animación "Letra_X"
+```
+
+1. Al montar la pantalla el `WebView` carga `model_viewer.html` en segundo plano (siempre montado).
+2. React Native envía `{ type: 'LOAD_MODEL', url: '...' }` para cargar el GLB una sola vez.
+3. Cuando el usuario toca una letra, el modal se abre y se envía `{ type: 'PLAY_ANIMATION', animation: 'Letra_A' }`.
+4. Three.js reproduce la animación con fade-in de 0.22 s. El modelo permanece en memoria al navegar entre letras con las flechas prev/next.
+5. El botón **Repetir** reenvía el mismo mensaje sin recargar el modelo.
+
+### Animaciones disponibles en el GLB
+
+El modelo tiene **33 acciones** nombradas:
+
+| Tipo | Nombres |
+|---|---|
+| **Alfabeto (26)** | `Letra_A` … `Letra_Z` |
+| **Frases (6)** | `Hola_Saludo`, `Gracias`, `Te_Amo`, `Si_Afirmacion`, `No_Negacion`, `Pose_Neutral` |
+| **Original Mixamo** | `mixamo.com` |
+
+### Editar el modelo en Blender
+
+El archivo fuente es `cuerpo.blend`, ubicado en la carpeta `modelado/` del repositorio del proyecto.
+
+Después de modificar el modelo o las animaciones, exportarlo como GLB:
+
+1. En Blender: **File → Export → glTF 2.0 (.glb/.gltf)**
+2. Seleccionar **Format: GLB**
+3. Activar: `Animations`, `Skinning`, `Materials`
+4. Guardar en `app/assets/signia_model.glb` (sobreescribir)
+
+### Agregar una nueva seña al alfabeto
+
+1. Abrir `cuerpo.blend` en Blender.
+2. Crear una nueva acción con el nombre `Letra_X` (donde X es la letra).
+3. Animar los huesos del brazo y los dedos de la mano derecha.
+4. Exportar el GLB actualizado a `app/assets/signia_model.glb`.
+5. La pantalla la detecta automáticamente — no requiere cambios en código.
 
 ---
 
-### Solución de errores comunes al iniciar
+## Arquitectura del frontend
+
+El frontend sigue una arquitectura en capas (Clean Architecture simplificada):
+
+```
+app/
+├── presentation/          ← Capa visual
+│   ├── screens/           → Pantallas (una carpeta por módulo)
+│   ├── components/        → Componentes reutilizables
+│   └── navigation/        → Navegación entre pantallas
+│
+├── state/                 ← Estado global (AuthContext, ThemeContext)
+├── hooks/                 ← Lógica extraída de pantallas
+│
+├── assets/                ← Imágenes, modelo 3D, visor HTML
+├── config/                ← URL del backend y mapa de endpoints
+├── constants/             ← Sistema de diseño (colores, tamaños, strings)
+├── types/                 ← Interfaces TypeScript globales
+│
+├── business/              ← Pendiente: lógica de negocio
+├── data/                  ← Pendiente: repositorios de datos
+├── services/              ← Pendiente: llamadas a la API
+└── utils/                 ← Pendiente: funciones utilitarias
+```
+
+### Estado de implementación
+
+| Capa | Estado | Contenido |
+|---|---|---|
+| `presentation/` | ✅ Completa | Todas las pantallas, componentes y navegación |
+| `state/` | ✅ Completo | `AuthContext` y `ThemeContext` |
+| `hooks/` | ✅ Completo | `useLoginForm`, `useRegisterForm` |
+| `config/` | ✅ Completo | `api.config.ts` con todos los endpoints |
+| `constants/` | ✅ Completo | Colores, tamaños, strings del sistema de diseño |
+| `types/` | ✅ Completo | User, Auth, Traduccion, Lexico, Alarma, etc. |
+| `assets/` | ✅ Completo | Imágenes, `signia_model.glb`, `model_viewer.html` |
+| `services/` | ⏳ Pendiente | Se implementa al conectar el backend real |
+| `data/` | ⏳ Pendiente | Se implementa con los servicios |
+| `business/` | ⏳ Pendiente | Lógica compleja desacoplada de pantallas |
+| `utils/` | ⏳ Pendiente | Formateo, validaciones genéricas |
+
+### Flujo de datos previsto (al conectar backend)
+
+```
+Pantalla → Hook → Service → Data → API backend
+```
+
+---
+
+## Pantallas disponibles
+
+| Pantalla | Archivo | Descripción |
+|---|---|---|
+| **Landing** | `LandingScreen.tsx` | Hero, carrusel con flechas/dots, features, testimonial |
+| **Login** | `Auth/LoginScreen.tsx` | Split-screen con imagen en web, lavanda en móvil |
+| **Registro** | `Auth/RegisterScreen.tsx` | Formulario con términos y condiciones |
+| **Recuperar contraseña** | `Auth/ForgotPasswordScreen.tsx` | Envío de código por correo |
+| **Verificar código** | `Auth/VerifyCodeScreen.tsx` | Ingreso del código de 6 dígitos |
+| **Nueva contraseña** | `Auth/NewPasswordScreen.tsx` | Formulario de restablecimiento |
+| **Traducción** | `Translation/TranslationScreen.tsx` | Cámara + toggle texto↔señas |
+| **Alfabeto LSC** | `Alphabet/AlphabetScreen.tsx` | Modelo 3D interactivo + grilla A-Z |
+| **Historial** | `History/HistoryScreen.tsx` | Traducciones anteriores |
+| **Estadísticas** | `Stats/StatsScreen.tsx` | KPIs y gráfica de uso |
+| **Perfil** | `Profile/ProfileScreen.tsx` | Datos del usuario, acento de color, tema y configuración |
+| **Términos y condiciones** | `Profile/TermsScreen.tsx` | 9 secciones legales accesibles desde Perfil |
+| **Política de privacidad** | `Profile/PrivacyPolicyScreen.tsx` | 11 secciones (Ley 1581 de 2012) accesibles desde Perfil |
+
+---
+
+## Sistema de diseño
+
+Todo el sistema visual está centralizado en `app/constants/`. Cambiar un valor aquí lo propaga a toda la app.
+
+### Colores principales — `colors.ts`
+
+El archivo expone **cuatro paletas** que se seleccionan automáticamente según el modo y el acento que el usuario configure desde Perfil:
+
+| Paleta | Modo | Acento |
+|---|---|---|
+| `Colors` | Claro | Púrpura (default) |
+| `DarkColors` | Oscuro | Púrpura |
+| `GreenColors` | Claro | Verde |
+| `GreenDarkColors` | Oscuro | Verde — superficies con sutil tinte verde |
+
+Tokens semánticos (valores del modo claro púrpura):
+
+| Token | Valor púrpura | Valor verde | Uso |
+|---|---|---|---|
+| `primary` | `#7C3AED` | `#4CAF82` | Botones, acentos, badges, activos |
+| `primaryBg` | `#EDE9FE` | `#E8F5EE` | Fondos de pantallas de auth y badges suaves |
+| `background` | `#FFFFFF` | `#FFFFFF` | Fondo general |
+| `backgroundGray` | `#F9FAFB` | `#F9FAFB` | Fondo exterior web |
+| `textPrimary` | `#1F2937` | `#1F2937` | Títulos y cuerpo |
+| `textSecondary` | `#6B7280` | `#6B7280` | Labels, descripciones |
+| `success` | `#10B981` | `#10B981` | Confirmaciones |
+| `error` / `danger` | `#EF4444` | `#EF4444` | Errores, acciones destructivas |
+
+> El acento solo afecta a las **pantallas internas** (Translation, Alphabet, Stats, History, Profile, Términos, Privacidad). Login, Registro y Landing conservan el morado de marca.
+
+### Cómo consumir colores en un componente
+
+Siempre usa el hook `useColors()` para que el componente reaccione al tema:
+
+```tsx
+import { useColors } from '../../state/ThemeContext';
+
+const MyView = () => {
+  const C = useColors();
+  return <View style={{ backgroundColor: C.surface, borderColor: C.primary }} />;
+};
+```
+
+> Importar `Colors` directamente filtra el morado al cambiar a verde u oscuro. Resérvalo solo para Login/Registro/Landing.
+
+Para cambiar el color primario púrpura por uno distinto, edita `PrimaryScale.DEFAULT` y los tokens semánticos en `Colors`. Para añadir un acento nuevo, crea otra paleta tipo `GreenColors`/`GreenDarkColors` y agrégala al `useColors()` de `state/ThemeContext.tsx`.
+
+### Tamaños — `sizes.ts`
+
+| Token | Valor | Uso |
+|---|---|---|
+| `inputHeight` | `52px` | Todos los campos de texto |
+| `buttonHeight` | `52px` | Todos los botones |
+| `tabBarHeight` | `65px` | Barra de tabs inferior |
+| `radiusLg` | `16px` | Cards |
+| `radiusXl` | `24px` | Modales |
+
+### Diseño responsive
+
+Todas las pantallas usan `useWindowDimensions()` para adaptarse:
+
+| Breakpoint | Ancho | Comportamiento |
+|---|---|---|
+| Móvil pequeño | alto < 600px | 5 cols en alfabeto, visor 3D 200 px |
+| Móvil normal | < 768px | 5 cols en alfabeto, visor 3D 250 px |
+| Tablet | 768–1023px | 7 cols en alfabeto, visor 3D 250 px |
+| Desktop/Web | ≥ 1024px | 9 cols en alfabeto, visor 3D 250 px |
+
+```tsx
+// Siempre dentro del componente, nunca a nivel de módulo
+const { width, height } = useWindowDimensions();
+const VIEWER_H = height < 640 ? 200 : width >= 768 ? Math.round(height * 0.40) : Math.round(height * 0.34);
+```
+
+---
+
+## Internacionalización (i18n)
+
+La app soporta **4 idiomas** seleccionables desde la pantalla de Perfil: Español, Inglés, Francés y Portugués.
+
+### Archivos del sistema
+
+| Archivo | Descripción |
+|---|---|
+| `app/i18n/locales/es.ts` | Fuente de verdad con ~150 claves en español |
+| `app/i18n/locales/en.ts` | Traducciones al inglés (tipadas como `typeof es`) |
+| `app/i18n/locales/fr.ts` | Traducciones al francés |
+| `app/i18n/locales/pt.ts` | Traducciones al portugués |
+| `app/i18n/index.ts` | Hook `useTranslation()` con fallback `es` |
+| `app/state/LanguageContext.tsx` | Contexto global + persistencia en AsyncStorage |
+
+### Cómo funciona
+
+1. El usuario elige un idioma en **Perfil → Idioma de la app**.
+2. `LanguageContext` guarda la selección en `AsyncStorage` con la clave `@app_language` y la propaga a todos los componentes hijos.
+3. Cualquier pantalla llama `const { t } = useTranslation()` y usa `t('clave')` para obtener el texto en el idioma activo.
+4. Si una clave no existe en el idioma elegido, se usa el valor en español como fallback.
+
+```tsx
+// Ejemplo de uso en cualquier componente
+import { useTranslation } from '../../i18n';
+
+const MyScreen = () => {
+  const { t } = useTranslation();
+  return <Text>{t('loginBtn')}</Text>; // → "Sign In" en inglés, "Ingresar" en español
+};
+```
+
+### Cómo agregar un idioma nuevo
+
+1. Crear `app/i18n/locales/xx.ts` tipado como `typeof es` y completar todas las claves.
+2. Importarlo en `app/i18n/index.ts` y agregarlo al objeto `translations`.
+3. Agregar el código al tipo `LanguageCode` y su nombre en `LANGUAGE_NAMES` en `app/state/LanguageContext.tsx`.
+4. El selector en `ProfileScreen` lo detecta automáticamente.
+
+### Cómo agregar una nueva clave
+
+1. Agregar la clave con su valor en español a `app/i18n/locales/es.ts`.
+2. Agregar la traducción equivalente en `en.ts`, `fr.ts` y `pt.ts` (TypeScript marcará un error si falta).
+3. Usar `t('nuevaClave')` en el componente.
+
+### Pantallas traducidas
+
+Todas las pantallas de la app usan `useTranslation()`:
+
+| Pantalla | Estado |
+|---|---|
+| LandingScreen | ✅ |
+| LoginScreen | ✅ |
+| RegisterScreen | ✅ |
+| ForgotPasswordScreen | ✅ |
+| VerifyCodeScreen | ✅ |
+| NewPasswordScreen | ✅ |
+| TranslationScreen | ✅ |
+| AlphabetScreen | ✅ |
+| AlarmsScreen | ✅ |
+| HistoryScreen | ✅ |
+| StatsScreen | ✅ |
+| ProfileScreen | ✅ |
+| MainTabNavigator / WebTopBar | ✅ |
+
+---
+
+## Configuración web (`app/web/`)
+
+### Título de pestaña del navegador
+
+El título se controla en dos niveles:
+
+1. **Estático** — `app/web/index.html` define `<title>Traduce Señas</title>` como valor inicial.
+2. **Dinámico** — `AppNavigator.tsx` usa la prop `documentTitle` de `NavigationContainer` para mantener siempre el mismo título al navegar:
+
+```tsx
+<NavigationContainer documentTitle={{ formatter: () => 'Traduce Señas' }}>
+```
+
+Si en el futuro se necesita mostrar el nombre de la pantalla (p. ej. `"Traducción | Traduce Señas"`), basta cambiar el formatter en `app/presentation/navigation/AppNavigator.tsx`.
+
+### Ícono de la app en web (favicon)
+
+El `index.html` ya incluye:
+
+```html
+<link rel="icon" type="image/png" href="/images/icono.png" />
+<link rel="apple-touch-icon" href="/images/icono.png" />
+```
+
+El ícono vive en dos lugares con roles distintos:
+
+| Archivo | Ruta | Para qué |
+|---|---|---|
+| Ícono en la app (código React Native) | `app/images/icono.png` | Referenciado con `require()` en pantallas |
+| Favicon del navegador web | `app/web/images/icono.png` | Servido estáticamente en `/images/icono.png` |
+
+> **Por qué dos copias:** Expo con Metro procesa y hashea los archivos de `app/assets/` — no son accesibles como rutas URL simples. Solo los archivos dentro de `app/web/` se sirven estáticamente. Si actualizas el ícono, cópialo en ambas ubicaciones.
+
+---
+
+## Assets locales
+
+| Archivo | Ubicación | Usado en |
+|---|---|---|
+| `comunicate-sinbarreras.png` | `app/assets/images/` | LandingScreen — slide 1 del carrusel |
+| `traducion-real.png` | `app/assets/images/` | LandingScreen — slide 2 del carrusel |
+| `historial.png` | `app/assets/images/` | LandingScreen — slide 3 del carrusel |
+| `alfabeto.png` | `app/assets/images/` | LandingScreen — banner "Aprende el alfabeto dactilológico" |
+| `slide1.jpg` / `slide2.jpg` / `slide3.jpg` | `app/assets/images/` | LoginScreen / RegisterScreen (split-screen en web) y card "Reconocida oficialmente" del Landing |
+| `testimonial.jpg` | `app/assets/images/` | LandingScreen — avatar del testimonio |
+| `camera_placeholder.jpg` | `app/assets/images/` | TranslationScreen |
+| `signia_model.glb` | `app/assets/` | AlphabetScreen (modelo 3D del personaje) |
+| `model_viewer.html` | `app/assets/` | AlphabetScreen (visor Three.js cargado en WebView) |
+| `icono.png` | `app/assets/images/` | Favicon y apple-touch-icon en web |
+
+---
+
+## Dependencias clave
+
+| Paquete | Versión | Para qué |
+|---|---|---|
+| `expo` | ~54.0.0 | Framework base |
+| `react` | 19.1.0 | Motor de UI |
+| `react-native` | 0.81.5 | UI nativa (versión requerida por Expo SDK 54) |
+| `react-native-webview` | 13.15.0 | Visor 3D del alfabeto (Three.js) |
+| `react-native-reanimated` | ~4.1.1 | Animaciones nativas del sheet |
+| `expo-linear-gradient` | ~15.0.8 | Gradientes en UI |
+| `@expo/vector-icons` | ^15.0.3 | Iconos Ionicons |
+| `@react-navigation/native` | ^6.1.17 | Navegación entre pantallas |
+| `expo-camera` | ~17.0.10 | Cámara para traducción |
+| `expo-av` | ~16.0.8 | Audio y video |
+| `expo-notifications` | ~0.32.16 | Notificaciones push |
+
+> **Nota:** `react-native-worklets` **no debe declararse** en `package.json` — es una dependencia interna de `react-native-reanimated` que npm resuelve automáticamente. Declararlo manualmente en versión incorrecta causa el error `PlatformConstants could not be found` en móvil.
+
+---
+
+## Solución de errores comunes
 
 | Error | Causa | Solución |
 |---|---|---|
-| `expo: command not found` | Expo no está instalado globalmente | Usar `npx expo` en lugar de `expo` |
-| `Port 8082 already in use` | Otro proceso usa ese puerto | Cambiar a `--port 8083` o cerrar el proceso anterior |
-| Pantalla en blanco en el navegador | Error de JavaScript en tiempo de ejecución | Abrir **F12 → Console** y revisar el error en rojo |
-| `Cannot find module '...'` | Falta instalar dependencias | Ejecutar `npm install` nuevamente |
-| `node_modules` no existe | Dependencias no instaladas | Ejecutar `npm install` dentro de la carpeta `app/` |
+| `expo: command not found` | Expo no instalado globalmente | Usar `npx expo` |
+| `Port 8082 already in use` | Puerto ocupado | Cambiar a `--port 8083` |
+| Pantalla en blanco | Error de JS | Abrir **F12 → Console** |
+| `Cannot find module '...'` | Dependencias faltantes | `npm install` |
+| Modelo 3D no carga | GLB no copiado a assets | Verificar `app/assets/signia_model.glb` |
+| Modelo 3D no carga en iOS | Rutas `file://` no resueltas en iOS Expo | El código usa `expo-asset` para obtener el `localUri` real; verificar que `expo-asset` esté instalado |
+| WebView en blanco | `react-native-webview` no instalado | `npm install react-native-webview` |
+| Visor 3D sin fondo / negro | Three.js no cargó desde CDN (sin internet) | El visor requiere conexión para cargar Three.js r160 desde jsDelivr |
+| `node_modules` no existe | Primera ejecución | `npm install` en `app/` |
+| `Project is incompatible with this version of Expo Go` | SDK desactualizado | Ejecutar `npm install --legacy-peer-deps` en `app/` (proyecto ya actualizado a SDK 54) |
+| **`PlatformConstants could not be found` en móvil** | `react-native-worklets` declarado manualmente en versión incorrecta, conflicto con TurboModules de RN 0.81 | Eliminar `react-native-worklets` de `package.json`, luego `rm -rf node_modules && npm install && npx expo start --clear` |
 
 ---
 
-## Guía de modificaciones estéticas y de tamaños
+## Extensiones recomendadas para VS Code
 
-Todo el sistema visual de la app está centralizado en dos archivos dentro de `app/constants/`. **No es necesario tocar los componentes ni las pantallas** para cambiar colores, tamaños o textos — solo se modifican estos archivos.
-
----
-
-### 1. Colores — `app/constants/colors.ts`
-
-Archivo con toda la paleta del diseño. Para cambiar un color, edita el valor hexadecimal correspondiente.
-
-#### Colores principales
-
-| Constante | Valor actual | Dónde se usa |
-|---|---|---|
-| `primary` | `#7C3AED` | Botones principales, acentos, toggles activos |
-| `primaryLight` | `#A78BFA` | Iconos secundarios, estados hover |
-| `primaryLighter` | `#C4B5FD` | Bordes de toggle, dots de slider, avatar |
-| `primaryBg` | `#EDE9FE` | Fondo de las cards de autenticación (Login, Registro, etc.) |
-| `primaryHeader` | `#C4B5FD` | Fondo de la barra de navegación superior |
-
-#### Colores de fondo y superficies
-
-| Constante | Valor actual | Dónde se usa |
-|---|---|---|
-| `background` | `#FFFFFF` | Fondo general de todas las pantallas |
-| `backgroundGray` | `#F9FAFB` | Fondo exterior en la versión web |
-| `surface` | `#FFFFFF` | Fondo de cards, modales y elementos flotantes |
-| `inputBg` | `#F3F4F6` | Fondo de todos los campos de texto |
-
-#### Colores de texto
-
-| Constante | Valor actual | Dónde se usa |
-|---|---|---|
-| `textPrimary` | `#1F2937` | Títulos y textos principales |
-| `textSecondary` | `#6B7280` | Subtítulos, labels, descripciones |
-| `textHint` | `#9CA3AF` | Placeholders de inputs |
-| `textOnPrimary` | `#FFFFFF` | Texto dentro de botones de color primario |
-| `textLink` | `#7C3AED` | Links y texto clickeable |
-
-#### Colores de estado
-
-| Constante | Valor actual | Dónde se usa |
-|---|---|---|
-| `success` | `#10B981` | Confirmaciones, operaciones exitosas |
-| `error` | `#EF4444` | Mensajes de error, botón "Eliminar cuenta" |
-| `warning` | `#F59E0B` | Advertencias |
-| `info` | `#3B82F6` | Información general |
-| `danger` | `#EF4444` | Variante `danger` del botón |
-
-#### Colores de bordes y otros
-
-| Constante | Valor actual | Dónde se usa |
-|---|---|---|
-| `border` | `#E5E7EB` | Bordes de cards, separadores, inputs |
-| `borderInput` | `#D1D5DB` | Borde específico de campos de texto |
-| `toggleOn` | `#7C3AED` | Color del Switch cuando está activado |
-| `toggleOff` | `#D1D5DB` | Color del Switch cuando está desactivado |
-| `facebook` | `#1877F2` | Botón de Facebook en la pantalla de login |
-
-#### Ejemplo: cambiar el color primario de púrpura a azul
-
-```ts
-// En app/constants/colors.ts
-primary: '#1D4ED8',        // antes: #7C3AED
-primaryLight: '#3B82F6',   // antes: #A78BFA
-primaryLighter: '#93C5FD', // antes: #C4B5FD
-primaryBg: '#EFF6FF',      // antes: #EDE9FE
-primaryHeader: '#93C5FD',  // antes: #C4B5FD
-```
-
----
-
-### 2. Tamaños y espaciados — `app/constants/sizes.ts`
-
-Controla el espaciado, tipografía, radios de borde y dimensiones de componentes.
-
-#### Espaciado
-
-| Constante | Valor | Equivalente |
-|---|---|---|
-| `xs` | `4px` | Espacio mínimo entre elementos |
-| `sm` | `8px` | Padding interno pequeño |
-| `md` | `16px` | Padding estándar de pantallas |
-| `lg` | `24px` | Separación entre secciones |
-| `xl` | `32px` | Padding de cards y modales |
-| `xxl` | `48px` | Espaciado grande, secciones principales |
-
-#### Tipografía
-
-| Constante | Valor | Uso recomendado |
-|---|---|---|
-| `fontXs` | `11px` | Textos auxiliares, badges |
-| `fontSm` | `13px` | Labels, hints, notas al pie |
-| `fontMd` | `15px` | Texto de cuerpo, inputs |
-| `fontLg` | `17px` | Texto principal |
-| `fontXl` | `20px` | Subtítulos |
-| `fontXxl` | `24px` | Títulos de sección |
-| `fontTitle` | `28px` | Títulos de pantalla |
-| `fontDisplay` | `36px` | Títulos grandes (landing) |
-
-#### Radios de borde (bordes redondeados)
-
-| Constante | Valor | Resultado visual |
-|---|---|---|
-| `radiusSm` | `8px` | Bordes ligeramente redondeados (inputs, badges) |
-| `radiusMd` | `12px` | Redondeado medio (botones) |
-| `radiusLg` | `16px` | Redondeado grande (cards) |
-| `radiusXl` | `24px` | Muy redondeado (modales, cards auth) |
-| `radiusFull` | `999px` | Completamente circular (avatares, chips) |
-
-#### Dimensiones de componentes
-
-| Constante | Valor | Componente |
-|---|---|---|
-| `inputHeight` | `52px` | Altura de todos los campos de texto |
-| `buttonHeight` | `52px` | Altura de todos los botones |
-| `tabBarHeight` | `65px` | Altura de la barra de tabs inferior (móvil) |
-| `headerHeight` | `56px` | Altura del header de navegación |
-
----
-
-### 3. Textos de la interfaz — `app/constants/strings.ts`
-
-Todos los textos visibles en la app están centralizados aquí. Para cambiar cualquier texto (título, botón, mensaje de error, placeholder), edita este archivo.
-
-#### Ejemplo: cambiar el texto del botón de traducir
-
-```ts
-// En app/constants/strings.ts
-translate: 'Traducir',   // cambia esto por el texto deseado
-```
-
----
-
-### 4. Modificar una pantalla específica
-
-| Si quieres cambiar... | Archivo a editar |
+| Extensión | ID |
 |---|---|
-| La pantalla de inicio (slider, testimonios) | `app/presentation/screens/LandingScreen.tsx` |
-| El formulario de login | `app/presentation/screens/Auth/LoginScreen.tsx` |
-| El formulario de registro | `app/presentation/screens/Auth/RegisterScreen.tsx` |
-| La pantalla de traducción (cámara/toggle) | `app/presentation/screens/Translation/TranslationScreen.tsx` |
-| La lista de alarmas y el reloj | `app/presentation/screens/Alarms/AlarmsScreen.tsx` |
-| El grid del alfabeto de señas | `app/presentation/screens/Alphabet/AlphabetScreen.tsx` |
-| Las gráficas de estadísticas | `app/presentation/screens/Stats/StatsScreen.tsx` |
-| La lista del historial | `app/presentation/screens/History/HistoryScreen.tsx` |
-| El perfil del usuario | `app/presentation/screens/Profile/ProfileScreen.tsx` |
-| La barra de navegación superior (web) | `app/presentation/components/common/WebTopBar.tsx` |
-| La barra de navegación (móvil/tabs) | `app/presentation/navigation/MainTabNavigator.tsx` |
+| ES7+ React/Redux snippets | `dsznajder.es7-react-js-snippets` |
+| Prettier | `esbenp.prettier-vscode` |
+| TypeScript Importer | `pmneo.tsimporter` |
+| Expo Tools | `expo.vscode-expo-tools` |
+| React Native Tools | `msjsdiag.vscode-react-native` |
+| PlantUML | `jebbs.plantuml` |
+| GitLens | `eamodio.gitlens` |
 
 ---
 
-### 5. Modificar componentes base
+## Por qué el `.gitignore` excluye ciertas carpetas
 
-Los componentes reutilizables están en `app/presentation/components/common/`. Cambiarlos afecta **todas** las pantallas que los usan.
+| Carpeta/Archivo | Razón |
+|---|---|
+| `node_modules/` | Pesa +500 MB, se regenera con `npm install` |
+| `.expo/` | Caché local de la máquina de desarrollo |
+| `android/` / `ios/` | Generadas por Expo Build, no son código fuente |
+| `.env` | Contiene contraseñas y claves — nunca al repositorio |
+| `*.log` | Logs de errores locales |
+| `.claude/` | Configuración del agente de desarrollo |
 
-| Componente | Archivo | Qué controla |
-|---|---|---|
-| `Button` | `Button.tsx` | Forma, tamaño, colores y variantes de todos los botones |
-| `Input` | `Input.tsx` | Estilo de todos los campos de texto (altura, radio, colores) |
-| `AppHeader` | `AppHeader.tsx` | Header con logo en la versión móvil |
-| `WebTopBar` | `WebTopBar.tsx` | Barra superior con navegación en la versión web |
-
-#### Variantes disponibles del botón `Button`
-
-| Variante | Color de fondo | Uso |
-|---|---|---|
-| `primary` | `#7C3AED` (púrpura) | Acción principal |
-| `secondary` | `#C4B5FD` (lavanda) | Acción secundaria |
-| `danger` | `#EF4444` (rojo) | Eliminar o acción destructiva |
-| `outline` | Transparente con borde | Acción alternativa |
-| `ghost` | Transparente sin borde | Acción sutil |
-
----
-
-### 6. Ejecutar la app para ver los cambios
-
-```bash
-cd app
-npx expo start --web --port 8082   # Ver en navegador
-npx expo start --android            # Ver en Android
-npx expo start --ios                # Ver en iOS
-```
-
-Expo recarga automáticamente los cambios al guardar un archivo. No es necesario reiniciar el servidor para cambios de colores, textos o estilos.
+> **Regla:** si un archivo se puede regenerar automáticamente o contiene datos privados de tu máquina, va en `.gitignore`.
