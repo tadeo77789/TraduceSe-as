@@ -43,14 +43,7 @@ CREATE TABLE translation (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
-CREATE TABLE alarm (
-    alarm_id SERIAL PRIMARY KEY,
-    time TIME,
-    message VARCHAR(255),
-    is_active BOOLEAN,
-    user_id INT,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
+
 
 CREATE TABLE usage_event (
     event_id SERIAL PRIMARY KEY,
