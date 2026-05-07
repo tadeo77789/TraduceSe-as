@@ -41,10 +41,11 @@ export const VerifyCodeScreen: React.FC = () => {
   const { t } = useTranslation();
 
   const handleChange = (text: string, index: number) => {
+    const digit = text.replace(/\D/g, '').slice(-1); // Filtra cualquier carácter que no sea dígito (teclado físico/web pueden ignorar keyboardType) y deja solo el último
     const newCode = [...code];
-    newCode[index] = text;
+    newCode[index] = digit;
     setCode(newCode);
-    if (text && index < CODE_LENGTH - 1) {
+    if (digit && index < CODE_LENGTH - 1) {
       inputs.current[index + 1]?.focus();
     }
   };
@@ -109,7 +110,7 @@ export const VerifyCodeScreen: React.FC = () => {
                 digit ? { borderColor: Colors.primary, backgroundColor: '#EDE9FE' } : null,
               ]}
               value={digit}
-              onChangeText={text => handleChange(text.slice(-1), i)}
+              onChangeText={text => handleChange(text, i)}
               onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, i)}
               keyboardType="number-pad"
               maxLength={1}

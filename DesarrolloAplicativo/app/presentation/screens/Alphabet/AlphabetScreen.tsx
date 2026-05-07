@@ -42,47 +42,16 @@ import { Asset } from 'expo-asset';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
 import { useColors, useTheme } from '../../../state/ThemeContext';
-import { useTranslation } from '../../../i18n';
+import { useTranslation, type TranslationKey } from '../../../i18n';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
-interface LetterItem { letter: string; imageUrl: string; tip: string }
-
-// ─── Tips de cada seña ───────────────────────────────────────────────────────
-const TIPS: Record<string, string> = {
-  A: 'Puño cerrado con el pulgar al costado.',
-  B: 'Cuatro dedos extendidos juntos, pulgar doblado hacia adentro.',
-  C: 'Mano curvada en forma de C.',
-  D: 'Índice apunta hacia arriba, los otros dedos curvados tocan el pulgar.',
-  E: 'Todos los dedos semi-curvados hacia adelante, pulgar bajo.',
-  F: 'Índice y pulgar se tocan formando un círculo, otros extendidos.',
-  G: 'Índice apunta al costado, pulgar paralelo a él.',
-  H: 'Índice y medio extendidos y juntos, apuntando al costado.',
-  I: 'Solo el meñique extendido, puño cerrado.',
-  J: 'Meñique extendido, traza la letra J en el aire.',
-  K: 'Índice arriba, medio en diagonal y pulgar entre los dos.',
-  L: 'Índice hacia arriba y pulgar extendido forman una L.',
-  M: 'Tres dedos doblados cubren el pulgar.',
-  N: 'Dos dedos doblados cubren el pulgar.',
-  O: 'Todos los dedos y el pulgar curvados forman un círculo.',
-  P: 'Como K pero con la mano apuntando hacia abajo.',
-  Q: 'Como G pero con la mano apuntando hacia abajo.',
-  R: 'Índice y medio cruzados uno sobre el otro.',
-  S: 'Puño cerrado con el pulgar sobre los dedos.',
-  T: 'Pulgar asoma entre el índice y el medio.',
-  U: 'Índice y medio juntos y extendidos hacia arriba.',
-  V: 'Índice y medio en V abierta (signo de victoria).',
-  W: 'Índice, medio y anular extendidos en abanico.',
-  X: 'Solo el índice extendido y doblado en gancho.',
-  Y: 'Pulgar y meñique extendidos, otros doblados.',
-  Z: 'Índice extendido traza la letra Z en el aire.',
-};
+interface LetterItem { letter: string; imageUrl: string }
 
 const ALPHABET: LetterItem[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   .split('')
   .map(letter => ({
     letter,
     imageUrl: `https://www.lifeprint.com/asl101/images-handshapes/${letter.toLowerCase()}.gif`,
-    tip: TIPS[letter] ?? '',
   }));
 
 // ─── Paleta de acento por letra (ciclo de 6) ─────────────────────────────────
@@ -459,7 +428,7 @@ export const AlphabetScreen: React.FC = () => {
               <Ionicons name="hand-left" size={13} color="#fff" />
             </View>
             <Text style={[styles.tipText, { color: C.textPrimary }]} numberOfLines={2}>
-              {selected?.tip ?? ''}
+              {selected ? t(`alphabetTip${selected.letter}` as TranslationKey) : ''}
             </Text>
           </View>
 

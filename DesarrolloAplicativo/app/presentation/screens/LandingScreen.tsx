@@ -85,18 +85,17 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
     <View style={styles.root}>{/* Contenedor raíz que ocupa toda la pantalla con fondo gris claro */}
 
       {/* ── Header ───────────────────────────────────────────── */}
-      <LinearGradient // Componente de degradado que forma el header superior
-        colors={['#9333EA', '#7C3AED']} // Define el degradado de morado claro a morado oscuro de izquierda a derecha
-        start={{ x: 0, y: 0 }} // Punto de inicio del degradado: esquina superior izquierda
-        end={{ x: 1, y: 0 }} // Punto final del degradado: esquina superior derecha
-        style={styles.header} // Aplica los estilos de sombra y forma del header
-      >{/* Cierre de la apertura de LinearGradient del header */}
+      <View style={styles.header}>{/* Header con color sólido lavanda igual al WebTopBar de usuario */}
         <View style={[styles.headerInner, isWide && styles.headerInnerWide]}>{/* Contenedor interno del header: en pantallas anchas aplica estilo centrado con máximo 960px */}
           {/* Logo */}
-          <View style={styles.logoRow}>{/* Fila horizontal que agrupa el ícono emoji y el nombre de la app */}
-            <View style={styles.logoBox}>{/* Caja cuadrada semitransparente con borde que contiene el emoji de la mano */}
-              <Text style={styles.logoEmoji}>👌</Text>{/* Emoji de la mano que actúa como logotipo de la app */}
-            </View>{/* Cierre de logoBox */}
+          <View style={styles.logoRow}>{/* Fila horizontal que agrupa el ícono y el nombre de la app */}
+            <LinearGradient colors={Colors.gradientPrimary} style={styles.logoBox}>{/* Caja cuadrada con degradado morado que contiene la imagen del logo */}
+              <Image
+                source={require('../../assets/images/icono.png')}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />{/* Imagen del icono que actúa como logotipo de la app */}
+            </LinearGradient>{/* Cierre de logoBox */}
             <Text style={[styles.appName, isNarrow && styles.appNameNarrow]}>TraduceSeña</Text>{/* Nombre de la aplicación: en pantallas estrechas reduce el tamaño de fuente */}
           </View>{/* Cierre de logoRow */}
 
@@ -117,7 +116,7 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
             </TouchableOpacity>{/* Cierre del botón Ingresar */}
           </View>{/* Cierre de authRow */}
         </View>{/* Cierre de headerInner */}
-      </LinearGradient>{/* Cierre del LinearGradient del header */}
+      </View>{/* Cierre del header */}
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>{/* ScrollView principal de la pantalla: oculta la barra de scroll y aplica padding inferior */}
         <View style={[styles.innerContent, isWide && styles.innerContentWide]}>{/* Contenedor del contenido principal: en pantallas anchas centra el contenido a máximo 960px */}
@@ -126,7 +125,11 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
           {showNotif && ( // Renderiza la tarjeta de notificación solo si showNotif es true (no ha sido descartada)
             <View style={styles.notifCard}>{/* Tarjeta de notificación simulada con fondo blanco, bordes redondeados y sombra morada */}
               <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.notifIconBg}>{/* Fondo degradado morado del ícono de la notificación */}
-                <Text style={{ fontSize: 16 }}>👌</Text>{/* Emoji de la mano como ícono de la notificación push */}
+                <Image
+                  source={require('../../assets/images/icono.png')}
+                  style={styles.notifIconImage}
+                  resizeMode="contain"
+                />{/* Imagen del icono como ícono de la notificación push */}
               </LinearGradient>{/* Cierre del degradado del ícono de notificación */}
               <View style={styles.notifBody}>{/* Contenedor principal del cuerpo de la notificación (flex:1 para ocupar el espacio disponible) */}
                 <View style={styles.notifTopRow}>{/* Fila superior de la notificación con nombre de la app y hora */}
@@ -397,12 +400,15 @@ const styles = StyleSheet.create({ // Crea la hoja de estilos del componente con
   root: { flex: 1, backgroundColor: Colors.backgroundGray }, // Línea 325 — ocupa toda la pantalla con fondo gris claro como color base
 
   // ── Header ──
-  header: { // Línea 328 — estilos del contenedor del header con gradiente
+  header: { // Línea 328 — estilos del contenedor del header con color lavanda como WebTopBar
+    backgroundColor: Colors.primaryHeader, // Color de fondo lavanda igual al WebTopBar de usuario
+    borderBottomWidth: 1, // Línea de separación inferior sutil
+    borderBottomColor: Colors.primaryLighter, // Color del borde inferior en morado claro
     shadowColor: '#7C3AED', // Línea 329 — color de la sombra del header en morado
-    shadowOffset: { width: 0, height: 4 }, // Línea 330 — desplazamiento de la sombra: 4px hacia abajo
-    shadowOpacity: 0.25, // Línea 331 — opacidad de la sombra al 25%
+    shadowOffset: { width: 0, height: 3 }, // Línea 330 — desplazamiento de la sombra: 3px hacia abajo
+    shadowOpacity: 0.1, // Línea 331 — opacidad de la sombra al 10%
     shadowRadius: 10, // Línea 332 — radio de difuminado de la sombra en 10px
-    elevation: 8, // Línea 333 — elevación en Android equivalente a la sombra iOS
+    elevation: 6, // Línea 333 — elevación en Android equivalente a la sombra iOS
   }, // Cierre del estilo header
   headerInner: { // Línea 335 — contenedor interno del header con layout horizontal
     flexDirection: 'row', // Línea 336 — alinea logo y botones en fila horizontal
@@ -419,27 +425,26 @@ const styles = StyleSheet.create({ // Crea la hoja de estilos del componente con
     paddingHorizontal: 32, // Línea 347 — padding horizontal mayor en pantallas anchas
   }, // Cierre del estilo headerInnerWide
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 }, // Línea 349 — fila con logo y nombre de la app, separados 10px
-  logoBox: { // Línea 350 — caja cuadrada para el emoji del logo
+  logoBox: { // Línea 350 — caja cuadrada del logo con degradado morado
     width: 40, height: 40, // Línea 351 — dimensiones fijas de 40x40px para la caja del logo
-    backgroundColor: 'rgba(255,255,255,0.2)', // Línea 352 — fondo blanco semitransparente al 20% de opacidad
     borderRadius: 12, // Línea 353 — bordes redondeados de 12px para suavizar la caja
-    alignItems: 'center', justifyContent: 'center', // Línea 354 — centra el emoji dentro de la caja
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)', // Línea 355 — borde blanco semitransparente al 35% de opacidad
+    alignItems: 'center', justifyContent: 'center', // Línea 354 — centra la imagen dentro de la caja
+    overflow: 'hidden', // Recorta la imagen al borde redondeado
   }, // Cierre del estilo logoBox
-  logoEmoji: { fontSize: 20 }, // Línea 357 — tamaño de fuente 20px para el emoji del logo
-  appName: { fontSize: 20, fontWeight: '800', color: '#fff', letterSpacing: 0.2 }, // Línea 358 — nombre de la app en blanco, tamaño 20, peso 800 y espaciado de letras 0.2
+  logoImage: { width: 32, height: 32 }, // Tamaño de la imagen del logo dentro de la caja
+  appName: { fontSize: 20, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.2 }, // Línea 358 — nombre de la app en color de texto principal sobre fondo lavanda
   appNameNarrow: { fontSize: 15 }, // Línea 359 — reduce el tamaño del nombre a 15px en pantallas estrechas
   authRow: { flexDirection: 'row', alignItems: 'center', gap: 8 }, // Línea 360 — fila de botones de auth con separación de 8px
   btnNarrow: { paddingHorizontal: 10, paddingVertical: 6 }, // Línea 361 — padding reducido para botones en pantallas estrechas
   btnTextNarrow: { fontSize: 12 }, // Línea 362 — reduce el tamaño de texto de los botones a 12px en pantallas estrechas
   registerBtn: { // Línea 363 — estilos del botón de registro en el header
     borderWidth: 1.5, // Línea 364 — borde de 1.5px de grosor
-    borderColor: 'rgba(255,255,255,0.6)', // Línea 365 — borde blanco semitransparente al 60% de opacidad
+    borderColor: Colors.primary, // Borde morado primario para destacar sobre fondo lavanda
     borderRadius: 20, // Línea 366 — bordes muy redondeados (forma de píldora) con radio 20px
     paddingHorizontal: 16, // Línea 367 — padding horizontal de 16px
     paddingVertical: 7, // Línea 368 — padding vertical de 7px
   }, // Cierre del estilo registerBtn
-  registerBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' }, // Línea 370 — texto del botón de registro en blanco, tamaño 13 y peso 700
+  registerBtnText: { color: Colors.primary, fontSize: 13, fontWeight: '700' }, // Texto del botón de registro en morado primario
   loginBtn: { // Línea 371 — estilos del botón de login en el header
     flexDirection: 'row', // Línea 372 — ícono y texto del botón en fila horizontal
     alignItems: 'center', // Línea 373 — alinea verticalmente el ícono y el texto
@@ -473,9 +478,11 @@ const styles = StyleSheet.create({ // Crea la hoja de estilos del componente con
   }, // Cierre del estilo notifCard
   notifIconBg: { // Línea 402 — caja cuadrada del ícono de la notificación
     width: 44, height: 44, borderRadius: 12, // Línea 403 — dimensiones 44x44 con bordes redondeados de 12px
-    alignItems: 'center', justifyContent: 'center', // Línea 404 — centra el emoji dentro de la caja
+    alignItems: 'center', justifyContent: 'center', // Línea 404 — centra la imagen dentro de la caja
     flexShrink: 0, // Línea 405 — evita que la caja del ícono se reduzca cuando el texto es largo
+    overflow: 'hidden', // Recorta la imagen al borde redondeado del contenedor
   }, // Cierre del estilo notifIconBg
+  notifIconImage: { width: 30, height: 30 }, // Tamaño de la imagen del icono dentro del cuadro de la notificación
   notifBody: { flex: 1 }, // Línea 407 — cuerpo de la notificación ocupa todo el espacio disponible en la fila
   notifTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }, // Línea 408 — fila superior con nombre de la app y hora, separados en los extremos
   notifApp: { fontSize: 12, fontWeight: '700', color: Colors.primary }, // Línea 409 — nombre de la app en morado, tamaño 12 y peso 700

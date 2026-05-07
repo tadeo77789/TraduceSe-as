@@ -14,7 +14,7 @@
  * @prop onProfile - Callback del ícono de perfil.
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -58,7 +58,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         ) : (
           <View style={styles.logoRow}>
             <View style={styles.logoBox}>
-              <Text style={styles.logoEmoji}>👌</Text>
+              <Image
+                source={require('../../../assets/images/icono.png')}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
             </View>
             <Text style={styles.appName}>TraduceSeña</Text>
           </View>
@@ -101,8 +105,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.4)',
+    overflow: 'hidden',
   },
-  logoEmoji: { fontSize: 20 },
+  logoImage: { width: 30, height: 30 },
   appName: {
     fontSize: 19,
     fontWeight: '800',

@@ -13,7 +13,7 @@
  * no dentro de los links centrales.
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { BottomTabHeaderProps } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -42,7 +42,11 @@ export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route })
         {/* Logo */}
         <TouchableOpacity style={styles.logoRow} onPress={() => goTo('Translation')}>
           <LinearGradient colors={C.gradientPrimary} style={styles.logoBox}>
-            <Text style={styles.logoEmoji}>👌</Text>
+            <Image
+              source={require('../../../assets/images/icono.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
           </LinearGradient>
           <Text style={[styles.appName, { color: C.textPrimary }]}>TraduceSeña</Text>
         </TouchableOpacity>
@@ -109,8 +113,8 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  logoBox: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  logoEmoji: { fontSize: 20 },
+  logoBox: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  logoImage: { width: 32, height: 32 },
   appName: { fontSize: 19, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.2 },
   links: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 2 },
   link: {
