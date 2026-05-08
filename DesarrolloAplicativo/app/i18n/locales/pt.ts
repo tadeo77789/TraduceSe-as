@@ -203,6 +203,7 @@ const pt: typeof es = {
 
   historyTitle: 'Histórico',
   historyRecords: 'registros',
+  historyFilter: 'Digite a tradução que você procura...',
   historySenaTexto: 'Sinal → Texto',
   historyTextoSena: 'Texto → Sinal',
   historyVozSena: 'Voz → Sinal',

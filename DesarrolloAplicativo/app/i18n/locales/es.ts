@@ -214,6 +214,7 @@ const es = {
   // ── Historial ─────────────────────────────────────────────────────────────
   historyTitle: 'Historial',
   historyRecords: 'registros',
+  historyFilter: 'escribe la traduccion que buscas...',
   historySenaTexto: 'Seña → Texto',
   historyTextoSena: 'Texto → Seña',
   historyVozSena: 'Voz → Seña',
