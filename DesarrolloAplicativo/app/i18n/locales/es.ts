@@ -41,6 +41,7 @@ const es = {
   tabAlphabet: 'Alfabeto',
   tabStats: 'Estadística',
   tabHistory: 'Historial',
+  tabAdmin: 'Admin',
   tabProfile: 'Perfil',
 
   // ── Landing ───────────────────────────────────────────────────────────────
@@ -196,9 +197,33 @@ const es = {
   trainEnter: 'Entrenar',
   trainExit: 'Volver a detectar',
   trainClearAll: 'Borrar todo el entrenamiento',
-  trainClearConfirm: '¿Borrar todas las plantillas guardadas?',
+  trainClearConfirm: '¿Borrar todas las plantillas guardadas? Esta acción no se puede deshacer.',
+  trainClearConfirmSecond: 'Confirma de nuevo: se eliminarán {count} muestras',
   trainSourceKnn: 'IA entrenada',
   trainSourceGeo: 'Reglas',
+  trainTotalSamples: 'Muestras totales',
+  trainLettersCovered: 'Letras cubiertas',
+  trainLastDetected: 'Última detección',
+  trainContinue: 'Continuar',
+  trainConfirmDelete: 'Sí, borrar todo',
+
+  // ── Admin ────────────────────────────────────────────────────────────────
+  adminDashboardTitle: 'Panel de administración',
+  adminDashboardSubtitle: 'Estado de la IA y métricas de la app',
+  adminAiState: 'Estado de la IA',
+  adminAiActive: 'IA entrenada activa',
+  adminAiInactive: 'Sin entrenar — usando reglas geométricas',
+  adminCoverage: 'Cobertura',
+  adminSamplesPerLetter: 'Muestras por letra',
+  adminSystem: 'Sistema',
+  adminAppVersion: 'Versión de la app',
+  adminPlatform: 'Plataforma',
+  adminLanguage: 'Idioma activo',
+  adminVisionProvider: 'Proveedor de visión',
+  adminAdminUser: 'Usuario admin',
+  adminQuickActions: 'Acciones rápidas',
+  adminGoToTraining: 'Entrenar la IA',
+  adminGoToTrainingDesc: 'Agregar muestras al dataset KNN',
 
   // ── Alfabeto ──────────────────────────────────────────────────────────────
   alphabetTitle: 'Alfabeto LSC',

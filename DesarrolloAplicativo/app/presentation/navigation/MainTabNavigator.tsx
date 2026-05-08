@@ -18,16 +18,20 @@ import { AlphabetScreen } from '../screens/Alphabet/AlphabetScreen'; // Importa 
 import { StatsScreen } from '../screens/Stats/StatsScreen'; // Importa la pantalla de estadísticas de uso — fuente: app/presentation/screens/Stats/StatsScreen.tsx
 import { HistoryScreen } from '../screens/History/HistoryScreen'; // Importa la pantalla del historial de traducciones — fuente: app/presentation/screens/History/HistoryScreen.tsx
 import { ProfileStackNavigator } from './ProfileStackNavigator'; // Importa el stack anidado del tab de perfil (contiene ProfileScreen) — fuente: app/presentation/navigation/ProfileStackNavigator.tsx
+import { AdminStackNavigator } from './AdminStackNavigator';
 import { WebTopBar } from '../components/common/WebTopBar'; // Importa la barra de navegación superior usada en web en lugar de la barra de tabs inferior — fuente: app/presentation/components/common/WebTopBar.tsx
 import { Colors } from '../../constants/colors'; // Importa la paleta de colores estáticos de la app — fuente: app/constants/colors.ts
 import { useColors } from '../../state/ThemeContext'; // Importa el hook que provee los colores reactivos según el tema (claro/oscuro) activo — fuente: app/state/ThemeContext.tsx
 import { useTranslation } from '../../i18n';
+import { useAuth } from '../../state/AuthContext';
+import { isAdmin } from '../../utils/adminAccess';
 
 export type MainTabParams = { // Define y exporta el tipo TypeScript que mapea cada tab con sus parámetros esperados
   Translation: undefined; // Ruta 'Translation' no recibe parámetros de navegación
   Alphabet: undefined; // Ruta 'Alphabet' no recibe parámetros de navegación
   Stats: undefined; // Ruta 'Stats' no recibe parámetros de navegación
   History: undefined; // Ruta 'History' no recibe parámetros de navegación
+  Admin: undefined; // Ruta 'Admin' (solo visible para admins) — abre AdminStackNavigator
   Profile: undefined; // Ruta 'Profile' no recibe parámetros de navegación
 }; // Cierra la definición del tipo MainTabParams
 
@@ -37,6 +41,8 @@ export const MainTabNavigator: React.FC = () => { // Define y exporta el compone
   const { width } = useWindowDimensions(); // Obtiene el ancho actual del viewport; se actualiza automáticamente si el usuario rota el dispositivo o redimensiona la ventana
   const C = useColors(); // Obtiene los tokens de color reactivos del tema activo (claro u oscuro)
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const userIsAdmin = isAdmin(user);
   // Muestra la barra superior solo en web con viewport ancho (≥ 1024 px)
   // En móvil real y en web con viewport estrecho usa la barra de tabs inferior
   const isWide = Platform.OS === 'web' && width >= 1024; // Calcula si la pantalla es web de escritorio (≥1024px); true activa la barra superior WebTopBar y oculta la barra inferior
@@ -66,6 +72,7 @@ export const MainTabNavigator: React.FC = () => { // Define y exporta el compone
           Alphabet:    ['hand-left-outline','hand-left'], // Íconos para el tab de alfabeto: outline (inactivo) y sólido (activo)
           Stats:       ['bar-chart-outline','bar-chart'], // Íconos para el tab de estadísticas: outline (inactivo) y sólido (activo)
           History:     ['time-outline',     'time'], // Íconos para el tab de historial: outline (inactivo) y sólido (activo)
+          Admin:       ['shield-outline',   'shield'], // Íconos para el tab de admin: outline (inactivo) y sólido (activo)
           Profile:     ['person-outline',   'person'], // Íconos para el tab de perfil: outline (inactivo) y sólido (activo)
         }; // Cierra el objeto de mapeo de íconos
         const [inactive, active] = icons[route.name] || ['ellipse-outline', 'ellipse']; // Extrae el par de íconos para la ruta actual; usa íconos genéricos si la ruta no está en el mapa
@@ -76,6 +83,7 @@ export const MainTabNavigator: React.FC = () => { // Define y exporta el compone
         Alphabet:    t('tabAlphabet'),
         Stats:       t('tabStats'),
         History:     t('tabHistory'),
+        Admin:       t('tabAdmin'),
         Profile:     t('tabProfile'),
       } as Record<string, string>)[route.name] || route.name,
     })} // Cierra el objeto retornado por screenOptions y la prop screenOptions
@@ -84,6 +92,9 @@ export const MainTabNavigator: React.FC = () => { // Define y exporta el compone
     <Tab.Screen name="Alphabet"    component={AlphabetScreen}    />
     <Tab.Screen name="Stats"       component={StatsScreen}       />
     <Tab.Screen name="History"     component={HistoryScreen}     />
+    {userIsAdmin && (
+      <Tab.Screen name="Admin"     component={AdminStackNavigator} />
+    )}
     <Tab.Screen name="Profile"     component={ProfileStackNavigator} />
   </Tab.Navigator>
   ); // Cierra el return del componente MainTabNavigator
