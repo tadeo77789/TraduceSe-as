@@ -20,9 +20,17 @@ import { Colors } from '../../../constants/colors';
 import { useColors } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
 import { useSignAgent } from '../../../hooks/useSignAgent';
+import { recordSample, getSampleCounts, clearTrainingData } from '../../../services/vision';
 import type { SignAgentStatus } from '../../../types';
 
 type Mode = 'sena_texto' | 'texto_sena';
+
+const ALPHABET_LSC = [
+  'A', 'B', 'C', 'D', 'E', 'F', 'G',
+  'H', 'I', 'J', 'K', 'L', 'M', 'N',
+  'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T',
+  'U', 'V', 'W', 'X', 'Y', 'Z', '5',
+];
 
 export const TranslationScreen: React.FC = () => {
   const { width } = useWindowDimensions();
@@ -52,6 +60,40 @@ export const TranslationScreen: React.FC = () => {
   const [result, setResult] = useState('');
   const [isActive, setIsActive] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [trainingMode, setTrainingMode] = useState(false);
+  const [sampleCounts, setSampleCounts] = useState<Record<string, number>>({});
+
+  const refreshSampleCounts = useCallback(async () => {
+    setSampleCounts(await getSampleCounts());
+  }, []);
+
+  useEffect(() => { refreshSampleCounts(); }, [refreshSampleCounts]);
+
+  const handleRecordSample = useCallback(async (label: string) => {
+    const features = agentLastResult?.features;
+    if (!features || features.length === 0) {
+      const msg = t('trainNoHand');
+      if (Platform.OS === 'web') { alert(msg); } else { Alert.alert('', msg); }
+      return;
+    }
+    await recordSample(label, features);
+    await refreshSampleCounts();
+  }, [t, refreshSampleCounts, agentLastResult]);
+
+  const handleClearTraining = useCallback(() => {
+    const doClear = async () => {
+      await clearTrainingData();
+      await refreshSampleCounts();
+    };
+    if (Platform.OS === 'web') {
+      if (confirm(t('trainClearConfirm'))) doClear();
+    } else {
+      Alert.alert(t('trainClearAll'), t('trainClearConfirm'), [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'OK', style: 'destructive', onPress: doClear },
+      ]);
+    }
+  }, [t, refreshSampleCounts]);
 
   const handleAction = useCallback(async () => {
     if (mode === 'sena_texto') {
@@ -203,8 +245,106 @@ export const TranslationScreen: React.FC = () => {
             </View>
           )}
 
-          {/* ── Tips (solo modo seña) ── */}
+          {/* ── Toolbar entrenamiento (solo modo seña) ── */}
           {mode === 'sena_texto' && (
+            <View style={styles.trainToolbar}>
+              <TouchableOpacity
+                style={[
+                  styles.trainToggleBtn,
+                  { backgroundColor: trainingMode ? C.primary : C.primaryBg },
+                ]}
+                onPress={() => setTrainingMode(v => !v)}
+                activeOpacity={0.85}
+              >
+                <Ionicons
+                  name={trainingMode ? 'school' : 'school-outline'}
+                  size={16}
+                  color={trainingMode ? '#fff' : C.primary}
+                />
+                <Text
+                  style={[
+                    styles.trainToggleText,
+                    { color: trainingMode ? '#fff' : C.primary },
+                  ]}
+                >
+                  {trainingMode ? t('trainExit') : t('trainEnter')}
+                </Text>
+              </TouchableOpacity>
+
+              {agentLastResult?.source && isActive && (
+                <View style={[styles.sourceBadge, { backgroundColor: C.inputBg }]}>
+                  <Ionicons
+                    name={agentLastResult.source === 'knn' ? 'sparkles' : 'options-outline'}
+                    size={12}
+                    color={C.textSecondary}
+                  />
+                  <Text style={[styles.sourceBadgeText, { color: C.textSecondary }]}>
+                    {agentLastResult.source === 'knn' ? t('trainSourceKnn') : t('trainSourceGeo')}
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* ── Panel de entrenamiento ── */}
+          {mode === 'sena_texto' && trainingMode && (
+            <View style={[styles.trainPanel, { backgroundColor: C.surface, borderColor: C.border }]}>
+              <View style={styles.trainHeader}>
+                <Ionicons name="school" size={18} color={C.primary} />
+                <Text style={[styles.trainTitle, { color: C.textPrimary }]}>{t('trainTitle')}</Text>
+              </View>
+              <Text style={[styles.trainHintText, { color: C.textSecondary }]}>
+                {t('trainHint')}
+              </Text>
+              <View style={styles.alphabetGrid}>
+                {ALPHABET_LSC.map(letter => {
+                  const count = sampleCounts[letter] ?? 0;
+                  const trained = count > 0;
+                  return (
+                    <TouchableOpacity
+                      key={letter}
+                      style={[
+                        styles.letterBtn,
+                        {
+                          backgroundColor: trained ? C.primaryBg : C.backgroundGray,
+                          borderColor: trained ? C.primary : C.border,
+                        },
+                      ]}
+                      onPress={() => handleRecordSample(letter)}
+                      activeOpacity={0.7}
+                    >
+                      <Text
+                        style={[
+                          styles.letterBtnText,
+                          { color: trained ? C.primary : C.textPrimary },
+                        ]}
+                      >
+                        {letter}
+                      </Text>
+                      {count > 0 && (
+                        <View style={[styles.letterCountBadge, { backgroundColor: C.primary }]}>
+                          <Text style={styles.letterCountText}>{count}</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              <TouchableOpacity
+                style={[styles.trainClearBtn, { borderColor: C.border }]}
+                onPress={handleClearTraining}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="trash-outline" size={14} color={C.textSecondary} />
+                <Text style={[styles.trainClearText, { color: C.textSecondary }]}>
+                  {t('trainClearAll')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* ── Tips (solo modo seña, ocultos en entrenamiento) ── */}
+          {mode === 'sena_texto' && !trainingMode && (
             <View style={styles.tipsRow}>
               {TIPS.map((tip, i) => (
                 <View key={i} style={[styles.tipChip, { backgroundColor: C.primaryBg }]}>
@@ -345,6 +485,26 @@ const styles = StyleSheet.create({
   tipsRow: { gap: 10 },
   tipChip: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14 },
   tipText: { fontSize: 13, fontWeight: '500', flex: 1, lineHeight: 19 },
+
+  // Toolbar entrenamiento
+  trainToolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' },
+  trainToggleBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14 },
+  trainToggleText: { fontSize: 13, fontWeight: '700' },
+  sourceBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12 },
+  sourceBadgeText: { fontSize: 11, fontWeight: '700' },
+
+  // Panel entrenamiento
+  trainPanel: { borderRadius: 20, padding: 16, borderWidth: 1.5, gap: 14 },
+  trainHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  trainTitle: { fontSize: 15, fontWeight: '700' },
+  trainHintText: { fontSize: 12, lineHeight: 17 },
+  alphabetGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  letterBtn: { width: 42, height: 42, borderRadius: 10, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  letterBtnText: { fontSize: 15, fontWeight: '800' },
+  letterCountBadge: { position: 'absolute', top: -5, right: -5, minWidth: 16, height: 16, paddingHorizontal: 4, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  letterCountText: { color: '#fff', fontSize: 9, fontWeight: '800' },
+  trainClearBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderStyle: 'dashed' },
+  trainClearText: { fontSize: 12, fontWeight: '600' },
 
   // Resultado
   resultCard: { borderRadius: 24, overflow: 'hidden', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 16, elevation: 5, borderWidth: 1.5 },

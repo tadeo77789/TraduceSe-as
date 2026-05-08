@@ -178,6 +178,19 @@ const en: typeof es = {
   agentTranscriptLabel: 'Recognized text',
   agentClear: 'Clear',
 
+  // ── Agent training ───────────────────────────────────────────────────────
+  trainTitle: 'Train AI',
+  trainHint: 'Make the sign in front of the camera and tap the correct letter',
+  trainNoHand: 'I need to see your hand to save the sample',
+  trainSaved: 'Sample of {label} saved',
+  trainSamples: 'samples',
+  trainEnter: 'Train',
+  trainExit: 'Back to detection',
+  trainClearAll: 'Clear all training',
+  trainClearConfirm: 'Delete all saved templates?',
+  trainSourceKnn: 'Trained AI',
+  trainSourceGeo: 'Rules',
+
   alphabetTitle: 'LSC Alphabet',
   alphabetLetters: 'letters',
   alphabetTip: 'Tap a letter to see the 3D sign',

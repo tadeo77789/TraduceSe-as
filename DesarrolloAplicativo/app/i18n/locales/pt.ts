@@ -178,6 +178,19 @@ const pt: typeof es = {
   agentTranscriptLabel: 'Texto reconhecido',
   agentClear: 'Limpar',
 
+  // ── Treinamento da IA ────────────────────────────────────────────────────
+  trainTitle: 'Treinar IA',
+  trainHint: 'Faça o sinal na frente da câmera e toque na letra correta',
+  trainNoHand: 'Preciso ver sua mão para salvar a amostra',
+  trainSaved: 'Amostra de {label} salva',
+  trainSamples: 'amostras',
+  trainEnter: 'Treinar',
+  trainExit: 'Voltar à detecção',
+  trainClearAll: 'Apagar todo o treino',
+  trainClearConfirm: 'Excluir todos os modelos salvos?',
+  trainSourceKnn: 'IA treinada',
+  trainSourceGeo: 'Regras',
+
   alphabetTitle: 'Alfabeto LSC',
   alphabetLetters: 'letras',
   alphabetTip: 'Toque uma letra para ver o sinal em 3D',

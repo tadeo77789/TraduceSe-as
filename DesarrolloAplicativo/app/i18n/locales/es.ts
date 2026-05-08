@@ -187,6 +187,19 @@ const es = {
   agentTranscriptLabel: 'Texto reconocido',
   agentClear: 'Limpiar',
 
+  // ── Entrenamiento del agente ─────────────────────────────────────────────
+  trainTitle: 'Entrenar IA',
+  trainHint: 'Haz la seña frente a la cámara y pulsa la letra correcta',
+  trainNoHand: 'Necesito ver tu mano para guardar la muestra',
+  trainSaved: 'Muestra de {label} guardada',
+  trainSamples: 'muestras',
+  trainEnter: 'Entrenar',
+  trainExit: 'Volver a detectar',
+  trainClearAll: 'Borrar todo el entrenamiento',
+  trainClearConfirm: '¿Borrar todas las plantillas guardadas?',
+  trainSourceKnn: 'IA entrenada',
+  trainSourceGeo: 'Reglas',
+
   // ── Alfabeto ──────────────────────────────────────────────────────────────
   alphabetTitle: 'Alfabeto LSC',
   alphabetLetters: 'letras',

@@ -73,6 +73,10 @@ export interface SignDetectionResult {
   status: SignAgentStatus;
   /** Marca temporal ISO del frame analizado. */
   timestamp: string;
+  /** Vector normalizado de 63 features (21 puntos × xyz) cuando hay mano. */
+  features?: number[];
+  /** Origen del resultado: clasificador KNN entrenado o geométrico de respaldo. */
+  source?: 'knn' | 'geometric' | 'mock';
 }
 
 // ─── Léxico ──────────────────────────────────────────────────────────────────

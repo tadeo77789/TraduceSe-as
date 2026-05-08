@@ -10,6 +10,8 @@
  * este archivo automáticamente cuando la plataforma es `web`.
  */
 import { classifyLetterLSC, type Landmark } from './classifier';
+import { normalizeLandmarks } from './normalize';
+import { knnClassify } from './knnClassifier';
 import type { SignDetectionResult, SignVisionProvider, VisionFrame } from './types';
 
 const CDN_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
@@ -113,22 +115,42 @@ export const mediapipeProvider: SignVisionProvider = {
       }
 
       const hand = result.landmarks[0] as Landmark[];
-      const { letter, confidence } = classifyLetterLSC(hand);
+      const features = normalizeLandmarks(hand);
+      const featuresArray = Array.from(features);
 
-      if (!letter) {
+      // 1) KNN sobre las plantillas entrenadas por el usuario.
+      const knn = await knnClassify(features);
+      if (knn.used && knn.letter && knn.confidence >= 0.55) {
+        return {
+          text: knn.letter,
+          confidence: knn.confidence,
+          status: knn.confidence >= 0.7 ? 'detecting' : 'low_confidence',
+          timestamp: frame.capturedAt,
+          features: featuresArray,
+          source: 'knn',
+        };
+      }
+
+      // 2) Fallback al clasificador geométrico (9 letras de fábrica).
+      const geo = classifyLetterLSC(hand);
+      if (!geo.letter) {
         return {
           text: '',
-          confidence,
+          confidence: geo.confidence,
           status: 'low_confidence',
           timestamp: frame.capturedAt,
+          features: featuresArray,
+          source: 'geometric',
         };
       }
 
       return {
-        text: letter,
-        confidence,
-        status: confidence >= 0.7 ? 'detecting' : 'low_confidence',
+        text: geo.letter,
+        confidence: geo.confidence,
+        status: geo.confidence >= 0.7 ? 'detecting' : 'low_confidence',
         timestamp: frame.capturedAt,
+        features: featuresArray,
+        source: 'geometric',
       };
     } catch {
       return {
