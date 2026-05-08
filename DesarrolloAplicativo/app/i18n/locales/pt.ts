@@ -168,6 +168,16 @@ const pt: typeof es = {
   cameraPermissionTitle: 'Permissão de câmera',
   cameraPermissionMsg: 'É necessário acesso à câmera para traduzir sinais.',
 
+  // ── Agente de sinais ─────────────────────────────────────────────────────
+  agentStarting: 'Ativando câmera...',
+  agentDetecting: 'Reconhecendo sinal...',
+  agentLowConfidence: 'Baixa confiança, repita o sinal',
+  agentNoHands: 'Sem mãos no quadro',
+  agentError: 'Erro ao analisar o quadro',
+  agentConfidence: 'Confiança',
+  agentTranscriptLabel: 'Texto reconhecido',
+  agentClear: 'Limpar',
+
   alphabetTitle: 'Alfabeto LSC',
   alphabetLetters: 'letras',
   alphabetTip: 'Toque uma letra para ver o sinal em 3D',

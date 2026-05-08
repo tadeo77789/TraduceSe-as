@@ -168,6 +168,16 @@ const en: typeof es = {
   cameraPermissionTitle: 'Camera permission',
   cameraPermissionMsg: 'Camera access is required to translate signs.',
 
+  // ── Sign agent ───────────────────────────────────────────────────────────
+  agentStarting: 'Starting camera...',
+  agentDetecting: 'Recognizing sign...',
+  agentLowConfidence: 'Low confidence, try the sign again',
+  agentNoHands: 'No hands in frame',
+  agentError: 'Error analyzing frame',
+  agentConfidence: 'Confidence',
+  agentTranscriptLabel: 'Recognized text',
+  agentClear: 'Clear',
+
   alphabetTitle: 'LSC Alphabet',
   alphabetLetters: 'letters',
   alphabetTip: 'Tap a letter to see the 3D sign',

@@ -1,5 +1,5 @@
 // Archivo: app/presentation/screens/Translation/TranslationScreen.tsx
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,8 @@ import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
 import { useColors } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
+import { useSignAgent } from '../../../hooks/useSignAgent';
+import type { SignAgentStatus } from '../../../types';
 
 type Mode = 'sena_texto' | 'texto_sena';
 
@@ -29,6 +31,15 @@ export const TranslationScreen: React.FC = () => {
   const C = useColors();
   const { t } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef<CameraView>(null);
+  const {
+    status: agentStatus,
+    lastResult: agentLastResult,
+    transcript: agentTranscript,
+    start: agentStart,
+    stop: agentStop,
+    reset: agentReset,
+  } = useSignAgent(cameraRef, { intervalMs: 1500, minConfidence: 0.7 });
 
   const TIPS = [
     { icon: 'hand-left-outline' as const, text: t('tip1') },
@@ -58,7 +69,10 @@ export const TranslationScreen: React.FC = () => {
           }
         }
         setIsActive(true);
+        agentReset();
+        agentStart();
       } else {
+        agentStop();
         setIsActive(false);
         setResult('');
       }
@@ -70,14 +84,34 @@ export const TranslationScreen: React.FC = () => {
         setLoading(false);
       }, 1200);
     }
-  }, [mode, text, isActive, permission, requestPermission, t]);
+  }, [mode, text, isActive, permission, requestPermission, t, agentStart, agentStop, agentReset]);
 
   const switchMode = useCallback((m: Mode) => {
     setMode(m);
     setResult('');
     setText('');
     setIsActive(false);
-  }, []);
+    agentStop();
+    agentReset();
+  }, [agentStop, agentReset]);
+
+  useEffect(() => () => { agentStop(); }, [agentStop]);
+
+  const statusLabelKey: Record<SignAgentStatus, string> = {
+    idle: 'tapStartCamera',
+    starting: 'agentStarting',
+    detecting: 'agentDetecting',
+    low_confidence: 'agentLowConfidence',
+    no_hands: 'agentNoHands',
+    error: 'agentError',
+  };
+
+  const cameraStatusLabel = isActive
+    ? t(statusLabelKey[agentStatus] as Parameters<typeof t>[0])
+    : t('tapStartCamera');
+
+  const signResult = mode === 'sena_texto' ? agentTranscript : result;
+  const confidencePct = agentLastResult ? Math.round(agentLastResult.confidence * 100) : 0;
 
   const cameraGranted = permission?.granted ?? false;
 
@@ -119,7 +153,7 @@ export const TranslationScreen: React.FC = () => {
 
               {/* Cámara real o placeholder */}
               {isActive && cameraGranted ? (
-                <CameraView style={styles.cameraImage} facing="front" />
+                <CameraView ref={cameraRef} style={styles.cameraImage} facing="front" />
               ) : (
                 <Image
                   source={require('../../../assets/images/camera_placeholder.jpg')}
@@ -142,9 +176,10 @@ export const TranslationScreen: React.FC = () => {
               {/* Label inferior */}
               <View style={styles.cameraLabel}>
                 <Ionicons name="camera-outline" size={14} color="#fff" />
-                <Text style={styles.cameraLabelText}>
-                  {isActive ? t('analyzingSigns') : t('tapStartCamera')}
-                </Text>
+                <Text style={styles.cameraLabelText}>{cameraStatusLabel}</Text>
+                {isActive && agentLastResult && agentLastResult.confidence > 0 && (
+                  <Text style={styles.cameraConfidence}>· {confidencePct}%</Text>
+                )}
               </View>
             </View>
           ) : (
@@ -187,7 +222,7 @@ export const TranslationScreen: React.FC = () => {
                 <Ionicons name="chatbubble-ellipses-outline" size={16} color={C.primary} />
               </LinearGradient>
               <Text style={[styles.resultTitle, { color: C.textPrimary }]}>{t('sectionTranslation')}</Text>
-              {result ? (
+              {signResult ? (
                 <View style={styles.detectedBadge}>
                   <View style={styles.detectedDot} />
                   <Text style={styles.detectedText}>{t('done')}</Text>
@@ -199,16 +234,27 @@ export const TranslationScreen: React.FC = () => {
               )}
             </View>
             <View style={styles.resultBody}>
-              {result ? (
+              {signResult ? (
                 <>
-                  <Text style={[styles.resultText, { color: C.textPrimary }]}>{result}</Text>
-                  <TouchableOpacity
-                    style={[styles.copyBtn, { backgroundColor: C.primaryBg }]}
-                    onPress={() => Alert.alert(t('copied'), t('copiedToClipboard'))}
-                  >
-                    <Ionicons name="copy-outline" size={14} color={C.primary} />
-                    <Text style={[styles.copyBtnText, { color: C.primary }]}>{t('copy')}</Text>
-                  </TouchableOpacity>
+                  <Text style={[styles.resultText, { color: C.textPrimary }]}>{signResult}</Text>
+                  <View style={styles.resultActions}>
+                    <TouchableOpacity
+                      style={[styles.copyBtn, { backgroundColor: C.primaryBg }]}
+                      onPress={() => Alert.alert(t('copied'), t('copiedToClipboard'))}
+                    >
+                      <Ionicons name="copy-outline" size={14} color={C.primary} />
+                      <Text style={[styles.copyBtnText, { color: C.primary }]}>{t('copy')}</Text>
+                    </TouchableOpacity>
+                    {mode === 'sena_texto' && (
+                      <TouchableOpacity
+                        style={[styles.copyBtn, { backgroundColor: C.inputBg }]}
+                        onPress={agentReset}
+                      >
+                        <Ionicons name="trash-outline" size={14} color={C.textSecondary} />
+                        <Text style={[styles.copyBtnText, { color: C.textSecondary }]}>{t('agentClear')}</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 </>
               ) : (
                 <View style={styles.resultEmpty}>
@@ -285,6 +331,7 @@ const styles = StyleSheet.create({
   cornerBR: { bottom: 0, right: 0, borderBottomWidth: CORNER_WIDTH, borderRightWidth: CORNER_WIDTH, borderBottomRightRadius: 4 },
   cameraLabel: { position: 'absolute', bottom: 14, left: 0, right: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, zIndex: 10 },
   cameraLabelText: { color: 'rgba(255,255,255,0.9)', fontSize: 13, fontWeight: '500' },
+  cameraConfidence: { color: 'rgba(255,255,255,0.75)', fontSize: 12, fontWeight: '700' },
 
   // Input card
   inputCard: { borderRadius: 24, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 14, elevation: 4 },
@@ -311,7 +358,8 @@ const styles = StyleSheet.create({
   waitingText: { fontSize: 11, fontWeight: '600' },
   resultBody: { padding: 18, minHeight: 96 },
   resultText: { fontSize: 17, fontWeight: '600', lineHeight: 27 },
-  copyBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', marginTop: 14, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
+  resultActions: { flexDirection: 'row', gap: 10, marginTop: 14, flexWrap: 'wrap' },
+  copyBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
   copyBtnText: { fontSize: 13, fontWeight: '600' },
   resultEmpty: { alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 12 },
   resultEmptyText: { fontSize: 13, textAlign: 'center', lineHeight: 21, maxWidth: 240 },

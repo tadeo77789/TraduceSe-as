@@ -177,6 +177,16 @@ const es = {
   cameraPermissionTitle: 'Permiso de cámara',
   cameraPermissionMsg: 'Se necesita acceso a la cámara para traducir señas.',
 
+  // ── Agente de señas ──────────────────────────────────────────────────────
+  agentStarting: 'Activando cámara...',
+  agentDetecting: 'Reconociendo seña...',
+  agentLowConfidence: 'Confianza baja, repite la seña',
+  agentNoHands: 'No detecto manos en cuadro',
+  agentError: 'Error analizando frame',
+  agentConfidence: 'Confianza',
+  agentTranscriptLabel: 'Texto reconocido',
+  agentClear: 'Limpiar',
+
   // ── Alfabeto ──────────────────────────────────────────────────────────────
   alphabetTitle: 'Alfabeto LSC',
   alphabetLetters: 'letras',

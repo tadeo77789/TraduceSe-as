@@ -168,6 +168,16 @@ const fr: typeof es = {
   cameraPermissionTitle: 'Autorisation caméra',
   cameraPermissionMsg: 'L\'accès à la caméra est requis pour traduire les signes.',
 
+  // ── Agent de reconnaissance ──────────────────────────────────────────────
+  agentStarting: 'Activation de la caméra...',
+  agentDetecting: 'Reconnaissance du signe...',
+  agentLowConfidence: 'Confiance faible, répétez le signe',
+  agentNoHands: 'Aucune main détectée',
+  agentError: 'Erreur lors de l\'analyse',
+  agentConfidence: 'Confiance',
+  agentTranscriptLabel: 'Texte reconnu',
+  agentClear: 'Effacer',
+
   alphabetTitle: 'Alphabet LSC',
   alphabetLetters: 'lettres',
   alphabetTip: 'Touchez une lettre pour voir le signe en 3D',
