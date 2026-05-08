@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-  Alert,
   Platform,
   useWindowDimensions,
 } from 'react-native';
@@ -21,6 +20,7 @@ import { useColors } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
 import { useSignAgent } from '../../../hooks/useSignAgent';
 import { recordSample, getSampleCounts, clearTrainingData } from '../../../services/vision';
+import { showInfo, showError, showConfirm } from '../../../utils/dialogs';
 import type { AdminStackParams } from '../../navigation/AdminStackNavigator';
 
 type Nav = NativeStackNavigationProp<AdminStackParams, 'Training'>;
@@ -62,8 +62,7 @@ export const AdminTrainingScreen: React.FC = () => {
     if (!permission?.granted) {
       const res = await requestPermission();
       if (!res.granted) {
-        const msg = t('cameraPermissionMsg');
-        if (Platform.OS === 'web') alert(msg); else Alert.alert(t('cameraPermissionTitle'), msg);
+        showError(t('cameraPermissionMsg'), t('cameraPermissionTitle'));
         return;
       }
     }
@@ -79,41 +78,39 @@ export const AdminTrainingScreen: React.FC = () => {
   const handleRecordSample = useCallback(async (label: string) => {
     const features = agentLastResult?.features;
     if (!features || features.length === 0) {
-      const msg = t('trainNoHand');
-      if (Platform.OS === 'web') alert(msg); else Alert.alert('', msg);
+      showInfo(t('trainNoHand'));
       return;
     }
     await recordSample(label, features);
     await refreshCounts();
   }, [t, refreshCounts, agentLastResult]);
 
-  const handleClearTraining = useCallback(() => {
+  const handleClearTraining = useCallback(async () => {
     const total = Object.values(sampleCounts).reduce((a, b) => a + b, 0);
     if (total === 0) return;
 
-    const firstMsg = t('trainClearConfirm');
-    const secondMsg = t('trainClearConfirmSecond').replace('{count}', String(total));
+    const firstOk = await showConfirm({
+      title: t('trainClearAll'),
+      message: t('trainClearConfirm'),
+      icon: 'warning',
+      confirmText: t('trainContinue'),
+      cancelText: t('cancel'),
+      destructive: true,
+    });
+    if (!firstOk) return;
 
-    const doClear = async () => {
-      await clearTrainingData();
-      await refreshCounts();
-    };
+    const secondOk = await showConfirm({
+      title: t('trainClearAll'),
+      message: t('trainClearConfirmSecond').replace('{count}', String(total)),
+      icon: 'warning',
+      confirmText: t('trainConfirmDelete'),
+      cancelText: t('cancel'),
+      destructive: true,
+    });
+    if (!secondOk) return;
 
-    if (Platform.OS === 'web') {
-      if (confirm(firstMsg) && confirm(secondMsg)) doClear();
-    } else {
-      Alert.alert(t('trainClearAll'), firstMsg, [
-        { text: t('cancel'), style: 'cancel' },
-        {
-          text: t('trainContinue'),
-          style: 'destructive',
-          onPress: () => Alert.alert(t('trainClearAll'), secondMsg, [
-            { text: t('cancel'), style: 'cancel' },
-            { text: t('trainConfirmDelete'), style: 'destructive', onPress: doClear },
-          ]),
-        },
-      ]);
-    }
+    await clearTrainingData();
+    await refreshCounts();
   }, [sampleCounts, t, refreshCounts]);
 
   const cameraGranted = permission?.granted ?? false;

@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
-  Alert,
   useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -26,6 +25,7 @@ import {
 } from '../../../services/vision';
 import { useLanguage } from '../../../state/LanguageContext';
 import { downloadTextFile, pickTextFile, isFileIOSupported } from '../../../utils/fileIO';
+import { showSuccess, showError, showInfo, showChoice } from '../../../utils/dialogs';
 import type { AdminStackParams } from '../../navigation/AdminStackNavigator';
 
 const ALPHABET_LSC = [
@@ -66,44 +66,40 @@ export const AdminDashboardScreen: React.FC = () => {
   const coverage = Math.round((lettersTrained / ALPHABET_LSC.length) * 100);
   const aiActive = totalSamples > 0;
 
-  const showMessage = useCallback((title: string, body: string) => {
-    if (Platform.OS === 'web') alert(body || title); else Alert.alert(title, body);
-  }, []);
-
   const handleExport = useCallback(async () => {
     if (!isFileIOSupported()) {
-      showMessage('', t('adminFileIONotSupported'));
+      showInfo(t('adminFileIONotSupported'));
       return;
     }
     try {
       const json = await exportTrainingJson();
       const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
       downloadTextFile(`traduce_senas_dataset_${ts}.json`, json);
-      showMessage('', t('adminExportSuccess'));
+      showSuccess(t('adminExportSuccess'));
     } catch {
-      showMessage('', t('adminImportError'));
+      showError(t('adminImportError'));
     }
-  }, [t, showMessage]);
+  }, [t]);
 
   const performImport = useCallback(async (mode: 'merge' | 'replace') => {
     try {
       const content = await pickTextFile();
       if (!content) {
-        showMessage('', t('adminImportEmpty'));
+        showInfo(t('adminImportEmpty'));
         return;
       }
       const count = await importTrainingJson(content, mode);
       await refresh();
-      showMessage('', t('adminImportSuccess').replace('{count}', String(count)));
+      showSuccess(t('adminImportSuccess').replace('{count}', String(count)));
     } catch (err) {
       const msg = err instanceof Error ? err.message : t('adminImportError');
-      showMessage(t('adminImportError'), msg);
+      showError(msg, t('adminImportError'));
     }
-  }, [refresh, showMessage, t]);
+  }, [refresh, t]);
 
-  const handleImport = useCallback(() => {
+  const handleImport = useCallback(async () => {
     if (!isFileIOSupported()) {
-      showMessage('', t('adminFileIONotSupported'));
+      showInfo(t('adminFileIONotSupported'));
       return;
     }
     if (totalSamples === 0) {
@@ -111,18 +107,20 @@ export const AdminDashboardScreen: React.FC = () => {
       performImport('merge');
       return;
     }
-    if (Platform.OS === 'web') {
-      // Dos confirmaciones: primero pregunto cómo importar.
-      const useReplace = confirm(t('adminImportConfirmMerge') + '\n\nOK = ' + t('adminImportReplaceOption') + '\nCancelar = ' + t('adminImportMergeOption'));
-      performImport(useReplace ? 'replace' : 'merge');
-    } else {
-      Alert.alert(t('adminImportDataset'), t('adminImportConfirmMerge'), [
-        { text: t('cancel'), style: 'cancel' },
-        { text: t('adminImportMergeOption'), onPress: () => performImport('merge') },
-        { text: t('adminImportReplaceOption'), style: 'destructive', onPress: () => performImport('replace') },
-      ]);
+    const choice = await showChoice({
+      title: t('adminImportDataset'),
+      message: t('adminImportConfirmMerge'),
+      icon: 'question',
+      cancelText: t('cancel'),
+      choices: [
+        { key: 'merge', label: t('adminImportMergeOption') },
+        { key: 'replace', label: t('adminImportReplaceOption'), destructive: true },
+      ],
+    });
+    if (choice === 'merge' || choice === 'replace') {
+      performImport(choice);
     }
-  }, [totalSamples, performImport, t, showMessage]);
+  }, [totalSamples, performImport, t]);
 
   const maxCount = Math.max(1, ...Object.values(sampleCounts));
 
