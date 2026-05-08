@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
+  Alert,
   useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -17,8 +18,14 @@ import { AppHeader } from '../../components/common/AppHeader';
 import { useColors } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
 import { useAuth } from '../../../state/AuthContext';
-import { getSampleCounts, signVisionProvider } from '../../../services/vision';
+import {
+  getSampleCounts,
+  signVisionProvider,
+  exportTrainingJson,
+  importTrainingJson,
+} from '../../../services/vision';
 import { useLanguage } from '../../../state/LanguageContext';
+import { downloadTextFile, pickTextFile, isFileIOSupported } from '../../../utils/fileIO';
 import type { AdminStackParams } from '../../navigation/AdminStackNavigator';
 
 const ALPHABET_LSC = [
@@ -58,6 +65,64 @@ export const AdminDashboardScreen: React.FC = () => {
   const lettersTrained = ALPHABET_LSC.filter(l => (sampleCounts[l] ?? 0) > 0).length;
   const coverage = Math.round((lettersTrained / ALPHABET_LSC.length) * 100);
   const aiActive = totalSamples > 0;
+
+  const showMessage = useCallback((title: string, body: string) => {
+    if (Platform.OS === 'web') alert(body || title); else Alert.alert(title, body);
+  }, []);
+
+  const handleExport = useCallback(async () => {
+    if (!isFileIOSupported()) {
+      showMessage('', t('adminFileIONotSupported'));
+      return;
+    }
+    try {
+      const json = await exportTrainingJson();
+      const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      downloadTextFile(`traduce_senas_dataset_${ts}.json`, json);
+      showMessage('', t('adminExportSuccess'));
+    } catch {
+      showMessage('', t('adminImportError'));
+    }
+  }, [t, showMessage]);
+
+  const performImport = useCallback(async (mode: 'merge' | 'replace') => {
+    try {
+      const content = await pickTextFile();
+      if (!content) {
+        showMessage('', t('adminImportEmpty'));
+        return;
+      }
+      const count = await importTrainingJson(content, mode);
+      await refresh();
+      showMessage('', t('adminImportSuccess').replace('{count}', String(count)));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : t('adminImportError');
+      showMessage(t('adminImportError'), msg);
+    }
+  }, [refresh, showMessage, t]);
+
+  const handleImport = useCallback(() => {
+    if (!isFileIOSupported()) {
+      showMessage('', t('adminFileIONotSupported'));
+      return;
+    }
+    if (totalSamples === 0) {
+      // No hay nada que reemplazar — directamente merge.
+      performImport('merge');
+      return;
+    }
+    if (Platform.OS === 'web') {
+      // Dos confirmaciones: primero pregunto cómo importar.
+      const useReplace = confirm(t('adminImportConfirmMerge') + '\n\nOK = ' + t('adminImportReplaceOption') + '\nCancelar = ' + t('adminImportMergeOption'));
+      performImport(useReplace ? 'replace' : 'merge');
+    } else {
+      Alert.alert(t('adminImportDataset'), t('adminImportConfirmMerge'), [
+        { text: t('cancel'), style: 'cancel' },
+        { text: t('adminImportMergeOption'), onPress: () => performImport('merge') },
+        { text: t('adminImportReplaceOption'), style: 'destructive', onPress: () => performImport('replace') },
+      ]);
+    }
+  }, [totalSamples, performImport, t, showMessage]);
 
   const maxCount = Math.max(1, ...Object.values(sampleCounts));
 
@@ -159,6 +224,33 @@ export const AdminDashboardScreen: React.FC = () => {
                 <Text style={[styles.actionDesc, { color: C.primary }]}>{t('adminGoToTrainingDesc')}</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={C.primary} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionRow, { backgroundColor: C.inputBg, opacity: totalSamples === 0 ? 0.5 : 1 }]}
+              onPress={handleExport}
+              activeOpacity={0.85}
+              disabled={totalSamples === 0}
+            >
+              <Ionicons name="cloud-download-outline" size={20} color={C.textPrimary} />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.actionTitle, { color: C.textPrimary }]}>{t('adminExportDataset')}</Text>
+                <Text style={[styles.actionDesc, { color: C.textSecondary }]}>{t('adminExportDatasetDesc')}</Text>
+              </View>
+              <Ionicons name="download-outline" size={20} color={C.textSecondary} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionRow, { backgroundColor: C.inputBg }]}
+              onPress={handleImport}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="cloud-upload-outline" size={20} color={C.textPrimary} />
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.actionTitle, { color: C.textPrimary }]}>{t('adminImportDataset')}</Text>
+                <Text style={[styles.actionDesc, { color: C.textSecondary }]}>{t('adminImportDatasetDesc')}</Text>
+              </View>
+              <Ionicons name="add-circle-outline" size={20} color={C.textSecondary} />
             </TouchableOpacity>
           </View>
 

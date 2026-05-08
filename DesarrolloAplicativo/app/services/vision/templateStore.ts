@@ -99,4 +99,65 @@ export const templateStore = {
     cache = [];
     await persist();
   },
+
+  /** Serializa el dataset completo a JSON. */
+  async exportJSON(): Promise<string> {
+    const all = await load();
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      templates: all,
+    };
+    return JSON.stringify(payload, null, 2);
+  },
+
+  /**
+   * Importa plantillas desde un JSON exportado previamente.
+   * @param json contenido del archivo JSON.
+   * @param mode 'merge' agrega a las existentes; 'replace' las sobrescribe.
+   * @returns número de plantillas importadas.
+   */
+  async importJSON(json: string, mode: 'merge' | 'replace' = 'merge'): Promise<number> {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(json);
+    } catch {
+      throw new Error('JSON inválido');
+    }
+
+    const obj = parsed as { templates?: unknown };
+    if (!Array.isArray(obj.templates)) {
+      throw new Error('Formato no reconocido: falta el array "templates"');
+    }
+
+    const incoming: SignTemplate[] = [];
+    for (const raw of obj.templates) {
+      const t = raw as Partial<SignTemplate>;
+      if (
+        typeof t?.label === 'string' &&
+        Array.isArray(t.features) &&
+        t.features.length === 63 &&
+        t.features.every((n: unknown) => typeof n === 'number')
+      ) {
+        incoming.push({
+          label: t.label,
+          features: t.features as number[],
+          createdAt: typeof t.createdAt === 'string' ? t.createdAt : new Date().toISOString(),
+        });
+      }
+    }
+
+    if (incoming.length === 0) {
+      throw new Error('No se encontraron plantillas válidas en el archivo');
+    }
+
+    await load();
+    if (mode === 'replace' || !cache) {
+      cache = incoming;
+    } else {
+      cache = [...cache, ...incoming];
+    }
+    await persist();
+    return incoming.length;
+  },
 };

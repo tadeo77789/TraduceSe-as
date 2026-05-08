@@ -14,11 +14,16 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppHeader } from '../../components/common/AppHeader';
 import { useColors } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
 import { useSignAgent } from '../../../hooks/useSignAgent';
 import { recordSample, getSampleCounts, clearTrainingData } from '../../../services/vision';
+import type { AdminStackParams } from '../../navigation/AdminStackNavigator';
+
+type Nav = NativeStackNavigationProp<AdminStackParams, 'Training'>;
 
 const ALPHABET_LSC = [
   'A', 'B', 'C', 'D', 'E', 'F', 'G',
@@ -33,6 +38,7 @@ export const AdminTrainingScreen: React.FC = () => {
   const isDesktop = width >= 1024;
   const C = useColors();
   const { t } = useTranslation();
+  const navigation = useNavigation<Nav>();
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
   const {
@@ -125,9 +131,21 @@ export const AdminTrainingScreen: React.FC = () => {
 
   return (
     <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>
-      <AppHeader />
+      <AppHeader showBack onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={[styles.content, isDesktop && styles.contentDesktop]}>
         <View style={[styles.inner, isTablet && styles.innerWide]}>
+
+          {/* Botón volver (visible en web — en mobile lo cubre AppHeader) */}
+          {Platform.OS === 'web' && (
+            <TouchableOpacity
+              style={[styles.backRow, { backgroundColor: C.surface, borderColor: C.border }]}
+              onPress={() => navigation.goBack()}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="arrow-back" size={18} color={C.primary} />
+              <Text style={[styles.backText, { color: C.primary }]}>{t('adminBack')}</Text>
+            </TouchableOpacity>
+          )}
 
           {/* Métricas resumen */}
           <View style={styles.metricsRow}>
@@ -245,6 +263,9 @@ const styles = StyleSheet.create({
   contentDesktop: { paddingHorizontal: 48, paddingVertical: 32 },
   inner: { width: '100%', gap: 18 },
   innerWide: { maxWidth: 760, alignSelf: 'center' },
+
+  backRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1, alignSelf: 'flex-start' },
+  backText: { fontSize: 14, fontWeight: '700' },
 
   metricsRow: { flexDirection: 'row', gap: 10 },
   metricCard: { flex: 1, padding: 14, borderRadius: 16, borderWidth: 1.5, alignItems: 'center', gap: 4 },

@@ -31,6 +31,15 @@ export const clearTrainingData = (): Promise<void> => templateStore.clear();
 export const clearLabel = (label: string): Promise<void> =>
   templateStore.removeLabel(label);
 
+/** Serializa el dataset completo a JSON (string). */
+export const exportTrainingJson = (): Promise<string> => templateStore.exportJSON();
+
+/** Importa un JSON exportado previamente. mode='merge' agrega; 'replace' sobrescribe. */
+export const importTrainingJson = (
+  json: string,
+  mode: 'merge' | 'replace' = 'merge',
+): Promise<number> => templateStore.importJSON(json, mode);
+
 export { mockProvider } from './mockProvider';
 export { mediapipeProvider } from './mediapipeProvider';
 export type { SignVisionProvider, VisionFrame, SignDetectionResult } from './types';
