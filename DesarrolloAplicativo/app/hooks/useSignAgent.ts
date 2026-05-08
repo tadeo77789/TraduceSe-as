@@ -138,6 +138,10 @@ export const useSignAgent = (
       timerRef.current = setTimeout(tick, intervalMs);
     };
 
+    // Pre-carga del modelo (MediaPipe descarga ~7 MB en web la primera vez).
+    // Si falla o no aplica, igual seguimos con el bucle normal.
+    signVisionProvider.init?.().catch(() => undefined);
+
     // Primer disparo: damos un pequeño respiro para que la cámara renderice.
     timerRef.current = setTimeout(tick, 600);
 
