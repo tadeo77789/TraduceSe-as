@@ -30,7 +30,6 @@ const BarChart: React.FC<{
   const chartHeight = 100;
   const axisWidth = showAxes ? 40 : 0;
 
-  // ticks for vertical axis
   const ticks = 4;
   const tickValues = Array.from({ length: ticks + 1 }, (_, i) => Math.round((max * (ticks - i)) / ticks));
 
@@ -50,7 +49,8 @@ const BarChart: React.FC<{
             <View key={i} style={bar.barGroup}>
               <View style={{ alignItems: 'center' }}>
                 <Text style={[bar.valueLabel, { color: C.textHint }]}>{item.value}</Text>
-                <View style={[bar.barWrap, { height: (item.value / max) * chartHeight }]}>
+                {/* ✅ FIX ③: Math.max(4, ...) para evitar barras invisibles */}
+                <View style={[bar.barWrap, { height: Math.max(4, (item.value / max) * chartHeight) }]}>
                   <LinearGradient colors={colors} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} style={bar.bar} />
                 </View>
               </View>
@@ -71,23 +71,34 @@ const BarChart: React.FC<{
 };
 
 // ─── Gráfica de línea ─────────────────────────────────────────────────────────
-const LineChart: React.FC<{ data: number[]; color: string; labels?: string[]; showAxes?: boolean; height?: number }> = ({ data, color, labels, showAxes, height }) => {
-  const [containerWidth, setContainerWidth] = useState(280);
+const LineChart: React.FC<{
+  data: number[];
+  color: string;
+  labels?: string[];
+  showAxes?: boolean;
+  height?: number;
+}> = ({ data, color, labels, showAxes, height }) => {
+  // ✅ FIX ②a: inicializar en 0 para esperar la medida real del contenedor
+  const [containerWidth, setContainerWidth] = useState(0);
   const max = Math.max(...data);
   const chartHeight = height || 80;
   const step = containerWidth / (data.length - 1 || 1);
-
-  const points = data.map((v, i) => ({
-    x: i * step,
-    y: chartHeight - (v / max) * chartHeight,
-  }));
 
   const handleLayout = (e: LayoutChangeEvent) => {
     const w = e.nativeEvent.layout.width;
     if (w > 0) setContainerWidth(w);
   };
 
-  // axis ticks
+  // ✅ FIX ②b: no dibujar hasta tener el ancho real
+  if (containerWidth === 0) {
+    return <View style={{ height: chartHeight }} onLayout={handleLayout} />;
+  }
+
+  const points = data.map((v, i) => ({
+    x: i * step,
+    y: chartHeight - (v / max) * chartHeight,
+  }));
+
   const ticks = 4;
   const tickValues = Array.from({ length: ticks + 1 }, (_, i) => Math.round((max * (ticks - i)) / ticks));
 
@@ -111,7 +122,13 @@ const LineChart: React.FC<{ data: number[]; color: string; labels?: string[]; sh
           return (
             <View
               key={i}
-              style={[lineStyle.segment, { left: pt.x, top: pt.y + 5, width: length, transform: [{ rotate: `${angle}deg` }], backgroundColor: color + '50' }]}
+              style={[lineStyle.segment, {
+                left: pt.x,
+                top: pt.y + 5,
+                width: length,
+                transform: [{ rotate: `${angle}deg` }],
+                backgroundColor: color + '50',
+              }]}
             />
           );
         })}
@@ -258,7 +275,6 @@ const tbl = StyleSheet.create({
   cell: { fontSize: 13 },
   cellValue: { fontSize: 13, fontWeight: '700', width: 60, textAlign: 'right' },
 
-  /* compact (card) styles */
   compactContainer: { borderRadius: 12, overflow: 'hidden', marginTop: 8 },
   compactRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 10, paddingVertical: 6 },
   compactLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
@@ -352,6 +368,7 @@ const DetailModal: React.FC<DetailModalProps> = ({ cardKey, onClose, sectionPie,
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={modal.overlay}>
           <TouchableWithoutFeedback>
+            {/* ✅ FIX ①: maxHeight agregado para que el ScrollView interno funcione */}
             <View style={[modal.sheet, { backgroundColor: C.surface, width: sheetMaxWidth }]}>
               {/* Header */}
               <View style={[modal.header, { borderBottomColor: C.border }]}>
@@ -375,11 +392,13 @@ const DetailModal: React.FC<DetailModalProps> = ({ cardKey, onClose, sectionPie,
 
 const modal = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  sheet: { width: '100%', maxWidth: 560, borderRadius: 24, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.25, shadowRadius: 30, elevation: 20 },
+  // ✅ FIX ①: maxHeight: '85%' para que el modal no crezca más de la pantalla
+  sheet: { width: '100%', maxWidth: 560, maxHeight: '85%', borderRadius: 24, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.25, shadowRadius: 30, elevation: 20 },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 18, borderBottomWidth: 1, gap: 12 },
   title: { flex: 1, fontSize: 17, fontWeight: '800' },
   closeBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
-  body: { padding: 24, gap: 4 },
+  // ✅ FIX ④: padding y gap ajustados para mejor distribución del contenido
+  body: { padding: 16, paddingBottom: 24, gap: 12 },
   desc: { fontSize: 13, lineHeight: 20, marginTop: 16 },
 });
 
@@ -399,7 +418,6 @@ export const StatsScreen: React.FC = () => {
     { label: t('sectionHistory'),     value: 24, color: '#10B981' },
   ];
 
-  // compact table rows for cards
   const weeklyRows = WEEKLY_DATA.map(d => ({ label: d.label, value: d.value, color: C.primary }));
   const monthlyRows = MONTHLY_LINE.map((v, i) => ({ label: MONTHLY_LABELS[i], value: v, color: C.primary }));
   const volumeRows = VOLUME_DATA.map(d => ({ label: d.label, value: d.value, color: '#06B6D4' }));
@@ -443,7 +461,7 @@ export const StatsScreen: React.FC = () => {
             ))}
           </View>
 
-          {/* Stat Cards — toca para ver detalle */}
+          {/* Stat Cards */}
           <View style={[styles.cardsGrid, isTablet && styles.cardsGridTablet]}>
             <StatCard title={t('statsWeeklyTitle')} accentColor={C.primary} description={t('statsWeeklyDesc')} onPress={() => setOpenCard('weekly')}>
               <BarChart data={WEEKLY_DATA} colors={[C.primaryLight, C.primary]} />
@@ -500,3 +518,4 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 15, fontWeight: '700' },
   cardDesc: { fontSize: 13, lineHeight: 20, marginTop: 14 },
 });
+
