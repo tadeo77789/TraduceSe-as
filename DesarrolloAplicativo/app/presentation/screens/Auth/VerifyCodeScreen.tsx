@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   // Logo
   logoCorner: {
     position: 'absolute',
-    top: 20,
+    top: 11,
     left: 68,
     flexDirection: 'row',
     alignItems: 'center',

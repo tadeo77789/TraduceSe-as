@@ -159,8 +159,8 @@ const styles = StyleSheet.create({
     top: 20,
     left: 20,
     zIndex: 20,
-    width: 38,
-    height: 38,
+    width: 42,
+    height: 42,
     borderRadius: 19,
     backgroundColor: 'rgba(255,255,255,0.9)',
     alignItems: 'center',
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   // Logo
   logoCorner: {
     position: 'absolute',
-    top: 20,
+    top: 11,
     left: 68,
     flexDirection: 'row',
     alignItems: 'center',
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 6,
+    elevation: 3,
   },
   logoEmoji: { fontSize: 22 },
   brandName: { fontSize: 17, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.2 },
