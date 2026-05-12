@@ -178,6 +178,8 @@ const fr: typeof es = {
   agentConfidence: 'Confiance',
   agentTranscriptLabel: 'Texte reconnu',
   agentClear: 'Effacer',
+  agentBackspace: 'Supprimer',
+  agentSpace: 'Espace',
 
   // ── Entraînement de l'IA ─────────────────────────────────────────────────
   trainTitle: 'Entraîner l\'IA',

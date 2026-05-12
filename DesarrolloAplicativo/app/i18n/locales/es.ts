@@ -187,6 +187,8 @@ const es = {
   agentConfidence: 'Confianza',
   agentTranscriptLabel: 'Texto reconocido',
   agentClear: 'Limpiar',
+  agentBackspace: 'Borrar',
+  agentSpace: 'Espacio',
 
   // ── Entrenamiento del agente ─────────────────────────────────────────────
   trainTitle: 'Entrenar IA',

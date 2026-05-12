@@ -178,6 +178,8 @@ const pt: typeof es = {
   agentConfidence: 'Confiança',
   agentTranscriptLabel: 'Texto reconhecido',
   agentClear: 'Limpar',
+  agentBackspace: 'Apagar',
+  agentSpace: 'Espaço',
 
   // ── Treinamento da IA ────────────────────────────────────────────────────
   trainTitle: 'Treinar IA',

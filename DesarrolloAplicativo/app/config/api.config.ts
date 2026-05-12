@@ -42,3 +42,15 @@ export const ENDPOINTS = {
   updateProfile: '/users/profile',
   deleteAccount: '/users/delete',
 };
+
+// ── Modelo de reconocimiento de señas para móvil (TFJS) ─────────────────────
+// El provider TFJS de mobile carga estos artefactos al inicializarse. Si las
+// URLs están vacías o el modelo no es accesible, el provider degrada a mock
+// sin romper la UI. Para usarlo:
+//   1) Entrenar el modelo en https://teachablemachine.withgoogle.com/train/image
+//   2) Exportar como "Tensorflow.js" → carpeta con model.json + pesos.bin
+//   3) Subir esos archivos a una URL pública (Firebase Hosting, GitHub Pages, etc.)
+//   4) Crear labels.json con ["A","B","C", ...] (orden igual al de Teachable Machine)
+//   5) Apuntar TFJS_MODEL_URL y TFJS_LABELS_URL a esos archivos.
+export const TFJS_MODEL_URL = '';   // ej. 'https://midominio.com/modelo/model.json'
+export const TFJS_LABELS_URL = '';  // ej. 'https://midominio.com/modelo/labels.json'

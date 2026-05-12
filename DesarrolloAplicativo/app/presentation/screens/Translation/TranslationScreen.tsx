@@ -20,6 +20,7 @@ import { Colors } from '../../../constants/colors';
 import { useColors } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
 import { useSignAgent } from '../../../hooks/useSignAgent';
+import { translationsService } from '../../../services/translations.service';
 import type { SignAgentStatus } from '../../../types';
 
 type Mode = 'sena_texto' | 'texto_sena';
@@ -36,10 +37,15 @@ export const TranslationScreen: React.FC = () => {
     status: agentStatus,
     lastResult: agentLastResult,
     transcript: agentTranscript,
+    pendingLetter: agentPendingLetter,
+    pendingCount: agentPendingCount,
+    confirmFrames: agentConfirmFrames,
     start: agentStart,
     stop: agentStop,
     reset: agentReset,
-  } = useSignAgent(cameraRef, { intervalMs: 1500, minConfidence: 0.7 });
+    backspace: agentBackspace,
+    appendSpace: agentAppendSpace,
+  } = useSignAgent(cameraRef, { intervalMs: 1500, minConfidence: 0.7, confirmFrames: 2 });
 
   const TIPS = [
     { icon: 'hand-left-outline' as const, text: t('tip1') },
@@ -52,6 +58,38 @@ export const TranslationScreen: React.FC = () => {
   const [result, setResult] = useState('');
   const [isActive, setIsActive] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Persistencia silenciosa: si el backend no responde, no rompemos la UX.
+  const persistSignTranscript = useCallback(async () => {
+    const transcript = agentTranscript.trim();
+    if (!transcript) return;
+    try {
+      await translationsService.save({
+        inputText: transcript,
+        outputText: transcript,
+        type: 'sena_texto',
+        confidence: agentLastResult?.confidence,
+        source: (agentLastResult?.source as 'mediapipe' | 'knn' | 'mock' | undefined) ?? 'mediapipe',
+      });
+    } catch {
+      // Backend offline o sin tabla — silencioso para no bloquear el flujo.
+    }
+  }, [agentTranscript, agentLastResult]);
+
+  const persistTextToSign = useCallback(async (input: string) => {
+    const value = input.trim();
+    if (!value) return;
+    try {
+      await translationsService.save({
+        inputText: value,
+        outputText: value,
+        type: 'texto_sena',
+        source: 'manual',
+      });
+    } catch {
+      // Backend offline — silencioso.
+    }
+  }, []);
 
   const handleAction = useCallback(async () => {
     if (mode === 'sena_texto') {
@@ -75,16 +113,20 @@ export const TranslationScreen: React.FC = () => {
         agentStop();
         setIsActive(false);
         setResult('');
+        // Al detener, persistimos lo reconocido (si hay algo).
+        await persistSignTranscript();
       }
     } else {
       if (!text.trim()) { Alert.alert('', t('textEmptyAlert')); return; }
       setLoading(true);
-      setTimeout(() => {
-        setResult(t('translationResult') + text);
+      const value = text;
+      setTimeout(async () => {
+        setResult(t('translationResult') + value);
         setLoading(false);
+        await persistTextToSign(value);
       }, 1200);
     }
-  }, [mode, text, isActive, permission, requestPermission, t, agentStart, agentStop, agentReset]);
+  }, [mode, text, isActive, permission, requestPermission, t, agentStart, agentStop, agentReset, persistSignTranscript, persistTextToSign]);
 
   const switchMode = useCallback((m: Mode) => {
     setMode(m);
@@ -173,6 +215,23 @@ export const TranslationScreen: React.FC = () => {
                 <View style={[styles.corner, styles.cornerBR]} />
               </View>
 
+              {/* Indicador de letra pendiente — solo cuando el agente está confirmando */}
+              {isActive && agentPendingLetter && (
+                <View style={styles.pendingBubble}>
+                  <Text style={styles.pendingLetterText}>{agentPendingLetter}</Text>
+                  <View style={styles.pendingProgressTrack}>
+                    <View
+                      style={[
+                        styles.pendingProgressFill,
+                        {
+                          width: `${Math.min(100, (agentPendingCount / agentConfirmFrames) * 100)}%`,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+              )}
+
               {/* Label inferior */}
               <View style={styles.cameraLabel}>
                 <Ionicons name="camera-outline" size={14} color="#fff" />
@@ -246,13 +305,29 @@ export const TranslationScreen: React.FC = () => {
                       <Text style={[styles.copyBtnText, { color: C.primary }]}>{t('copy')}</Text>
                     </TouchableOpacity>
                     {mode === 'sena_texto' && agentTranscript && (
-                      <TouchableOpacity
-                        style={[styles.copyBtn, { backgroundColor: C.inputBg }]}
-                        onPress={agentReset}
-                      >
-                        <Ionicons name="trash-outline" size={14} color={C.textSecondary} />
-                        <Text style={[styles.copyBtnText, { color: C.textSecondary }]}>{t('agentClear')}</Text>
-                      </TouchableOpacity>
+                      <>
+                        <TouchableOpacity
+                          style={[styles.copyBtn, { backgroundColor: C.inputBg }]}
+                          onPress={agentBackspace}
+                        >
+                          <Ionicons name="backspace-outline" size={14} color={C.textSecondary} />
+                          <Text style={[styles.copyBtnText, { color: C.textSecondary }]}>{t('agentBackspace')}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.copyBtn, { backgroundColor: C.inputBg }]}
+                          onPress={agentAppendSpace}
+                        >
+                          <Ionicons name="ellipsis-horizontal" size={14} color={C.textSecondary} />
+                          <Text style={[styles.copyBtnText, { color: C.textSecondary }]}>{t('agentSpace')}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.copyBtn, { backgroundColor: C.inputBg }]}
+                          onPress={agentReset}
+                        >
+                          <Ionicons name="trash-outline" size={14} color={C.textSecondary} />
+                          <Text style={[styles.copyBtnText, { color: C.textSecondary }]}>{t('agentClear')}</Text>
+                        </TouchableOpacity>
+                      </>
                     )}
                   </View>
                 </>
@@ -332,6 +407,35 @@ const styles = StyleSheet.create({
   cameraLabel: { position: 'absolute', bottom: 14, left: 0, right: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, zIndex: 10 },
   cameraLabelText: { color: 'rgba(255,255,255,0.9)', fontSize: 13, fontWeight: '500' },
   cameraConfidence: { color: 'rgba(255,255,255,0.75)', fontSize: 12, fontWeight: '700' },
+
+  // Burbuja de letra pendiente — feedback visual durante la ventana de estabilidad
+  pendingBubble: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    zIndex: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 16,
+    minWidth: 64,
+  },
+  pendingLetterText: { color: '#fff', fontSize: 26, fontWeight: '800', lineHeight: 30 },
+  pendingProgressTrack: {
+    width: 44,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    marginTop: 6,
+    overflow: 'hidden',
+  },
+  pendingProgressFill: {
+    height: '100%',
+    borderRadius: 2,
+    backgroundColor: '#fff',
+  },
 
   // Input card
   inputCard: { borderRadius: 24, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 14, elevation: 4 },
