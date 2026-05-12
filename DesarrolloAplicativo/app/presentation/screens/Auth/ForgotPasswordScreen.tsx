@@ -12,6 +12,8 @@ import {
   Alert, useWindowDimensions,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,8 +22,10 @@ import { Input } from '../../components/common/Input';
 import { useColors, useTheme } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
 
+type NavigationProps = NativeStackNavigationProp<AuthStackParams>;
+
 export const ForgotPasswordScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProps>();
   const route = useRoute();
   const fromProfile = (route.params as any)?.fromProfile ?? false;
   const [email, setEmail] = useState('');
@@ -40,7 +44,7 @@ export const ForgotPasswordScreen: React.FC = () => {
     // TODO: llamar al backend para enviar código
     setTimeout(() => {
       setLoading(false);
-      navigation.navigate('VerifyCode' as never, { fromProfile } as never);
+      navigation.navigate('VerifyCode', { fromProfile });
     }, 1000);
   };
 
@@ -67,49 +71,49 @@ export const ForgotPasswordScreen: React.FC = () => {
       bounces={false}
     >
       <View style={styles.formInner}>
-      <View style={[styles.card, { backgroundColor: C.surface }]}>
-        <Text style={[styles.title, { color: C.textPrimary }]}>
-          {fromProfile ? t('forgotTitleFromProfile') : t('forgotTitle')}
-        </Text>
-        <Text style={[styles.subtitle, { color: C.textSecondary }]}>
-          {fromProfile ? t('forgotSubtitleFromProfile') : t('forgotSubtitle')}
-        </Text>
+        <View style={[styles.card, { backgroundColor: C.surface }]}>
+          <Text style={[styles.title, { color: C.textPrimary }]}>
+            {fromProfile ? t('forgotTitleFromProfile') : t('forgotTitle')}
+          </Text>
+          <Text style={[styles.subtitle, { color: C.textSecondary }]}>
+            {fromProfile ? t('forgotSubtitleFromProfile') : t('forgotSubtitle')}
+          </Text>
 
-        <Input
-          label={t('forgotEmailLabel')}
-          placeholder={t('forgotEmailPlaceholder')}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          leftIcon="mail-outline"
-          accentColor={Colors.primary}
-          containerStyle={styles.inputSpacing}
-        />
+          <Input
+            label={t('forgotEmailLabel')}
+            placeholder={t('forgotEmailPlaceholder')}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            leftIcon="mail-outline"
+            accentColor={Colors.primary}
+            containerStyle={styles.inputSpacing}
+          />
 
-        <View style={styles.btnWrapper}>
+          <View style={styles.btnWrapper}>
+            <TouchableOpacity
+              style={[styles.submitBtn, loading && styles.btnDisabled]}
+              onPress={handleConfirm}
+              disabled={loading}
+            >
+              <Text style={styles.submitBtnText}>
+                {loading ? t('forgotBtnLoading') : t('forgotBtn')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {!fromProfile && (
           <TouchableOpacity
-            style={[styles.submitBtn, loading && styles.btnDisabled]}
-            onPress={handleConfirm}
-            disabled={loading}
+            onPress={() => navigation.goBack()}
+            style={styles.linkRow}
           >
-            <Text style={styles.submitBtnText}>
-              {loading ? t('forgotBtnLoading') : t('forgotBtn')}
+            <Text style={[styles.linkText, { color: C.textSecondary }]}>
+              {t('forgotRemembered')}{' '}
+              <Text style={styles.linkAccent}>{t('forgotLoginLink')}</Text>
             </Text>
           </TouchableOpacity>
-        </View>
-      </View>
-
-      {!fromProfile && (
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.linkRow}
-        >
-          <Text style={[styles.linkText, { color: C.textSecondary }]}>
-            {t('forgotRemembered')}{' '}
-            <Text style={styles.linkAccent}>{t('forgotLoginLink')}</Text>
-          </Text>
-        </TouchableOpacity>
-      )}
+        )}
       </View>
     </ScrollView>
   );

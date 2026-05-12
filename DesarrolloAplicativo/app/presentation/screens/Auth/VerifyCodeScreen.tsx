@@ -16,6 +16,8 @@ import {
   Alert, useWindowDimensions,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -24,9 +26,11 @@ import { useColors, useTheme } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
 
 const CODE_LENGTH = 6;
+  
+type NavigationProps = NativeStackNavigationProp<AuthStackParams>;
 
 export const VerifyCodeScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProps>();
   const route = useRoute();
   const fromProfile = (route.params as any)?.fromProfile ?? false;
   const [code, setCode] = useState(Array(CODE_LENGTH).fill(''));
@@ -65,7 +69,7 @@ export const VerifyCodeScreen: React.FC = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      navigation.navigate('NewPassword' as never, { fromProfile } as never);
+      navigation.navigate('NewPassword', { fromProfile });
     }, 1000);
   };
 
