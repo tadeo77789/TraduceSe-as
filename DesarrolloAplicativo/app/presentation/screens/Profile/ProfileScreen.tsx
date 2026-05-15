@@ -114,7 +114,7 @@ export const ProfileScreen: React.FC = () => {
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>{t('profileAccount')}</Text>
             <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
-              <Input label={t('email')} value={displayEmail} editable={false} rightIcon="lock-closed-outline" containerStyle={styles.inputStyle} />
+              <Input label={t('email')} value={displayEmail} editable={false} rightIcon="mail-outline" containerStyle={styles.inputStyle} />
               <Input label={t('password')} value="••••••••" isPassword editable={false} containerStyle={styles.inputStyle} />
               <TouchableOpacity style={styles.forgotRow} onPress={() => (navigation.navigate as any)('ForgotPassword', { fromProfile: true })}>
                 <Ionicons name="key-outline" size={14} color={C.primary} />

@@ -35,7 +35,7 @@ const BarChart: React.FC<{
 
   return (
     <View style={bar.container}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', width: '100%' }}>
         {showAxes && (
           <View style={{ width: axisWidth, alignItems: 'flex-end', paddingRight: 8 }}>
             {tickValues.map((tv, i) => (
@@ -44,7 +44,7 @@ const BarChart: React.FC<{
           </View>
         )}
 
-        <View style={[bar.chart, showAxes ? { flex: 1 } : undefined, { height: chartHeight + 30 }]}>
+        <View style={[bar.chart, { flex: 1, height: chartHeight + 30 }]}>
           {data.map((item, i) => (
             <View key={i} style={bar.barGroup}>
               <View style={{ alignItems: 'center' }}>

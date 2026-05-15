@@ -19,7 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
 import { Input } from '../../components/common/Input';
-import { useColors, useTheme } from '../../../state/ThemeContext';
+import { useColors } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
 
 type NavigationProps = NativeStackNavigationProp<AuthStackParams>;
@@ -30,16 +30,29 @@ export const ForgotPasswordScreen: React.FC = () => {
   const fromProfile = (route.params as any)?.fromProfile ?? false;
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState<string | undefined>(undefined);
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isWide = width >= 768;
-  const C = useColors();
-  const { isDark } = useTheme();
-  const rootBg = isDark ? '#0F0B1A' : '#EDE9FE';
+  // Si la pantalla se abre desde Perfil (cambiar contraseña) usa el tema/acento del usuario.
+  // Si se abre desde Login (recuperar contraseña) usa la paleta fija morada/clara.
+  const themedC = useColors();
+  const C = fromProfile ? themedC : Colors;
+  const rootBg = C.background;
   const { t } = useTranslation();
 
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
   const handleConfirm = async () => {
-    if (!email) { Alert.alert(t('error'), t('forgotErrorEmpty')); return; }
+    if (!email.trim()) {
+      setEmailError(t('forgotErrorEmpty'));
+      return;
+    }
+    if (!EMAIL_REGEX.test(email.trim())) {
+      setEmailError(t('loginEmailInvalid'));
+      return;
+    }
+    setEmailError(undefined);
     setLoading(true);
     // TODO: llamar al backend para enviar código
     setTimeout(() => {
@@ -51,10 +64,10 @@ export const ForgotPasswordScreen: React.FC = () => {
   const Logo = (
     <>
       <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
-        <Ionicons name="chevron-back" size={22} color={Colors.primary} />
+        <Ionicons name="chevron-back" size={22} color={C.primary} />
       </TouchableOpacity>
       <View style={styles.logoCorner}>
-        <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.logoBox}>
+        <LinearGradient colors={[C.primaryLight, C.primary]} style={styles.logoBox}>
           <Text style={styles.logoEmoji}>👌</Text>
         </LinearGradient>
         <Text style={[styles.brandName, { color: C.textPrimary }]}>TraduceSeña</Text>
@@ -71,7 +84,7 @@ export const ForgotPasswordScreen: React.FC = () => {
       bounces={false}
     >
       <View style={styles.formInner}>
-        <View style={[styles.card, { backgroundColor: C.surface }]}>
+        <View style={[styles.card, { backgroundColor: C.primaryBg, shadowColor: C.primary }]}>
           <Text style={[styles.title, { color: C.textPrimary }]}>
             {fromProfile ? t('forgotTitleFromProfile') : t('forgotTitle')}
           </Text>
@@ -83,16 +96,17 @@ export const ForgotPasswordScreen: React.FC = () => {
             label={t('forgotEmailLabel')}
             placeholder={t('forgotEmailPlaceholder')}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(v) => { setEmail(v); if (emailError) setEmailError(undefined); }}
             keyboardType="email-address"
             leftIcon="mail-outline"
-            accentColor={Colors.primary}
+            accentColor={C.primary}
+            error={emailError}
             containerStyle={styles.inputSpacing}
           />
 
           <View style={styles.btnWrapper}>
             <TouchableOpacity
-              style={[styles.submitBtn, loading && styles.btnDisabled]}
+              style={[styles.submitBtn, { backgroundColor: C.primary }, loading && styles.btnDisabled]}
               onPress={handleConfirm}
               disabled={loading}
             >

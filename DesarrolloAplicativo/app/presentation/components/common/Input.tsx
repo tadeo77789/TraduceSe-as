@@ -109,19 +109,31 @@ function InputBase({ // Define el componente funcional interno InputBase (se exp
             onBlur={() => setFocused(false)} // Cuando el campo pierde el foco: desactiva el estado focused
             {...props} // Pasa todas las props restantes de TextInput (placeholder, value, onChangeText, keyboardType, etc.)
           />{/* Cierra TextInput */}
-          {isPassword && ( // Renderiza el toggle de visibilidad solo si isPassword=true
-            <TouchableOpacity onPress={() => setShowPassword(v => !v)} style={styles.rightIcon}>{/* Botón táctil: alterna showPassword entre true/false al presionar; usa padding estilo rightIcon */}
-              <Ionicons
-                name={showPassword ? 'eye-off-outline' : 'eye-outline'} // Ícono dinámico: ojo cerrado si showPassword=true (contraseña visible), ojo abierto si showPassword=false
-                size={20} // Tamaño del ícono de visibilidad: 20px
-                color={focused ? accent : C.textSecondary}
-              />
-            </TouchableOpacity> // Cierra TouchableOpacity del toggle de contraseña
+          {isPassword && ( // Renderiza el ojo: como botón si el campo es editable, decorativo si no
+            props.editable === false ? (
+              <View style={styles.rightIcon} pointerEvents="none">
+                <Ionicons name="eye-outline" size={20} color={C.textSecondary} />
+              </View>
+            ) : (
+              <TouchableOpacity onPress={() => setShowPassword(v => !v)} style={styles.rightIcon}>
+                <Ionicons
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color={focused ? accent : C.textSecondary}
+                />
+              </TouchableOpacity>
+            )
           )}{/* Cierra bloque condicional de isPassword */}
           {rightIcon && !isPassword && ( // Renderiza el ícono derecho personalizado solo si rightIcon existe Y no es campo de contraseña (evita conflicto con el toggle)
-            <TouchableOpacity onPress={onRightIconPress} style={styles.rightIcon}>{/* Botón táctil: ejecuta onRightIconPress al presionar; usa padding estilo rightIcon */}
-              <Ionicons name={rightIcon} size={20} color={C.textSecondary} />{/* Muestra el ícono derecho personalizado en color secundario del tema */}
-            </TouchableOpacity> // Cierra TouchableOpacity del rightIcon personalizado
+            onRightIconPress ? (
+              <TouchableOpacity onPress={onRightIconPress} style={styles.rightIcon}>
+                <Ionicons name={rightIcon} size={20} color={C.textSecondary} />
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.rightIcon} pointerEvents="none">
+                <Ionicons name={rightIcon} size={20} color={C.textSecondary} />
+              </View>
+            )
           )}{/* Cierra bloque condicional de rightIcon */}
         </View>{/* Cierra View wrapper del input */}
       </View>{/* Cierra fieldRow */}

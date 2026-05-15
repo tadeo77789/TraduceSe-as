@@ -22,7 +22,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
-import { useColors, useTheme } from '../../../state/ThemeContext';
+import { useColors } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
 
 const CODE_LENGTH = 6;
@@ -39,9 +39,11 @@ export const VerifyCodeScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isWide = width >= 768;
-  const C = useColors();
-  const { isDark } = useTheme();
-  const rootBg = isDark ? '#0F0B1A' : '#EDE9FE';
+  // Si la pantalla viene de Perfil usa el tema/acento del usuario; si viene del flujo de
+  // recuperación desde Login usa paleta fija morada/clara para mantener el branding del flujo.
+  const themedC = useColors();
+  const C = fromProfile ? themedC : Colors;
+  const rootBg = C.background;
   const { t } = useTranslation();
 
   const handleChange = (text: string, index: number) => {
@@ -76,10 +78,10 @@ export const VerifyCodeScreen: React.FC = () => {
   const Logo = (
     <>
       <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
-        <Ionicons name="chevron-back" size={22} color={Colors.primary} />
+        <Ionicons name="chevron-back" size={22} color={C.primary} />
       </TouchableOpacity>
       <View style={styles.logoCorner}>
-        <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.logoBox}>
+        <LinearGradient colors={[C.primaryLight, C.primary]} style={styles.logoBox}>
           <Text style={styles.logoEmoji}>👌</Text>
         </LinearGradient>
         <Text style={[styles.brandName, { color: C.textPrimary }]}>TraduceSeña</Text>
@@ -96,7 +98,7 @@ export const VerifyCodeScreen: React.FC = () => {
       bounces={false}
     >
       <View style={styles.formInner}>
-      <View style={[styles.card, { backgroundColor: C.surface }]}>
+      <View style={[styles.card, { backgroundColor: C.primaryBg, shadowColor: C.primary }]}>
         <Text style={[styles.title, { color: C.textPrimary }]}>{t('verifyTitle')}</Text>
         <Text style={[styles.subtitle, { color: C.textSecondary }]}>
           {t('verifySubtitle')}
@@ -111,7 +113,7 @@ export const VerifyCodeScreen: React.FC = () => {
               style={[
                 styles.otpInput,
                 { backgroundColor: C.inputBg, borderColor: C.border, color: C.textPrimary },
-                digit ? { borderColor: Colors.primary, backgroundColor: '#EDE9FE' } : null,
+                digit ? { borderColor: C.primary, backgroundColor: C.primaryBg } : null,
               ]}
               value={digit}
               onChangeText={text => handleChange(text, i)}
@@ -125,7 +127,7 @@ export const VerifyCodeScreen: React.FC = () => {
 
         <View style={styles.btnWrapper}>
           <TouchableOpacity
-            style={[styles.submitBtn, loading && styles.btnDisabled]}
+            style={[styles.submitBtn, { backgroundColor: C.primary }, loading && styles.btnDisabled]}
             onPress={handleConfirm}
             disabled={loading}
           >

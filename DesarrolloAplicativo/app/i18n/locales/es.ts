@@ -107,6 +107,17 @@ const es = {
   loginEmailInvalid: 'Correo inválido',
   loginPasswordRequired: 'La contraseña es obligatoria',
   loginErrorMsg: 'Correo o contraseña incorrectos',
+  loginEmailPlaceholder: 'Correo electrónico',
+  loginPasswordPlaceholder: 'Contraseña',
+  loginForgotPassword: '¿Has olvidado tu contraseña?',
+  loginSubmitBtn: 'Ingresar',
+  loginSubmitLoading: 'Ingresando...',
+  loginContinueGoogle: 'Continuar con Google',
+  loginContinueFacebook: 'Continuar con Facebook',
+  loginAcceptTerms: 'Al continuar aceptas los',
+  loginTermsLink: 'Términos',
+  loginAnd: 'y',
+  loginPrivacyLink: 'Política de privacidad',
 
   // ── Recuperar contraseña ──────────────────────────────────────────────────
   forgotTitle: 'Recuperar contraseña',
