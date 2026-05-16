@@ -138,13 +138,63 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline exitoso. Traduce Senas desplegado correctamente. Build #${env.BUILD_ID}"
+            script {
+                notificarBuild('SUCCESS')
+            }
         }
         failure {
-            echo "Pipeline fallido en Build #${env.BUILD_ID}. Revisa los logs para mas detalles."
+            script {
+                notificarBuild('FAILURE')
+            }
         }
         always {
             cleanWs()
         }
     }
+}
+
+def notificarBuild(String estado) {
+    def esExito = estado == 'SUCCESS'
+    def color   = esExito ? 3066993 : 15158332
+    def etiqueta = esExito ? '[OK]' : '[FAIL]'
+    def rama    = env.GIT_BRANCH ?: 'N/A'
+    def commit  = (env.GIT_COMMIT ?: 'N/A').take(8)
+    def titulo  = "${etiqueta} ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+
+    notificarDiscord(titulo, estado, rama, commit, color)
+    notificarCorreo(titulo, estado, rama, commit)
+}
+
+def notificarDiscord(String titulo, String estado, String rama, String commit, int color) {
+    def payload = groovy.json.JsonOutput.toJson([
+        username: 'Jenkins',
+        embeds: [[
+            title: titulo,
+            description: "Estado: ${estado}\nRama: ${rama}\nCommit: ${commit}\n[Ver build](${env.BUILD_URL})",
+            color: color
+        ]]
+    ])
+    writeFile file: 'discord-payload.json', text: payload
+    withCredentials([string(credentialsId: 'discord-webhook', variable: 'DISCORD_WEBHOOK_URL')]) {
+        sh 'curl -sS -H "Content-Type: application/json" -X POST --data-binary @discord-payload.json "$DISCORD_WEBHOOK_URL"'
+    }
+}
+
+def notificarCorreo(String titulo, String estado, String rama, String commit) {
+    def cuerpo = """
+        <h3>${titulo}</h3>
+        <ul>
+            <li><b>Estado:</b> ${estado}</li>
+            <li><b>Rama:</b> ${rama}</li>
+            <li><b>Commit:</b> ${commit}</li>
+            <li><b>Build:</b> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></li>
+            <li><b>Consola:</b> <a href="${env.BUILD_URL}console">${env.BUILD_URL}console</a></li>
+        </ul>
+    """
+    emailext(
+        subject: titulo,
+        body: cuerpo,
+        mimeType: 'text/html',
+        to: 'aleosea777@gmail.com'
+    )
 }
