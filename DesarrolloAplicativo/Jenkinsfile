@@ -195,6 +195,6 @@ def notificarCorreo(String titulo, String estado, String rama, String commit) {
         subject: titulo,
         body: cuerpo,
         mimeType: 'text/html',
-        to: 'aleosea777@gmail.com'
+        to: 'aleosea222@gmail.com'
     )
 }
