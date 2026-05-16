@@ -22,18 +22,22 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/jenkins']],
-                    extensions: [[
-                        $class: 'CloneOption',
-                        shallow: true,
-                        depth: 1,
-                        noTags: true
-                    ]],
-                    userRemoteConfigs: [[url: 'https://github.com/tadeo77789/TraduceSe-as.git']]
-                ])
-                echo "Codigo obtenido del repositorio: ${env.GIT_BRANCH}"
+                script {
+                    def scmVars = checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: '*/jenkins']],
+                        extensions: [[
+                            $class: 'CloneOption',
+                            shallow: true,
+                            depth: 1,
+                            noTags: true
+                        ]],
+                        userRemoteConfigs: [[url: 'https://github.com/tadeo77789/TraduceSe-as.git']]
+                    ])
+                    env.GIT_BRANCH = scmVars.GIT_BRANCH
+                    env.GIT_COMMIT = scmVars.GIT_COMMIT
+                }
+                echo "Codigo obtenido del repositorio: ${env.GIT_BRANCH} (${env.GIT_COMMIT})"
             }
         }
 
