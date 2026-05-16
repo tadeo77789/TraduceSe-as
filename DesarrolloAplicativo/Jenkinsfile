@@ -1,5 +1,5 @@
 // Pipeline CI/CD Traduce Senas con notificaciones Discord y correo
-// Prueba webhook GitHub
+// Prueba webhook GitHub con tunel localhost.run
 pipeline {
     agent any
 
