@@ -1,5 +1,5 @@
 // Pipeline CI/CD Traduce Senas con notificaciones Discord y correo
-// Prueba webhook GitHub con tunel localhost.run
+// Notificaciones detalladas: stage, mensaje, comando y log al fallar
 pipeline {
     agent any
 
@@ -23,51 +23,63 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    def scmVars = checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: '*/jenkins']],
-                        extensions: [[
-                            $class: 'CloneOption',
-                            shallow: true,
-                            depth: 1,
-                            noTags: true
-                        ]],
-                        userRemoteConfigs: [[url: 'https://github.com/tadeo77789/TraduceSe-as.git']]
-                    ])
-                    env.GIT_BRANCH = scmVars.GIT_BRANCH
-                    env.GIT_COMMIT = scmVars.GIT_COMMIT
+                    ejecutarStage('Checkout', 'git checkout */jenkins') {
+                        def scmVars = checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: '*/jenkins']],
+                            extensions: [[
+                                $class: 'CloneOption',
+                                shallow: true,
+                                depth: 1,
+                                noTags: true
+                            ]],
+                            userRemoteConfigs: [[url: 'https://github.com/tadeo77789/TraduceSe-as.git']]
+                        ])
+                        env.GIT_BRANCH = scmVars.GIT_BRANCH
+                        env.GIT_COMMIT = scmVars.GIT_COMMIT
+                        echo "Codigo obtenido del repositorio: ${env.GIT_BRANCH} (${env.GIT_COMMIT})"
+                    }
                 }
-                echo "Codigo obtenido del repositorio: ${env.GIT_BRANCH} (${env.GIT_COMMIT})"
             }
         }
 
         stage('Instalar Dependencias - Backend') {
             steps {
-                dir('DesarrolloAplicativo/backend') {
-                    sh 'npm install'
+                script {
+                    ejecutarStage('Instalar Dependencias - Backend', 'npm install (backend)') {
+                        dir('DesarrolloAplicativo/backend') {
+                            sh 'npm install'
+                        }
+                    }
                 }
             }
         }
 
         stage('Instalar Dependencias - Frontend') {
             steps {
-                dir('DesarrolloAplicativo/app') {
-                    sh 'npm install'
+                script {
+                    ejecutarStage('Instalar Dependencias - Frontend', 'npm install (app)') {
+                        dir('DesarrolloAplicativo/app') {
+                            sh 'npm install'
+                        }
+                    }
                 }
             }
         }
 
         stage('Analisis SonarQube') {
             steps {
-                withSonarQubeEnv('Sonar') {
-                    script {
-                        def scannerHome = tool 'sonar-scanner'
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                              -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                              -Dsonar.sources=DesarrolloAplicativo/app,DesarrolloAplicativo/backend/src \
-                              -Dsonar.exclusions=**/node_modules/**,**/coverage/**
-                        """
+                script {
+                    ejecutarStage('Analisis SonarQube', 'sonar-scanner') {
+                        withSonarQubeEnv('Sonar') {
+                            def scannerHome = tool 'sonar-scanner'
+                            sh """
+                                ${scannerHome}/bin/sonar-scanner \
+                                  -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                                  -Dsonar.sources=DesarrolloAplicativo/app,DesarrolloAplicativo/backend/src \
+                                  -Dsonar.exclusions=**/node_modules/**,**/coverage/**
+                            """
+                        }
                     }
                 }
             }
@@ -75,48 +87,68 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+                script {
+                    ejecutarStage('Quality Gate', 'waitForQualityGate') {
+                        timeout(time: 5, unit: 'MINUTES') {
+                            waitForQualityGate abortPipeline: true
+                        }
+                    }
                 }
             }
         }
 
         stage('Login Docker Hub') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'docker-hub',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                script {
+                    ejecutarStage('Login Docker Hub', 'docker login') {
+                        withCredentials([usernamePassword(
+                            credentialsId: 'docker-hub',
+                            usernameVariable: 'DOCKER_USER',
+                            passwordVariable: 'DOCKER_PASS'
+                        )]) {
+                            sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                        }
+                    }
                 }
             }
         }
 
         stage('Build Docker - Backend') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE_BACKEND} ./DesarrolloAplicativo/backend"
+                script {
+                    ejecutarStage('Build Docker - Backend', "docker build ${DOCKER_IMAGE_BACKEND}") {
+                        sh "docker build -t ${DOCKER_IMAGE_BACKEND} ./DesarrolloAplicativo/backend"
+                    }
+                }
             }
         }
 
         stage('Build Docker - Frontend') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE_FRONTEND} ./DesarrolloAplicativo/app"
+                script {
+                    ejecutarStage('Build Docker - Frontend', "docker build ${DOCKER_IMAGE_FRONTEND}") {
+                        sh "docker build -t ${DOCKER_IMAGE_FRONTEND} ./DesarrolloAplicativo/app"
+                    }
+                }
             }
         }
 
         stage('Push a Docker Hub') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'docker-hub',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh """
-                        echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
-                        docker push ${DOCKER_IMAGE_BACKEND}
-                        docker push ${DOCKER_IMAGE_FRONTEND}
-                    """
+                script {
+                    ejecutarStage('Push a Docker Hub', 'docker push backend && frontend') {
+                        withCredentials([usernamePassword(
+                            credentialsId: 'docker-hub',
+                            usernameVariable: 'DOCKER_USER',
+                            passwordVariable: 'DOCKER_PASS'
+                        )]) {
+                            sh """
+                                echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
+                                docker push ${DOCKER_IMAGE_BACKEND}
+                                docker push ${DOCKER_IMAGE_FRONTEND}
+                            """
+                        }
+                    }
                 }
             }
         }
@@ -128,16 +160,20 @@ pipeline {
                 }
             }
             steps {
-                sh """
-                    kubectl set image deployment/traduce-senas-backend \
-                        backend=${DOCKER_IMAGE_BACKEND} --record
+                script {
+                    ejecutarStage('Deploy a Kubernetes', 'kubectl set image && rollout status') {
+                        sh """
+                            kubectl set image deployment/traduce-senas-backend \
+                                backend=${DOCKER_IMAGE_BACKEND} --record
 
-                    kubectl set image deployment/traduce-senas-frontend \
-                        frontend=${DOCKER_IMAGE_FRONTEND} --record
+                            kubectl set image deployment/traduce-senas-frontend \
+                                frontend=${DOCKER_IMAGE_FRONTEND} --record
 
-                    kubectl rollout status deployment/traduce-senas-backend
-                    kubectl rollout status deployment/traduce-senas-frontend
-                """
+                            kubectl rollout status deployment/traduce-senas-backend
+                            kubectl rollout status deployment/traduce-senas-frontend
+                        """
+                    }
+                }
             }
         }
     }
@@ -150,7 +186,14 @@ pipeline {
         }
         failure {
             script {
-                notificarBuild('FAILURE')
+                // Red de seguridad por si falla algo fuera de un stage envuelto
+                if (!env.NOTIFICACION_FALLO_ENVIADA) {
+                    notificarBuild('FAILURE', [
+                        stage: 'Desconocido (fuera de stage envuelto)',
+                        mensaje: 'El pipeline fallo sin que un stage capturara la excepcion',
+                        comando: 'N/A'
+                    ])
+                }
             }
         }
         always {
@@ -159,48 +202,212 @@ pipeline {
     }
 }
 
-def notificarBuild(String estado) {
-    def esExito = estado == 'SUCCESS'
-    def color   = esExito ? 3066993 : 15158332
-    def etiqueta = esExito ? '[OK]' : '[FAIL]'
-    def rama    = env.GIT_BRANCH ?: 'N/A'
-    def commit  = (env.GIT_COMMIT ?: 'N/A').take(8)
-    def titulo  = "${etiqueta} ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+// ---------------------------------------------------------------------------
+// Helpers de ejecucion y notificacion
+// ---------------------------------------------------------------------------
 
-    notificarDiscord(titulo, estado, rama, commit, color)
-    notificarCorreo(titulo, estado, rama, commit)
+def ejecutarStage(String nombreStage, String comando, Closure accion) {
+    try {
+        accion.call()
+    } catch (e) {
+        env.NOTIFICACION_FALLO_ENVIADA = 'true'
+        notificarBuild('FAILURE', [
+            stage:   nombreStage,
+            mensaje: e.getMessage(),
+            comando: comando
+        ])
+        throw e
+    }
 }
 
-def notificarDiscord(String titulo, String estado, String rama, String commit, int color) {
+def notificarBuild(String estado, Map detallesError = [:]) {
+    def esExito  = estado == 'SUCCESS'
+    def color    = esExito ? 3066993 : 15158332
+    def etiqueta = esExito ? '[OK]' : '[FAIL]'
+    def rama     = env.GIT_BRANCH ?: 'N/A'
+    def commit   = (env.GIT_COMMIT ?: 'N/A').take(8)
+    def autor    = obtenerAutorCommit()
+    def duracion = currentBuild.durationString ?: 'N/A'
+    def titulo   = "${etiqueta} ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+
+    def infoError = [:]
+    if (!esExito) {
+        infoError = [
+            stage:    detallesError.stage    ?: 'Desconocido',
+            mensaje:  detallesError.mensaje  ?: 'Sin mensaje',
+            comando:  detallesError.comando  ?: 'N/A',
+            logTail:  obtenerUltimasLineasLog(30)
+        ]
+    }
+
+    notificarDiscord(titulo, estado, rama, commit, autor, duracion, color, infoError)
+    notificarCorreo(titulo, estado, rama, commit, autor, duracion, infoError)
+}
+
+def obtenerAutorCommit() {
+    try {
+        return sh(
+            script: 'git log -1 --pretty=format:"%an <%ae>"',
+            returnStdout: true
+        ).trim()
+    } catch (e) {
+        return 'N/A'
+    }
+}
+
+def obtenerUltimasLineasLog(int lineas = 30) {
+    try {
+        def log = currentBuild.rawBuild.getLog(lineas)
+        return log.join('\n')
+    } catch (e) {
+        return 'No se pudo obtener el log'
+    }
+}
+
+def truncar(String texto, int maxLen) {
+    if (!texto) return 'N/A'
+    return texto.length() > maxLen ? texto.take(maxLen) + '...' : texto
+}
+
+def notificarDiscord(String titulo, String estado, String rama, String commit,
+                     String autor, String duracion, int color, Map infoError) {
+
+    def campos = [
+        [name: 'Estado',   value: estado,   inline: true],
+        [name: 'Rama',     value: rama,     inline: true],
+        [name: 'Commit',   value: commit,   inline: true],
+        [name: 'Autor',    value: autor,    inline: true],
+        [name: 'Duracion', value: duracion, inline: true]
+    ]
+
+    if (infoError) {
+        campos << [
+            name: 'Stage que fallo',
+            value: infoError.stage,
+            inline: false
+        ]
+        campos << [
+            name: 'Mensaje de error',
+            value: "```${truncar(infoError.mensaje, 500)}```",
+            inline: false
+        ]
+        if (infoError.comando && infoError.comando != 'N/A') {
+            campos << [
+                name: 'Comando ejecutado',
+                value: "```${truncar(infoError.comando, 300)}```",
+                inline: false
+            ]
+        }
+        if (infoError.logTail) {
+            campos << [
+                name: 'Ultimas lineas del log',
+                value: "```${truncar(infoError.logTail, 800)}```",
+                inline: false
+            ]
+        }
+    }
+
     def payload = groovy.json.JsonOutput.toJson([
         username: 'Jenkins',
         embeds: [[
             title: titulo,
-            description: "Estado: ${estado}\nRama: ${rama}\nCommit: ${commit}\n[Ver build](${env.BUILD_URL})",
-            color: color
+            url: env.BUILD_URL,
+            description: infoError ?
+                "Build fallo\n[Ver consola completa](${env.BUILD_URL}console)" :
+                "Build exitoso\n[Ver build](${env.BUILD_URL})",
+            color: color,
+            fields: campos,
+            timestamp: new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'"),
+            footer: [text: "Jenkins - Build #${env.BUILD_NUMBER}"]
         ]]
     ])
+
     writeFile file: 'discord-payload.json', text: payload
     withCredentials([string(credentialsId: 'discord-webhook', variable: 'DISCORD_WEBHOOK_URL')]) {
         sh 'curl -sS -H "Content-Type: application/json" -X POST --data-binary @discord-payload.json "$DISCORD_WEBHOOK_URL"'
     }
 }
 
-def notificarCorreo(String titulo, String estado, String rama, String commit) {
+def notificarCorreo(String titulo, String estado, String rama, String commit,
+                    String autor, String duracion, Map infoError) {
+
+    def colorEstado = estado == 'SUCCESS' ? '#2ecc71' : '#e74c3c'
+
+    def seccionError = ''
+    if (infoError) {
+        def filaComando = ''
+        if (infoError.comando && infoError.comando != 'N/A') {
+            filaComando = """
+                <tr>
+                    <td style="padding:8px; background:#f8f8f8;"><b>Comando:</b></td>
+                    <td style="padding:8px;"><code>${infoError.comando}</code></td>
+                </tr>
+            """
+        }
+
+        seccionError = """
+            <hr>
+            <h3 style="color:#e74c3c;">Detalles del Error</h3>
+            <table style="border-collapse:collapse; width:100%;">
+                <tr>
+                    <td style="padding:8px; background:#f8f8f8;"><b>Stage que fallo:</b></td>
+                    <td style="padding:8px;">${infoError.stage}</td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; background:#f8f8f8;"><b>Mensaje:</b></td>
+                    <td style="padding:8px;"><pre style="background:#fff3f3; padding:10px; border-left:3px solid #e74c3c; overflow-x:auto;">${infoError.mensaje}</pre></td>
+                </tr>
+                ${filaComando}
+            </table>
+
+            <h3 style="color:#34495e;">Ultimas lineas del log</h3>
+            <pre style="background:#2c3e50; color:#ecf0f1; padding:15px; border-radius:5px; overflow-x:auto; font-size:12px;">${infoError.logTail}</pre>
+        """
+    }
+
     def cuerpo = """
-        <h3>${titulo}</h3>
-        <ul>
-            <li><b>Estado:</b> ${estado}</li>
-            <li><b>Rama:</b> ${rama}</li>
-            <li><b>Commit:</b> ${commit}</li>
-            <li><b>Build:</b> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></li>
-            <li><b>Consola:</b> <a href="${env.BUILD_URL}console">${env.BUILD_URL}console</a></li>
-        </ul>
+        <div style="font-family: Arial, sans-serif; max-width:700px;">
+            <h2 style="color:${colorEstado};">${titulo}</h2>
+
+            <table style="border-collapse:collapse; width:100%;">
+                <tr>
+                    <td style="padding:8px; background:#f8f8f8; width:30%;"><b>Estado:</b></td>
+                    <td style="padding:8px; color:${colorEstado};"><b>${estado}</b></td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; background:#f8f8f8;"><b>Rama:</b></td>
+                    <td style="padding:8px;">${rama}</td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; background:#f8f8f8;"><b>Commit:</b></td>
+                    <td style="padding:8px;"><code>${commit}</code></td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; background:#f8f8f8;"><b>Autor:</b></td>
+                    <td style="padding:8px;">${autor}</td>
+                </tr>
+                <tr>
+                    <td style="padding:8px; background:#f8f8f8;"><b>Duracion:</b></td>
+                    <td style="padding:8px;">${duracion}</td>
+                </tr>
+            </table>
+
+            ${seccionError}
+
+            <hr>
+            <p>
+                <a href="${env.BUILD_URL}" style="background:#3498db; color:white; padding:10px 15px; text-decoration:none; border-radius:5px;">Ver Build</a>
+                &nbsp;
+                <a href="${env.BUILD_URL}console" style="background:#34495e; color:white; padding:10px 15px; text-decoration:none; border-radius:5px;">Ver Consola</a>
+            </p>
+        </div>
     """
+
     emailext(
         subject: titulo,
         body: cuerpo,
         mimeType: 'text/html',
-        to: 'aleosea222@gmail.com'
+        to: 'aleosea222@gmail.com',
+        attachLog: estado != 'SUCCESS'
     )
 }
