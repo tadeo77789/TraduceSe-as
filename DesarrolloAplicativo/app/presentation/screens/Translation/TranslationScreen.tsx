@@ -26,9 +26,16 @@ import type { SignAgentStatus } from '../../../types';
 type Mode = 'sena_texto' | 'texto_sena';
 
 export const TranslationScreen: React.FC = () => {
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const isTablet = width >= 768;
   const isDesktop = width >= 1024;
+
+  // Tamaño de la cámara: aprovecha el ancho disponible con aspect 3:4 vertical,
+  // pero nunca supera el 55% del alto de la ventana (para que no desborde la pantalla).
+  const horizontalPadding = isDesktop ? 96 : 40;
+  const wrapperMaxWidth = isTablet ? 760 : width;
+  const cameraWidth = Math.min(width - horizontalPadding, wrapperMaxWidth);
+  const cameraHeight = Math.min(cameraWidth * (4 / 3), height * 0.55);
   const C = useColors();
   const { t } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
@@ -184,7 +191,7 @@ export const TranslationScreen: React.FC = () => {
 
           {/* ── Área de cámara / entrada ── */}
           {mode === 'sena_texto' ? (
-            <View style={[styles.cameraCard, { shadowColor: C.primary }]}>
+            <View style={[styles.cameraCard, { height: cameraHeight, shadowColor: C.primary }]}>
               {/* Badge EN VIVO */}
               {isActive && (
                 <View style={styles.liveBadge}>
@@ -391,8 +398,8 @@ const styles = StyleSheet.create({
   modeBtnText: { fontSize: 14, fontWeight: '700', color: Colors.textSecondary },
   modeBtnTextActive: { color: '#fff' },
 
-  // Cámara
-  cameraCard: { width: '100%', height: 280, borderRadius: 24, overflow: 'hidden', backgroundColor: '#1a1a2e', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 20, elevation: 10 },
+  // Cámara — el alto se calcula dinámicamente en el componente para no exceder el viewport
+  cameraCard: { width: '100%', borderRadius: 24, overflow: 'hidden', backgroundColor: '#1a1a2e', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 20, elevation: 10 },
   cameraImage: { width: '100%', height: '100%' },
   cameraOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 100 },
   liveBadge: { position: 'absolute', top: 14, left: 14, zIndex: 10, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(220,38,38,0.9)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
