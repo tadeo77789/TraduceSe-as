@@ -27,6 +27,14 @@ web-build/
 .env.production
 
 # ─────────────────────────────────────────────
+# LIQUIBASE — configuración local y credenciales
+# ─────────────────────────────────────────────
+# liquibase.properties contiene la URL de conexión,
+# usuario y contraseña de la base de datos.
+# No debe subirse al repositorio.
+liquibase.properties
+
+# ─────────────────────────────────────────────
 # SISTEMA OPERATIVO — archivos basura del SO
 # ─────────────────────────────────────────────
 # Windows
