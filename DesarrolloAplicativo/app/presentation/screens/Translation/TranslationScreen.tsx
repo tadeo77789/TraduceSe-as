@@ -76,7 +76,7 @@ export const TranslationScreen: React.FC = () => {
         outputText: transcript,
         type: 'sena_texto',
         confidence: agentLastResult?.confidence,
-        source: (agentLastResult?.source as 'mediapipe' | 'knn' | 'mock' | undefined) ?? 'mediapipe',
+        source: agentLastResult?.source ?? 'mediapipe',
       });
     } catch {
       // Backend offline o sin tabla — silencioso para no bloquear el flujo.

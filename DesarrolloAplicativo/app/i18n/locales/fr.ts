@@ -199,6 +199,16 @@ const fr: typeof es = {
   trainLastDetected: 'Dernière détection',
   trainContinue: 'Continuer',
   trainConfirmDelete: 'Oui, tout supprimer',
+  trainGestureTitle: 'Signes de mots (avec mouvement)',
+  trainGestureHint: 'Écrivez le mot, appuyez sur Enregistrer et faites le signe complet devant la caméra (~2,5 s). Enregistrez plusieurs prises du même mot pour améliorer la reconnaissance.',
+  trainGesturePlaceholder: 'Mot (ex. BONJOUR)',
+  trainGestureRecord: 'Enregistrer le geste',
+  trainGestureRecording: 'Enregistrement…',
+  trainGestureSaved: 'Geste enregistré pour « {label} »',
+  trainGestureNoMotion: "Aucun geste capturé. Activez la caméra et faites le signe pendant l'enregistrement.",
+  trainGestureNeedLabel: "Écrivez d'abord le mot à entraîner",
+  trainGestureDeleteTitle: 'Supprimer le geste',
+  trainGestureDeleteConfirm: 'Supprimer toutes les prises de « {label} » ?',
 
   // ── Admin ────────────────────────────────────────────────────────────────
   adminDashboardTitle: 'Panneau admin',

@@ -4,12 +4,10 @@
  * de MediaPipe Hands. Reconoce el alfabeto LSC estatico: A B C D E F G H I K
  * L M N O P Q R S T U V W X Y, mas el numero 5 (mano abierta).
  *
- * Letras NO soportadas (requieren trayectoria de movimiento que un frame
- * estatico no captura):
- *   J  - mecanique trazando J
- *   N  - N con movimiento ondulante
- *   RR - vibracion del puno
- *   Z  - indice trazando Z en el aire
+ * Letras con movimiento (J, Ñ, RR, Z): NO las resuelve este clasificador —
+ * las detecta `motionClassifier.ts` analizando la trayectoria sobre una
+ * ventana temporal, usando la letra estatica de cada frame como "forma base"
+ * (J usa I, Ñ usa N, RR usa R, Z usa D).
  *
  * Estrategia general:
  *  1. Calcular vector de "dedos extendidos" (pulgar + 4 dedos) y curvatura.

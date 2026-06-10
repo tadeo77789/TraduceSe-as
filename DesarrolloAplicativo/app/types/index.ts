@@ -75,8 +75,9 @@ export interface SignDetectionResult {
   timestamp: string;
   /** Vector normalizado de 63 features (21 puntos × xyz) cuando hay mano. */
   features?: number[];
-  /** Origen del resultado: clasificador KNN entrenado o geométrico de respaldo. */
-  source?: 'knn' | 'geometric' | 'mock';
+  /** Origen del resultado: KNN entrenado, geométrico de respaldo, o
+   *  clasificador de movimiento (señas dinámicas y palabras entrenadas). */
+  source?: 'knn' | 'geometric' | 'mock' | 'motion';
 }
 
 // ─── Léxico ──────────────────────────────────────────────────────────────────

@@ -168,16 +168,21 @@ export const useSignAgent = (
       setPendingLetter(pendingLetterRef.current);
       setPendingCount(pendingCountRef.current);
 
+      // Las detecciones de movimiento (J/Ñ/RR/Z y palabras entrenadas) son un
+      // gesto que ocurre UNA vez — no se puede esperar a verlo dos veces.
+      const framesNeeded = result.source === 'motion' ? 1 : confirmFrames;
+
       // ── Confirmar y anexar.
       if (
-        pendingCountRef.current >= confirmFrames &&
+        pendingCountRef.current >= framesNeeded &&
         candidate !== lastAppendedRef.current
       ) {
         lastAppendedRef.current = candidate;
         setTranscript(prev => {
           if (!prev) return candidate;
-          // Letras (1 caracter) se concatenan sin espacio; palabras con espacio.
-          const isLetter = candidate.length === 1;
+          // Letras (incluida RR, el dígrafo) se concatenan sin espacio;
+          // palabras completas van con espacio para formar la frase.
+          const isLetter = candidate.length === 1 || candidate === 'RR';
           return isLetter ? prev + candidate : `${prev} ${candidate}`;
         });
         clearPending();

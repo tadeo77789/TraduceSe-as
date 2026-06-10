@@ -199,6 +199,16 @@ const en: typeof es = {
   trainLastDetected: 'Last detected',
   trainContinue: 'Continue',
   trainConfirmDelete: 'Yes, delete everything',
+  trainGestureTitle: 'Word signs (with movement)',
+  trainGestureHint: 'Type the word, press Record and perform the full sign in front of the camera (~2.5 s). Record several takes of the same word to improve recognition.',
+  trainGesturePlaceholder: 'Word (e.g. HELLO)',
+  trainGestureRecord: 'Record gesture',
+  trainGestureRecording: 'Recording…',
+  trainGestureSaved: 'Gesture saved for "{label}"',
+  trainGestureNoMotion: 'No gesture was captured. Turn on the camera and perform the sign while recording.',
+  trainGestureNeedLabel: 'Type the word to train first',
+  trainGestureDeleteTitle: 'Delete gesture',
+  trainGestureDeleteConfirm: 'Delete all takes of "{label}"?',
 
   // ── Admin ────────────────────────────────────────────────────────────────
   adminDashboardTitle: 'Admin panel',

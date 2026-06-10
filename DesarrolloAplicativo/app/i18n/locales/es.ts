@@ -208,6 +208,16 @@ const es = {
   trainLastDetected: 'Última detección',
   trainContinue: 'Continuar',
   trainConfirmDelete: 'Sí, borrar todo',
+  trainGestureTitle: 'Señas de palabras (con movimiento)',
+  trainGestureHint: 'Escribe la palabra, presiona Grabar y haz la seña completa frente a la cámara (~2,5 s). Graba varias tomas de la misma palabra para mejorar el reconocimiento.',
+  trainGesturePlaceholder: 'Palabra (ej. HOLA)',
+  trainGestureRecord: 'Grabar gesto',
+  trainGestureRecording: 'Grabando…',
+  trainGestureSaved: 'Gesto guardado para "{label}"',
+  trainGestureNoMotion: 'No se capturó el gesto. Activa la cámara y haz la seña mientras dura la grabación.',
+  trainGestureNeedLabel: 'Escribe primero la palabra a entrenar',
+  trainGestureDeleteTitle: 'Borrar gesto',
+  trainGestureDeleteConfirm: '¿Borrar todas las tomas de "{label}"?',
 
   // ── Admin ────────────────────────────────────────────────────────────────
   adminDashboardTitle: 'Panel de administración',

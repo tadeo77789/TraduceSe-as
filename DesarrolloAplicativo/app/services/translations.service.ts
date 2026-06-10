@@ -6,7 +6,8 @@
  *   - output_text  (texto traducido / reconocido)
  *   - type         ('texto_sena' | 'sena_texto' | 'voz_sena')
  *   - confidence   (0..1, opcional, solo en sena_texto)
- *   - source       ('mediapipe' | 'knn' | 'mock' | 'manual', opcional)
+ *   - source       ('mediapipe' | 'knn' | 'mock' | 'manual' | 'motion' |
+ *                   'geometric', opcional)
  */
 import { api, getCurrentUserId } from './api.service';
 import { ENDPOINTS } from '../config/api.config';
@@ -17,7 +18,7 @@ export interface SaveTranslationInput {
   outputText: string;
   type: TipoTraduccion;
   confidence?: number;
-  source?: 'mediapipe' | 'knn' | 'mock' | 'manual';
+  source?: 'mediapipe' | 'knn' | 'mock' | 'manual' | 'motion' | 'geometric';
 }
 
 export interface SavedTranslation {

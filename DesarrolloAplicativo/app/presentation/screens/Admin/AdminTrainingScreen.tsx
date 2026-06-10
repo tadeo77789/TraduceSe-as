@@ -8,6 +8,7 @@ import {
   ScrollView,
   Image,
   Platform,
+  TextInput,
   useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,7 +20,15 @@ import { AppHeader } from '../../components/common/AppHeader';
 import { useColors } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
 import { useSignAgent } from '../../../hooks/useSignAgent';
-import { recordSample, getSampleCounts, clearTrainingData } from '../../../services/vision';
+import {
+  recordSample,
+  getSampleCounts,
+  clearTrainingData,
+  beginGestureCapture,
+  recordGesture,
+  getGestureCounts,
+  clearGestureLabel,
+} from '../../../services/vision';
 import { showInfo, showError, showConfirm } from '../../../utils/dialogs';
 import type { AdminStackParams } from '../../navigation/AdminStackNavigator';
 
@@ -50,9 +59,13 @@ export const AdminTrainingScreen: React.FC = () => {
 
   const [isActive, setIsActive] = useState(false);
   const [sampleCounts, setSampleCounts] = useState<Record<string, number>>({});
+  const [gestureWord, setGestureWord] = useState('');
+  const [gestureCounts, setGestureCounts] = useState<Record<string, number>>({});
+  const [recordingGesture, setRecordingGesture] = useState(false);
 
   const refreshCounts = useCallback(async () => {
     setSampleCounts(await getSampleCounts());
+    setGestureCounts(await getGestureCounts());
   }, []);
 
   useEffect(() => { refreshCounts(); }, [refreshCounts]);
@@ -84,6 +97,47 @@ export const AdminTrainingScreen: React.FC = () => {
     await recordSample(label, features);
     await refreshCounts();
   }, [t, refreshCounts, agentLastResult]);
+
+  /** Cuánto dura la toma de un gesto: la persona hace la seña completa
+   *  mientras el loop de movimiento llena el buffer. */
+  const GESTURE_CAPTURE_MS = 2400;
+
+  const handleRecordGesture = useCallback(async () => {
+    const label = gestureWord.trim().toUpperCase();
+    if (!label) {
+      showInfo(t('trainGestureNeedLabel'));
+      return;
+    }
+    if (!isActive) {
+      showInfo(t('tapStartCamera'));
+      return;
+    }
+    setRecordingGesture(true);
+    beginGestureCapture(); // Vacía el buffer: la plantilla solo tendrá lo que sigue.
+    await new Promise(resolve => setTimeout(resolve, GESTURE_CAPTURE_MS));
+    const ok = await recordGesture(label);
+    setRecordingGesture(false);
+    if (!ok) {
+      showError(t('trainGestureNoMotion'));
+      return;
+    }
+    await refreshCounts();
+    showInfo(t('trainGestureSaved').replace('{label}', label));
+  }, [gestureWord, isActive, t, refreshCounts]);
+
+  const handleDeleteGesture = useCallback(async (label: string) => {
+    const ok = await showConfirm({
+      title: t('trainGestureDeleteTitle'),
+      message: t('trainGestureDeleteConfirm').replace('{label}', label),
+      icon: 'warning',
+      confirmText: t('trainConfirmDelete'),
+      cancelText: t('cancel'),
+      destructive: true,
+    });
+    if (!ok) return;
+    await clearGestureLabel(label);
+    await refreshCounts();
+  }, [t, refreshCounts]);
 
   const handleClearTraining = useCallback(async () => {
     const total = Object.values(sampleCounts).reduce((a, b) => a + b, 0);
@@ -248,6 +302,54 @@ export const AdminTrainingScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
+          {/* Panel de gestos: señas de palabra con movimiento */}
+          <View style={[styles.trainPanel, { backgroundColor: C.surface, borderColor: C.border }]}>
+            <View style={styles.trainHeader}>
+              <Ionicons name="hand-right" size={18} color={C.primary} />
+              <Text style={[styles.trainTitle, { color: C.textPrimary }]}>{t('trainGestureTitle')}</Text>
+            </View>
+            <Text style={[styles.trainHintText, { color: C.textSecondary }]}>{t('trainGestureHint')}</Text>
+
+            <View style={styles.gestureRow}>
+              <TextInput
+                style={[styles.gestureInput, { backgroundColor: C.backgroundGray, borderColor: C.border, color: C.textPrimary }]}
+                placeholder={t('trainGesturePlaceholder')}
+                placeholderTextColor={C.textHint}
+                value={gestureWord}
+                onChangeText={setGestureWord}
+                autoCapitalize="characters"
+                editable={!recordingGesture}
+              />
+              <TouchableOpacity
+                style={[
+                  styles.gestureRecordBtn,
+                  { backgroundColor: recordingGesture ? '#DC2626' : C.primary, opacity: isActive ? 1 : 0.5 },
+                ]}
+                onPress={handleRecordGesture}
+                activeOpacity={0.85}
+                disabled={!isActive || recordingGesture}
+              >
+                <Ionicons name={recordingGesture ? 'radio-button-on' : 'videocam-outline'} size={16} color="#fff" />
+                <Text style={styles.gestureRecordText}>
+                  {recordingGesture ? t('trainGestureRecording') : t('trainGestureRecord')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {Object.keys(gestureCounts).length > 0 && (
+              <View style={styles.gestureList}>
+                {Object.entries(gestureCounts).map(([label, count]) => (
+                  <View key={label} style={[styles.gestureChip, { backgroundColor: C.primaryBg, borderColor: C.primary }]}>
+                    <Text style={[styles.gestureChipText, { color: C.primary }]}>{label} × {count}</Text>
+                    <TouchableOpacity onPress={() => handleDeleteGesture(label)} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                      <Ionicons name="close-circle" size={16} color="#DC2626" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+
         </View>
       </ScrollView>
     </View>
@@ -293,4 +395,12 @@ const styles = StyleSheet.create({
   letterCountText: { color: '#fff', fontSize: 9, fontWeight: '800' },
   clearBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 11, borderRadius: 12, borderWidth: 1.5, borderStyle: 'dashed' },
   clearBtnText: { fontSize: 12, fontWeight: '700', color: '#DC2626' },
+
+  gestureRow: { flexDirection: 'row', gap: 8 },
+  gestureInput: { flex: 1, borderWidth: 1.5, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, fontWeight: '600' },
+  gestureRecordBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 14, borderRadius: 12 },
+  gestureRecordText: { color: '#fff', fontSize: 12, fontWeight: '800' },
+  gestureList: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  gestureChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 14, borderWidth: 1 },
+  gestureChipText: { fontSize: 12, fontWeight: '700' },
 });

@@ -199,6 +199,16 @@ const pt: typeof es = {
   trainLastDetected: 'Última detecção',
   trainContinue: 'Continuar',
   trainConfirmDelete: 'Sim, apagar tudo',
+  trainGestureTitle: 'Sinais de palavras (com movimento)',
+  trainGestureHint: 'Digite a palavra, pressione Gravar e faça o sinal completo diante da câmera (~2,5 s). Grave várias tomadas da mesma palavra para melhorar o reconhecimento.',
+  trainGesturePlaceholder: 'Palavra (ex. OLÁ)',
+  trainGestureRecord: 'Gravar gesto',
+  trainGestureRecording: 'Gravando…',
+  trainGestureSaved: 'Gesto salvo para "{label}"',
+  trainGestureNoMotion: 'Nenhum gesto foi capturado. Ligue a câmera e faça o sinal durante a gravação.',
+  trainGestureNeedLabel: 'Digite primeiro a palavra a treinar',
+  trainGestureDeleteTitle: 'Excluir gesto',
+  trainGestureDeleteConfirm: 'Excluir todas as tomadas de "{label}"?',
 
   // ── Admin ────────────────────────────────────────────────────────────────
   adminDashboardTitle: 'Painel de administração',
