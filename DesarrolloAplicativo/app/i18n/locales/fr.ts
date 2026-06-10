@@ -277,6 +277,7 @@ const fr: typeof es = {
   historyReuseMsg: 'Traduire à nouveau ?',
   historyReuseBtn: 'Réutiliser',
   historyDeleteBtn: 'Supprimer',
+  historyDeleteError: "Impossible de supprimer l'enregistrement. Réessayez.",
 
   kpiTranslations: 'Traductions',
   kpiActiveUsers: 'Utilisateurs actifs',

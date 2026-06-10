@@ -277,6 +277,7 @@ const pt: typeof es = {
   historyReuseMsg: 'Traduzir novamente?',
   historyReuseBtn: 'Reutilizar',
   historyDeleteBtn: 'Excluir',
+  historyDeleteError: 'Não foi possível excluir o registro. Tente novamente.',
 
   kpiTranslations: 'Traduções',
   kpiActiveUsers: 'Usuários ativos',

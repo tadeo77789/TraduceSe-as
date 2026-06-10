@@ -9,9 +9,16 @@
  *   son funciones que reciben el id y retornan la ruta completa.
  */
 
-// URL base del backend — cambiar por la IP real al desplegar
+import { Platform } from 'react-native';
+
+// URL base del backend — cambiar por la IP real al desplegar.
+// En desarrollo: el emulador Android ve el localhost del PC como 10.0.2.2;
+// web y simulador iOS usan localhost directo. Para un celular físico,
+// reemplazar por la IP LAN del PC (ej. http://192.168.1.50:3000/api).
 export const API_BASE_URL = __DEV__
-  ? 'http://10.0.2.2:3000/api'   // Android emulador → localhost del PC
+  ? Platform.OS === 'android'
+    ? 'http://10.0.2.2:3000/api'
+    : 'http://localhost:3000/api'
   : 'https://api.traducsenas.com/api';
 
 export const API_TIMEOUT = 10_000; // 10 segundos

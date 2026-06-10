@@ -277,6 +277,7 @@ const en: typeof es = {
   historyReuseMsg: 'Translate again?',
   historyReuseBtn: 'Reuse',
   historyDeleteBtn: 'Delete',
+  historyDeleteError: 'Could not delete the record. Please try again.',
 
   kpiTranslations: 'Translations',
   kpiActiveUsers: 'Active users',

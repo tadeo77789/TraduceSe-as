@@ -288,6 +288,7 @@ const es = {
   historyReuseMsg: '¿Traducir de nuevo?',
   historyReuseBtn: 'Reusar',
   historyDeleteBtn: 'Eliminar',
+  historyDeleteError: 'No se pudo eliminar el registro. Intenta de nuevo.',
 
   // ── Estadísticas ──────────────────────────────────────────────────────────
   kpiTranslations: 'Traducciones',

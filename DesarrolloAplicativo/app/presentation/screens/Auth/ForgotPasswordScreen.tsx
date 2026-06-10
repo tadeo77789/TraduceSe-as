@@ -40,7 +40,7 @@ export const ForgotPasswordScreen: React.FC = () => {
     // TODO: llamar al backend para enviar código
     setTimeout(() => {
       setLoading(false);
-      navigation.navigate('VerifyCode' as never, { fromProfile } as never);
+      (navigation as unknown as { navigate: (route: string, params?: object) => void }).navigate('VerifyCode', { fromProfile });
     }, 1000);
   };
 

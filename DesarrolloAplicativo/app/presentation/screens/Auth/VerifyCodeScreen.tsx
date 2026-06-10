@@ -65,7 +65,7 @@ export const VerifyCodeScreen: React.FC = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      navigation.navigate('NewPassword' as never, { fromProfile } as never);
+      (navigation as unknown as { navigate: (route: string, params?: object) => void }).navigate('NewPassword', { fromProfile });
     }, 1000);
   };
 
