@@ -30,23 +30,9 @@ import { Ionicons } from '@expo/vector-icons'; // Librería de iconos vectoriale
 import { Colors } from '../../../constants/colors'; // Paleta de colores centralizada — ruta: app/constants/colors.ts
 import { Input } from '../../components/common/Input'; // Componente reutilizable de campo de texto con íconos y errores — ruta: app/presentation/components/common/Input.tsx
 import { useLoginForm } from '../../../hooks/useLoginForm'; // Hook personalizado con la lógica del formulario de login (estado, validación, submit) — ruta: app/hooks/useLoginForm.ts
-
-// Logo oficial de Google (SVG multicolor) como data URI
-const GOOGLE_LOGO_URI = `data:image/svg+xml;utf8,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">' +
-  '<path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>' +
-  '<path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>' +
-  '<path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>' +
-  '<path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>' +
-  '</svg>'
-)}`;
-
-// Logo oficial de Facebook (SVG) como data URI
-const FACEBOOK_LOGO_URI = `data:image/svg+xml;utf8,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">' +
-  '<path fill="#ffffff" d="M24 12.073C24 5.446 18.627 0 12 0S0 5.446 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.43c0-3.007 1.792-4.67 4.533-4.67 1.312 0 2.686.235 2.686.235v2.953h-1.514c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>' +
-  '</svg>'
-)}`;
+import { googleIcon, facebookIcon } from '../../../assets/icons/socialIcons'; // Logos de Google y Facebook como ImageSourcePropType — para cambiarlos editar app/assets/icons/socialIcons.ts
+import { useTranslation } from '../../../i18n';
+import { useColors } from '../../../state/ThemeContext';
 
 
 export const LoginScreen: React.FC = () => { // Declara y exporta el componente funcional LoginScreen tipado como React.FC
@@ -54,7 +40,9 @@ export const LoginScreen: React.FC = () => { // Declara y exporta el componente 
   const { email, setEmail, password, setPassword, loading, errors, handleLogin } = useLoginForm();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const isWide = width >= 768;
+  const isWide = width >= 1024;
+  const { t } = useTranslation();
+  const C = useColors();
 
   const BackButton = ( // Define el botón de volver como constante JSX reutilizable en ambos layouts
     <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}> {/* Botón circular de volver posicionado sobre el inset del área segura; al presionar regresa a la pantalla anterior */}
@@ -80,7 +68,7 @@ export const LoginScreen: React.FC = () => { // Declara y exporta el componente 
 
         {/* Inputs */}
         <Input // Campo de texto para el correo electrónico
-          placeholder="Correo electrónico"
+          placeholder={t('loginEmailPlaceholder')}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -91,7 +79,7 @@ export const LoginScreen: React.FC = () => { // Declara y exporta el componente 
         />
 
         <Input
-          placeholder="Contraseña"
+          placeholder={t('loginPasswordPlaceholder')}
           value={password}
           onChangeText={setPassword}
           isPassword
@@ -102,44 +90,55 @@ export const LoginScreen: React.FC = () => { // Declara y exporta el componente 
         />
 
         {/* Olvidé contraseña */}
-        <TouchableOpacity // Botón de texto para ir a la pantalla de recuperación de contraseña
-          onPress={() => navigation.navigate('ForgotPassword' as never)} // Al presionar navega a la pantalla ForgotPassword
-          style={styles.forgotRow} // Alinea el enlace a la derecha con margen inferior
-        > {/* Cierre de la apertura del TouchableOpacity de "olvidé contraseña" */}
-          <Text style={styles.forgotText}>¿Has olvidado tu contraseña?</Text>
-        </TouchableOpacity> {/* Cierre del botón de "olvidé contraseña" */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate('ForgotPassword' as never)}
+          style={styles.forgotRow}
+        >
+          <Text style={styles.forgotText}>{t('loginForgotPassword')}</Text>
+        </TouchableOpacity>
 
         {/* Registrarse / Ingresar */}
-        <View style={styles.authRow}> {/* Fila horizontal con los dos botones principales de autenticación */}
-          <TouchableOpacity // Botón para navegar a la pantalla de registro
+        <View style={styles.authRow}>
+          <TouchableOpacity
             style={styles.registerBtn}
-            onPress={() => navigation.navigate('Register' as never)} // Al presionar navega a la pantalla Register
-          > {/* Cierre de la apertura del TouchableOpacity de Registrarse */}
-            <Text style={styles.registerBtnText}>Registrarse</Text>
-          </TouchableOpacity> {/* Cierre del botón Registrarse */}
+            onPress={() => navigation.navigate('Register' as never)}
+          >
+            <Text style={styles.registerBtnText}>{t('register')}</Text>
+          </TouchableOpacity>
 
-          <TouchableOpacity // Botón principal de inicio de sesión
+          <TouchableOpacity
             style={[styles.loginBtn, loading && styles.btnDisabled]}
-            onPress={handleLogin} // Al presionar llama a la función handleLogin del hook que valida y envía el formulario
-            disabled={loading} // Desactiva el botón mientras se procesa el login para evitar doble envío
-          > {/* Cierre de la apertura del TouchableOpacity de Ingresar */}
-            <Text style={styles.loginBtnText}>{loading ? 'Ingresando...' : 'Ingresar'}</Text> {/* Texto dinámico: "Ingresando..." durante la carga, "Ingresar" en estado normal */}
-          </TouchableOpacity> {/* Cierre del botón Ingresar */}
-        </View> {/* Cierre de authRow */}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            <Text style={styles.loginBtnText}>{loading ? t('loginSubmitLoading') : t('loginSubmitBtn')}</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Google */}
-        <TouchableOpacity style={styles.googleBtn}> {/* Botón social de Google con fondo blanco y sombra (sin acción real implementada aún) */}
-          {Platform.OS === 'web' // Condición para elegir el logo según la plataforma
-            ? <Image source={{ uri: GOOGLE_LOGO_URI }} style={styles.googleLogoImg} /> // En web muestra el SVG multicolor del logo de Google
-            : <Ionicons name="logo-google" size={20} color="#4285F4" />} {/* En nativo muestra el ícono de Google en azul */}
-          <Text style={styles.googleText}>Continuar con Google</Text> {/* Texto del botón de Google en color oscuro */}
-        </TouchableOpacity> {/* Cierre del botón de Google */}
+        <TouchableOpacity style={styles.googleBtn}>
+          <Image source={googleIcon} style={styles.socialLogoImg} resizeMode="contain" />
+          <Text style={styles.googleText}>{t('loginContinueGoogle')}</Text>
+        </TouchableOpacity>
 
         {/* Facebook */}
-        <TouchableOpacity style={styles.facebookBtn}> {/* Botón social de Facebook con fondo azul Facebook (sin acción real implementada aún) */}
-          <Ionicons name="logo-facebook" size={20} color="#fff" /> {/* Ícono de Facebook en blanco */}
-          <Text style={styles.facebookText}>Continuar con Facebook</Text> {/* Texto del botón de Facebook en blanco */}
-        </TouchableOpacity> {/* Cierre del botón de Facebook */}
+        <TouchableOpacity style={styles.facebookBtn}>
+          <Image source={facebookIcon} style={styles.socialLogoImg} resizeMode="contain" />
+          <Text style={styles.facebookText}>{t('loginContinueFacebook')}</Text>
+        </TouchableOpacity>
+
+        {/* Términos / Privacidad */}
+        <Text style={styles.legalText}>
+          {t('loginAcceptTerms')}{' '}
+          <Text style={styles.legalLink} onPress={() => navigation.navigate('Terms' as never)}>
+            {t('loginTermsLink')}
+          </Text>
+          {' '}{t('loginAnd')}{' '}
+          <Text style={styles.legalLink} onPress={() => navigation.navigate('PrivacyPolicy' as never)}>
+            {t('loginPrivacyLink')}
+          </Text>
+          .
+        </Text>
       </View> {/* Cierre de formInner */}
     </ScrollView> // Cierre del ScrollView del FormPanel
   ); // Cierre de la constante FormPanel
@@ -318,7 +317,7 @@ const styles = StyleSheet.create({ // Crea la hoja de estilos del componente con
     shadowRadius: 6, // Línea 308 — radio de difuminado de 6px
     elevation: 2, // Línea 309 — elevación en Android de 2 unidades
   }, // Cierre del estilo googleBtn
-  googleLogoImg: { width: 20, height: 20 }, // Línea 311 — imagen del logo SVG de Google de 20x20px
+  socialLogoImg: { width: 20, height: 20 }, // Tamaño del logo (Google o Facebook) dentro del botón social — 20x20px
   googleText: { // Línea 312 — estilos del texto del botón de Google
     fontSize: 16, // Línea 313 — tamaño de fuente de 16px
     fontWeight: '700', // Línea 314 — peso bold para el texto
@@ -338,4 +337,17 @@ const styles = StyleSheet.create({ // Crea la hoja de estilos del componente con
     fontWeight: '700', // Línea 328 — peso bold para el texto
     color: '#fff', // Línea 329 — color blanco para contrastar con el fondo azul de Facebook
   }, // Cierre del estilo facebookText
+
+  // Legal
+  legalText: {
+    marginTop: 24,
+    fontSize: 12,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  legalLink: {
+    color: Colors.primary,
+    fontWeight: '700',
+  },
 }); // Cierre del StyleSheet.create

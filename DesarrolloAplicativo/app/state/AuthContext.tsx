@@ -12,11 +12,35 @@
  * @exports AuthProvider - Componente proveedor que envuelve la app.
  * @exports useAuth - Hook para consumir el contexto desde cualquier componente.
  *
- * @todo Reemplazar los datos mock de `login` y `register` con llamadas reales al backend.
+ * `login` y `register` llaman al backend real (`/api/auth/*`) y guardan el
+ * JWT que este devuelve; el interceptor de `api.service.ts` lo adjunta como
+ * header `Authorization` en el resto de peticiones.
  */
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'; // Importa React y los hooks necesarios: createContext (crear contexto), useContext (consumir contexto), useState (estado local), useEffect (efectos secundarios), useCallback (memorizar funciones), useMemo (memorizar valores) — fuente: node_modules/react
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Importa AsyncStorage para persistir datos clave-valor de forma asíncrona en el dispositivo (token y usuario) — fuente: node_modules/@react-native-async-storage/async-storage
+import { api } from '../services/api.service'; // Instancia de Axios apuntando al backend — fuente: app/services/api.service.ts
+import { ENDPOINTS } from '../config/api.config'; // Rutas de la API (login, register, ...) — fuente: app/config/api.config.ts
 import { User, AuthState, LoginPayload, RegisterPayload } from '../types'; // Importa los tipos TypeScript: User (datos del usuario), AuthState (estado de autenticación), LoginPayload (datos del formulario de login), RegisterPayload (datos del formulario de registro) — fuente: app/types/index.ts
+
+/** Forma del usuario que devuelve el backend (tabla public.users). */
+interface BackendUser {
+  user_id: number;
+  name: string;
+  email: string;
+}
+
+/** Mapea el usuario del backend (user_id/name) al tipo `User` del frontend
+ *  (id_usuario/nombre). Los campos que el backend aún no maneja (edad, tema,
+ *  idioma) reciben valores por defecto. */
+const mapBackendUser = (u: BackendUser, extras?: Partial<User>): User => ({
+  id_usuario: u.user_id,
+  nombre: u.name,
+  edad: extras?.edad ?? 0,
+  email: u.email,
+  tema: extras?.tema ?? false,
+  idioma: extras?.idioma ?? 'es',
+  termino_acept: extras?.termino_acept ?? true,
+});
 
 interface AuthContextType extends AuthState { // Define la interfaz del contexto de autenticación; extiende AuthState añadiendo las acciones disponibles
   login: (payload: LoginPayload) => Promise<void>; // Acción de inicio de sesión: recibe email y password, devuelve una promesa que resuelve sin valor
@@ -41,7 +65,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           AsyncStorage.getItem('@auth_token'),
           AsyncStorage.getItem('@auth_user'),
         ]); // Lee token y usuario en paralelo desde AsyncStorage para reducir el tiempo de inicio
-        if (token && userStr) { // Condición: si ambos valores existen, la sesión anterior es válida y se restaura
+        if (token === 'mock-token-123') { // Sesión mock de versiones anteriores: ya no es válida contra el backend real
+          await AsyncStorage.multiRemove(['@auth_token', '@auth_user']); // Limpia la sesión obsoleta para forzar un login real
+          setState(prev => ({ ...prev, isLoading: false })); // Termina la carga sin sesión activa
+        } else if (token && userStr) { // Condición: si ambos valores existen, la sesión anterior es válida y se restaura
           setState({ // Actualiza el estado completo con los datos recuperados de AsyncStorage
             user: JSON.parse(userStr), // Deserializa el JSON del usuario guardado y lo asigna al campo user del estado
             token, // Asigna el token recuperado al campo token del estado
@@ -58,39 +85,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadStoredAuth(); // Invoca la función asíncrona de restauración de sesión al montar el componente
   }, []); // Array de dependencias vacío: el efecto solo se ejecuta una vez, al montar el componente
 
-  const login = useCallback(async (payload: LoginPayload) => { // Define la acción de login memorizada con useCallback; solo se recrea si cambian sus dependencias (ninguna en este caso)
-    // TODO: conectar con el backend real
-    const mockUser: User = { // Crea un objeto de usuario simulado para desarrollo mientras no hay backend disponible
-      id_usuario: 1, // ID de usuario hardcodeado para el mock
-      nombre: 'Usuario', // Nombre de usuario hardcodeado para el mock
-      edad: 25, // Edad hardcodeada para el mock
-      email: payload.email, // Usa el email real ingresado por el usuario en el formulario de login
-      tema: false, // Tema inicial en claro (false = light) para el usuario mock
-      idioma: 'es', // Idioma predeterminado español para el usuario mock
-      termino_acept: true, // Términos y condiciones aceptados por defecto en el mock
-    }; // Cierra el objeto mockUser
-    const mockToken = 'mock-token-123'; // Token de autenticación simulado; reemplazar con el JWT real que devuelva el backend
-    await AsyncStorage.setItem('@auth_token', mockToken); // Guarda el token simulado en AsyncStorage bajo la clave '@auth_token' para persistir la sesión
-    await AsyncStorage.setItem('@auth_user', JSON.stringify(mockUser)); // Serializa y guarda el usuario mock en AsyncStorage bajo la clave '@auth_user'
-    setState({ user: mockUser, token: mockToken, isLoading: false, isAuthenticated: true }); // Actualiza el estado global: establece el usuario, el token, desactiva la carga y marca la sesión como autenticada
-  }, []); // Array de dependencias vacío: login no depende de ningún valor reactivo externo
+  /** Persiste la sesión (token + usuario) en AsyncStorage y el estado global. */
+  const persistSession = useCallback(async (user: User, token: string) => {
+    await AsyncStorage.setItem('@auth_token', token); // Guarda el JWT real para que el interceptor lo adjunte en cada petición
+    await AsyncStorage.setItem('@auth_user', JSON.stringify(user)); // Guarda el usuario serializado para restaurar la sesión en reinicios
+    setState({ user, token, isLoading: false, isAuthenticated: true }); // Marca la sesión como activa en el estado global
+  }, []);
 
-  const register = useCallback(async (payload: RegisterPayload) => { // Define la acción de registro memorizada con useCallback; construye un usuario mock a partir del payload recibido
-    // TODO: conectar con el backend real
-    const mockUser: User = { // Crea un objeto de usuario simulado usando los datos reales ingresados en el formulario de registro
-      id_usuario: 1, // ID de usuario hardcodeado para el mock; el backend real asignará el ID real
-      nombre: payload.nombre, // Nombre real ingresado por el usuario en el formulario de registro
-      edad: payload.edad, // Edad real ingresada por el usuario en el formulario de registro
-      email: payload.email, // Correo electrónico real ingresado por el usuario en el formulario de registro
-      tema: false, // Tema inicial en claro (false = light) para el nuevo usuario
-      idioma: 'es', // Idioma predeterminado español para el nuevo usuario
-      termino_acept: payload.termino_acept, // Refleja si el usuario aceptó los términos y condiciones en el formulario
-    }; // Cierra el objeto mockUser del registro
-    const mockToken = 'mock-token-123'; // Token de autenticación simulado para el registro; reemplazar con el JWT real del backend
-    await AsyncStorage.setItem('@auth_token', mockToken); // Guarda el token simulado en AsyncStorage para persistir la nueva sesión tras el registro
-    await AsyncStorage.setItem('@auth_user', JSON.stringify(mockUser)); // Serializa y guarda el nuevo usuario en AsyncStorage para restaurar la sesión en reinicios
-    setState({ user: mockUser, token: mockToken, isLoading: false, isAuthenticated: true }); // Actualiza el estado global con el nuevo usuario registrado y lo marca como autenticado
-  }, []); // Array de dependencias vacío: register no depende de ningún valor reactivo externo
+  const login = useCallback(async (payload: LoginPayload) => { // Acción de login real contra el backend
+    const { data } = await api.post(ENDPOINTS.login, {
+      email: payload.email,
+      password: payload.password,
+    }); // POST /auth/login → { success, data: { token, user: { user_id, name, email } } }
+    const token: string | undefined = data?.data?.token;
+    const backendUser: BackendUser | undefined = data?.data?.user;
+    if (!token || !backendUser) throw new Error(data?.message ?? 'Respuesta de login inválida');
+    await persistSession(mapBackendUser(backendUser), token);
+  }, [persistSession]);
+
+  const register = useCallback(async (payload: RegisterPayload) => { // Acción de registro real contra el backend
+    const { data } = await api.post(ENDPOINTS.register, {
+      name: payload.nombre, // El backend usa `name` (tabla public.users); el frontend maneja `nombre`
+      email: payload.email,
+      password: payload.password,
+    }); // POST /auth/register → { success, data: { user_id, name, email } } (sin token)
+    if (!data?.success) throw new Error(data?.message ?? 'No fue posible registrar el usuario');
+    // El registro no devuelve token: iniciamos sesión de inmediato con las
+    // mismas credenciales para dejar al usuario autenticado.
+    const { data: loginData } = await api.post(ENDPOINTS.login, {
+      email: payload.email,
+      password: payload.password,
+    });
+    const token: string | undefined = loginData?.data?.token;
+    const backendUser: BackendUser | undefined = loginData?.data?.user;
+    if (!token || !backendUser) throw new Error(loginData?.message ?? 'Registro exitoso pero el login falló');
+    await persistSession(
+      mapBackendUser(backendUser, { edad: payload.edad, termino_acept: payload.termino_acept }),
+      token,
+    );
+  }, [persistSession]);
 
   const logout = useCallback(async () => { // Define la acción de logout memorizada con useCallback; limpia la sesión tanto en AsyncStorage como en el estado
     await AsyncStorage.removeItem('@auth_token'); // Elimina el token de AsyncStorage para que la sesión no pueda restaurarse en el próximo inicio

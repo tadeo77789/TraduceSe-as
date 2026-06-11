@@ -2,7 +2,7 @@
  * @file ProfileScreen.tsx
  * @description Pantalla de perfil del usuario autenticado.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -43,6 +43,7 @@ export const ProfileScreen: React.FC = () => {
   const C = useColors();
   const { language, setLanguage } = useLanguage();
   const { t } = useTranslation();
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   const USER_STATS = [
     { label: t('profileTranslations'), value: '1,248', icon: 'swap-horizontal-outline' as const, color: C.primary },
@@ -113,7 +114,7 @@ export const ProfileScreen: React.FC = () => {
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>{t('profileAccount')}</Text>
             <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
-              <Input label={t('email')} value={displayEmail} editable={false} rightIcon="lock-closed-outline" containerStyle={styles.inputStyle} />
+              <Input label={t('email')} value={displayEmail} editable={false} rightIcon="mail-outline" containerStyle={styles.inputStyle} />
               <Input label={t('password')} value="••••••••" isPassword editable={false} containerStyle={styles.inputStyle} />
               <TouchableOpacity style={styles.forgotRow} onPress={() => (navigation.navigate as any)('ForgotPassword', { fromProfile: true })}>
                 <Ionicons name="key-outline" size={14} color={C.primary} />
@@ -185,7 +186,12 @@ export const ProfileScreen: React.FC = () => {
                   </View>
                   <Text style={[styles.themeLabel, { color: C.textPrimary }]}>{t('profileNotifications')}</Text>
                 </View>
-                <Switch value={true} trackColor={{ false: C.toggleOff, true: '#059669' }} thumbColor="#fff" />
+                <Switch
+                  value={notificationsEnabled}
+                  onValueChange={setNotificationsEnabled}
+                  trackColor={{ false: C.toggleOff, true: '#059669' }}
+                  thumbColor="#fff"
+                />
               </View>
 
               <View style={[styles.divider, { backgroundColor: C.border }]} />

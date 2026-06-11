@@ -1,10 +1,16 @@
 const express = require('express');
-const authRoutes = require('./routes/auth.routes');
+const cors = require('cors');
+const authRoutes = require('./modules/auth/routes/auth.routes');
+const translationsRoutes = require('./modules/translations/routes/translations.routes');
 const app = express();
 
-app.use(express.json());
+// El frontend web (Expo) corre en un puerto distinto al backend; sin CORS el
+// navegador bloquea las peticiones.
+app.use(cors());
+app.use(express.json({ limit: '2mb' }));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/translations', translationsRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

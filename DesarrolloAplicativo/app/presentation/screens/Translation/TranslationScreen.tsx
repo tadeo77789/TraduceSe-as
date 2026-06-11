@@ -1,5 +1,5 @@
 // Archivo: app/presentation/screens/Translation/TranslationScreen.tsx
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,16 +19,40 @@ import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
 import { useColors } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
+import { useSignAgent } from '../../../hooks/useSignAgent';
+import { translationsService } from '../../../services/translations.service';
+import type { SignAgentStatus } from '../../../types';
 
 type Mode = 'sena_texto' | 'texto_sena';
 
 export const TranslationScreen: React.FC = () => {
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const isTablet = width >= 768;
   const isDesktop = width >= 1024;
+
+  // Tamaño de la cámara: aprovecha el ancho disponible con aspect 3:4 vertical,
+  // pero nunca supera el 55% del alto de la ventana (para que no desborde la pantalla).
+  const horizontalPadding = isDesktop ? 96 : 40;
+  const wrapperMaxWidth = isTablet ? 760 : width;
+  const cameraWidth = Math.min(width - horizontalPadding, wrapperMaxWidth);
+  const cameraHeight = Math.min(cameraWidth * (4 / 3), height * 0.55);
   const C = useColors();
   const { t } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef<CameraView>(null);
+  const {
+    status: agentStatus,
+    lastResult: agentLastResult,
+    transcript: agentTranscript,
+    pendingLetter: agentPendingLetter,
+    pendingCount: agentPendingCount,
+    confirmFrames: agentConfirmFrames,
+    start: agentStart,
+    stop: agentStop,
+    reset: agentReset,
+    backspace: agentBackspace,
+    appendSpace: agentAppendSpace,
+  } = useSignAgent(cameraRef, { intervalMs: 1500, minConfidence: 0.7, confirmFrames: 2 });
 
   const TIPS = [
     { icon: 'hand-left-outline' as const, text: t('tip1') },
@@ -41,6 +65,38 @@ export const TranslationScreen: React.FC = () => {
   const [result, setResult] = useState('');
   const [isActive, setIsActive] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Persistencia silenciosa: si el backend no responde, no rompemos la UX.
+  const persistSignTranscript = useCallback(async () => {
+    const transcript = agentTranscript.trim();
+    if (!transcript) return;
+    try {
+      await translationsService.save({
+        inputText: transcript,
+        outputText: transcript,
+        type: 'sena_texto',
+        confidence: agentLastResult?.confidence,
+        source: agentLastResult?.source ?? 'mediapipe',
+      });
+    } catch {
+      // Backend offline o sin tabla — silencioso para no bloquear el flujo.
+    }
+  }, [agentTranscript, agentLastResult]);
+
+  const persistTextToSign = useCallback(async (input: string) => {
+    const value = input.trim();
+    if (!value) return;
+    try {
+      await translationsService.save({
+        inputText: value,
+        outputText: value,
+        type: 'texto_sena',
+        source: 'manual',
+      });
+    } catch {
+      // Backend offline — silencioso.
+    }
+  }, []);
 
   const handleAction = useCallback(async () => {
     if (mode === 'sena_texto') {
@@ -58,26 +114,53 @@ export const TranslationScreen: React.FC = () => {
           }
         }
         setIsActive(true);
+        agentReset();
+        agentStart();
       } else {
+        agentStop();
         setIsActive(false);
         setResult('');
+        // Al detener, persistimos lo reconocido (si hay algo).
+        await persistSignTranscript();
       }
     } else {
       if (!text.trim()) { Alert.alert('', t('textEmptyAlert')); return; }
       setLoading(true);
-      setTimeout(() => {
-        setResult(t('translationResult') + text);
+      const value = text;
+      setTimeout(async () => {
+        setResult(t('translationResult') + value);
         setLoading(false);
+        await persistTextToSign(value);
       }, 1200);
     }
-  }, [mode, text, isActive, permission, requestPermission, t]);
+  }, [mode, text, isActive, permission, requestPermission, t, agentStart, agentStop, agentReset, persistSignTranscript, persistTextToSign]);
 
   const switchMode = useCallback((m: Mode) => {
     setMode(m);
     setResult('');
     setText('');
     setIsActive(false);
-  }, []);
+    agentStop();
+    agentReset();
+  }, [agentStop, agentReset]);
+
+  useEffect(() => () => { agentStop(); }, [agentStop]);
+
+  const statusLabelKey: Record<SignAgentStatus, string> = {
+    idle: 'tapStartCamera',
+    starting: 'agentStarting',
+    detecting: 'agentDetecting',
+    low_confidence: 'agentLowConfidence',
+    no_hands: 'agentNoHands',
+    error: 'agentError',
+  };
+
+  const cameraStatusLabel = isActive
+    ? t(statusLabelKey[agentStatus] as Parameters<typeof t>[0])
+    : t('tapStartCamera');
+
+  const signResult = mode === 'sena_texto' ? agentTranscript : result;
+  const confidencePct = agentLastResult ? Math.round(agentLastResult.confidence * 100) : 0;
 
   const cameraGranted = permission?.granted ?? false;
 
@@ -108,7 +191,7 @@ export const TranslationScreen: React.FC = () => {
 
           {/* ── Área de cámara / entrada ── */}
           {mode === 'sena_texto' ? (
-            <View style={[styles.cameraCard, { shadowColor: C.primary }]}>
+            <View style={[styles.cameraCard, { height: cameraHeight, shadowColor: C.primary }]}>
               {/* Badge EN VIVO */}
               {isActive && (
                 <View style={styles.liveBadge}>
@@ -119,7 +202,7 @@ export const TranslationScreen: React.FC = () => {
 
               {/* Cámara real o placeholder */}
               {isActive && cameraGranted ? (
-                <CameraView style={styles.cameraImage} facing="front" />
+                <CameraView ref={cameraRef} style={styles.cameraImage} facing="front" />
               ) : (
                 <Image
                   source={require('../../../assets/images/camera_placeholder.jpg')}
@@ -139,12 +222,30 @@ export const TranslationScreen: React.FC = () => {
                 <View style={[styles.corner, styles.cornerBR]} />
               </View>
 
+              {/* Indicador de letra pendiente — solo cuando el agente está confirmando */}
+              {isActive && agentPendingLetter && (
+                <View style={styles.pendingBubble}>
+                  <Text style={styles.pendingLetterText}>{agentPendingLetter}</Text>
+                  <View style={styles.pendingProgressTrack}>
+                    <View
+                      style={[
+                        styles.pendingProgressFill,
+                        {
+                          width: `${Math.min(100, (agentPendingCount / agentConfirmFrames) * 100)}%`,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+              )}
+
               {/* Label inferior */}
               <View style={styles.cameraLabel}>
                 <Ionicons name="camera-outline" size={14} color="#fff" />
-                <Text style={styles.cameraLabelText}>
-                  {isActive ? t('analyzingSigns') : t('tapStartCamera')}
-                </Text>
+                <Text style={styles.cameraLabelText}>{cameraStatusLabel}</Text>
+                {isActive && agentLastResult && agentLastResult.confidence > 0 && (
+                  <Text style={styles.cameraConfidence}>· {confidencePct}%</Text>
+                )}
               </View>
             </View>
           ) : (
@@ -187,7 +288,7 @@ export const TranslationScreen: React.FC = () => {
                 <Ionicons name="chatbubble-ellipses-outline" size={16} color={C.primary} />
               </LinearGradient>
               <Text style={[styles.resultTitle, { color: C.textPrimary }]}>{t('sectionTranslation')}</Text>
-              {result ? (
+              {signResult ? (
                 <View style={styles.detectedBadge}>
                   <View style={styles.detectedDot} />
                   <Text style={styles.detectedText}>{t('done')}</Text>
@@ -199,16 +300,43 @@ export const TranslationScreen: React.FC = () => {
               )}
             </View>
             <View style={styles.resultBody}>
-              {result ? (
+              {signResult ? (
                 <>
-                  <Text style={[styles.resultText, { color: C.textPrimary }]}>{result}</Text>
-                  <TouchableOpacity
-                    style={[styles.copyBtn, { backgroundColor: C.primaryBg }]}
-                    onPress={() => Alert.alert(t('copied'), t('copiedToClipboard'))}
-                  >
-                    <Ionicons name="copy-outline" size={14} color={C.primary} />
-                    <Text style={[styles.copyBtnText, { color: C.primary }]}>{t('copy')}</Text>
-                  </TouchableOpacity>
+                  <Text style={[styles.resultText, { color: C.textPrimary }]}>{signResult}</Text>
+                  <View style={styles.resultActions}>
+                    <TouchableOpacity
+                      style={[styles.copyBtn, { backgroundColor: C.primaryBg }]}
+                      onPress={() => Alert.alert(t('copied'), t('copiedToClipboard'))}
+                    >
+                      <Ionicons name="copy-outline" size={14} color={C.primary} />
+                      <Text style={[styles.copyBtnText, { color: C.primary }]}>{t('copy')}</Text>
+                    </TouchableOpacity>
+                    {mode === 'sena_texto' && agentTranscript && (
+                      <>
+                        <TouchableOpacity
+                          style={[styles.copyBtn, { backgroundColor: C.inputBg }]}
+                          onPress={agentBackspace}
+                        >
+                          <Ionicons name="backspace-outline" size={14} color={C.textSecondary} />
+                          <Text style={[styles.copyBtnText, { color: C.textSecondary }]}>{t('agentBackspace')}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.copyBtn, { backgroundColor: C.inputBg }]}
+                          onPress={agentAppendSpace}
+                        >
+                          <Ionicons name="ellipsis-horizontal" size={14} color={C.textSecondary} />
+                          <Text style={[styles.copyBtnText, { color: C.textSecondary }]}>{t('agentSpace')}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.copyBtn, { backgroundColor: C.inputBg }]}
+                          onPress={agentReset}
+                        >
+                          <Ionicons name="trash-outline" size={14} color={C.textSecondary} />
+                          <Text style={[styles.copyBtnText, { color: C.textSecondary }]}>{t('agentClear')}</Text>
+                        </TouchableOpacity>
+                      </>
+                    )}
+                  </View>
                 </>
               ) : (
                 <View style={styles.resultEmpty}>
@@ -270,8 +398,8 @@ const styles = StyleSheet.create({
   modeBtnText: { fontSize: 14, fontWeight: '700', color: Colors.textSecondary },
   modeBtnTextActive: { color: '#fff' },
 
-  // Cámara
-  cameraCard: { width: '100%', height: 280, borderRadius: 24, overflow: 'hidden', backgroundColor: '#1a1a2e', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 20, elevation: 10 },
+  // Cámara — el alto se calcula dinámicamente en el componente para no exceder el viewport
+  cameraCard: { width: '100%', borderRadius: 24, overflow: 'hidden', backgroundColor: '#1a1a2e', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 20, elevation: 10 },
   cameraImage: { width: '100%', height: '100%' },
   cameraOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 100 },
   liveBadge: { position: 'absolute', top: 14, left: 14, zIndex: 10, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(220,38,38,0.9)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
@@ -285,6 +413,36 @@ const styles = StyleSheet.create({
   cornerBR: { bottom: 0, right: 0, borderBottomWidth: CORNER_WIDTH, borderRightWidth: CORNER_WIDTH, borderBottomRightRadius: 4 },
   cameraLabel: { position: 'absolute', bottom: 14, left: 0, right: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, zIndex: 10 },
   cameraLabelText: { color: 'rgba(255,255,255,0.9)', fontSize: 13, fontWeight: '500' },
+  cameraConfidence: { color: 'rgba(255,255,255,0.75)', fontSize: 12, fontWeight: '700' },
+
+  // Burbuja de letra pendiente — feedback visual durante la ventana de estabilidad
+  pendingBubble: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    zIndex: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 16,
+    minWidth: 64,
+  },
+  pendingLetterText: { color: '#fff', fontSize: 26, fontWeight: '800', lineHeight: 30 },
+  pendingProgressTrack: {
+    width: 44,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    marginTop: 6,
+    overflow: 'hidden',
+  },
+  pendingProgressFill: {
+    height: '100%',
+    borderRadius: 2,
+    backgroundColor: '#fff',
+  },
 
   // Input card
   inputCard: { borderRadius: 24, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 14, elevation: 4 },
@@ -311,7 +469,8 @@ const styles = StyleSheet.create({
   waitingText: { fontSize: 11, fontWeight: '600' },
   resultBody: { padding: 18, minHeight: 96 },
   resultText: { fontSize: 17, fontWeight: '600', lineHeight: 27 },
-  copyBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', marginTop: 14, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
+  resultActions: { flexDirection: 'row', gap: 10, marginTop: 14, flexWrap: 'wrap' },
+  copyBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
   copyBtnText: { fontSize: 13, fontWeight: '600' },
   resultEmpty: { alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 12 },
   resultEmptyText: { fontSize: 13, textAlign: 'center', lineHeight: 21, maxWidth: 240 },

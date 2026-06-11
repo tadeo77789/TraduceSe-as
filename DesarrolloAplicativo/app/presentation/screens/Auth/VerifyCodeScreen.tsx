@@ -16,17 +16,21 @@ import {
   Alert, useWindowDimensions,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
-import { useColors, useTheme } from '../../../state/ThemeContext';
+import { useColors } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
 
 const CODE_LENGTH = 6;
+  
+type NavigationProps = NativeStackNavigationProp<AuthStackParams>;
 
 export const VerifyCodeScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProps>();
   const route = useRoute();
   const fromProfile = (route.params as any)?.fromProfile ?? false;
   const [code, setCode] = useState(Array(CODE_LENGTH).fill(''));
@@ -35,16 +39,19 @@ export const VerifyCodeScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isWide = width >= 768;
-  const C = useColors();
-  const { isDark } = useTheme();
-  const rootBg = isDark ? '#0F0B1A' : '#EDE9FE';
+  // Si la pantalla viene de Perfil usa el tema/acento del usuario; si viene del flujo de
+  // recuperación desde Login usa paleta fija morada/clara para mantener el branding del flujo.
+  const themedC = useColors();
+  const C = fromProfile ? themedC : Colors;
+  const rootBg = C.background;
   const { t } = useTranslation();
 
   const handleChange = (text: string, index: number) => {
+    const digit = text.replace(/\D/g, '').slice(-1); // Filtra cualquier carácter que no sea dígito (teclado físico/web pueden ignorar keyboardType) y deja solo el último
     const newCode = [...code];
-    newCode[index] = text;
+    newCode[index] = digit;
     setCode(newCode);
-    if (text && index < CODE_LENGTH - 1) {
+    if (digit && index < CODE_LENGTH - 1) {
       inputs.current[index + 1]?.focus();
     }
   };
@@ -64,17 +71,17 @@ export const VerifyCodeScreen: React.FC = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      navigation.navigate('NewPassword' as never, { fromProfile } as never);
+      navigation.navigate('NewPassword', { fromProfile });
     }, 1000);
   };
 
   const Logo = (
     <>
       <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
-        <Ionicons name="chevron-back" size={22} color={Colors.primary} />
+        <Ionicons name="chevron-back" size={22} color={C.primary} />
       </TouchableOpacity>
       <View style={styles.logoCorner}>
-        <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.logoBox}>
+        <LinearGradient colors={[C.primaryLight, C.primary]} style={styles.logoBox}>
           <Text style={styles.logoEmoji}>👌</Text>
         </LinearGradient>
         <Text style={[styles.brandName, { color: C.textPrimary }]}>TraduceSeña</Text>
@@ -91,7 +98,7 @@ export const VerifyCodeScreen: React.FC = () => {
       bounces={false}
     >
       <View style={styles.formInner}>
-      <View style={[styles.card, { backgroundColor: C.surface }]}>
+      <View style={[styles.card, { backgroundColor: C.primaryBg, shadowColor: C.primary }]}>
         <Text style={[styles.title, { color: C.textPrimary }]}>{t('verifyTitle')}</Text>
         <Text style={[styles.subtitle, { color: C.textSecondary }]}>
           {t('verifySubtitle')}
@@ -106,10 +113,10 @@ export const VerifyCodeScreen: React.FC = () => {
               style={[
                 styles.otpInput,
                 { backgroundColor: C.inputBg, borderColor: C.border, color: C.textPrimary },
-                digit ? { borderColor: Colors.primary, backgroundColor: '#EDE9FE' } : null,
+                digit ? { borderColor: C.primary, backgroundColor: C.primaryBg } : null,
               ]}
               value={digit}
-              onChangeText={text => handleChange(text.slice(-1), i)}
+              onChangeText={text => handleChange(text, i)}
               onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, i)}
               keyboardType="number-pad"
               maxLength={1}
@@ -120,7 +127,7 @@ export const VerifyCodeScreen: React.FC = () => {
 
         <View style={styles.btnWrapper}>
           <TouchableOpacity
-            style={[styles.submitBtn, loading && styles.btnDisabled]}
+            style={[styles.submitBtn, { backgroundColor: C.primary }, loading && styles.btnDisabled]}
             onPress={handleConfirm}
             disabled={loading}
           >
@@ -205,7 +212,7 @@ const styles = StyleSheet.create({
   // Logo
   logoCorner: {
     position: 'absolute',
-    top: 20,
+    top: 11,
     left: 68,
     flexDirection: 'row',
     alignItems: 'center',
@@ -267,6 +274,12 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     borderWidth: 1,
     borderColor: Colors.border,
+    textAlign: 'center', // Centra el dígito horizontalmente (en web el prop textAlign no siempre se aplica al <input> nativo)
+    textAlignVertical: 'center', // Centra el dígito verticalmente en Android
+    paddingVertical: 0, // Elimina el padding vertical default del <input> en web que descentra el texto
+    paddingHorizontal: 0, // Elimina el padding horizontal default del <input> en web
+    lineHeight: Platform.OS === 'web' ? 50 : undefined, // En web fuerza la altura de línea ≈ height para centrar verticalmente
+    includeFontPadding: false, // Quita el padding extra de fuente en Android
   },
   otpFilled: {
     borderColor: Colors.primary,

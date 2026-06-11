@@ -10,10 +10,9 @@
  * Cuando la lista está vacía muestra un estado vacío con mensaje descriptivo.
  * En tablet (≥ 768 px) la grilla usa 2 columnas.
  *
- * Los datos actuales son mock (`MOCK_HISTORY`).
- *
- * @todo Conectar con `ENDPOINTS.history` para cargar el historial real del usuario.
- * @todo Conectar `handleDelete` con `ENDPOINTS.deleteTranslation`.
+ * Los datos se cargan del backend (`GET /api/translations/history`) cada vez
+ * que la pantalla recibe foco; "Eliminar" hace borrado lógico vía
+ * `DELETE /api/translations/:id`.
  */
 import React, { useState, useCallback } from 'react';
 import {
@@ -22,10 +21,12 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
+  ActivityIndicator,
   ListRenderItem,
   useWindowDimensions,
+  TextInput,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { AppHeader } from '../../components/common/AppHeader';
 import { Colors } from '../../../constants/colors';
 import { useColors, useTheme } from '../../../state/ThemeContext';
@@ -33,23 +34,24 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Traduccion } from '../../../types';
 import { useTranslation } from '../../../i18n';
+import { translationsService, type SavedTranslation } from '../../../services/translations.service';
+import { showAlert, showConfirm } from '../../../utils/dialogs';
 
-const MOCK_HISTORY: Traduccion[] = [
-  { id_traduccion: 1, texto_entrada: 'No entiendo lo que dices', texto_traducido: '🤟 [seña detectada]', tipo: 'sena_texto', fecha_traduccion: '07/12/25', is_deleted: false },
-  { id_traduccion: 2, texto_entrada: 'Quisiera llevar algo de comer', texto_traducido: '👋 [animación LSC]', tipo: 'texto_sena', fecha_traduccion: '06/12/25', is_deleted: false },
-  { id_traduccion: 3, texto_entrada: 'Hola, me llamo Juan', texto_traducido: '👋 [animación LSC]', tipo: 'texto_sena', fecha_traduccion: '06/12/25', is_deleted: false },
-  { id_traduccion: 4, texto_entrada: 'Quisiera comunicarme contigo', texto_traducido: '🤟 [seña detectada]', tipo: 'sena_texto', fecha_traduccion: '05/12/25', is_deleted: false },
-  { id_traduccion: 5, texto_entrada: 'Buenos días, ¿cómo estás?', texto_traducido: '🎙️ [voz procesada]', tipo: 'voz_sena', fecha_traduccion: '05/12/25', is_deleted: false },
-  { id_traduccion: 6, texto_entrada: 'Por favor ayúdame', texto_traducido: '👋 [animación LSC]', tipo: 'texto_sena', fecha_traduccion: '05/12/25', is_deleted: false },
-  { id_traduccion: 7, texto_entrada: 'Hasta luego, nos vemos mañana', texto_traducido: '👋 [animación LSC]', tipo: 'texto_sena', fecha_traduccion: '04/12/25', is_deleted: false },
-  { id_traduccion: 8, texto_entrada: 'Necesito ayuda con esto', texto_traducido: '🤟 [seña detectada]', tipo: 'sena_texto', fecha_traduccion: '04/12/25', is_deleted: false },
-  { id_traduccion: 9, texto_entrada: 'Espero que le guste el regalo', texto_traducido: '👋 [animación LSC]', tipo: 'texto_sena', fecha_traduccion: '04/12/25', is_deleted: false },
-  { id_traduccion: 10, texto_entrada: 'Toma esto, es para ti', texto_traducido: '🤟 [seña detectada]', tipo: 'sena_texto', fecha_traduccion: '02/12/25', is_deleted: false },
-];
+/** Item del historial: el tipo de dominio + hora formateada para la tarjeta. */
+type HistoryItem = Traduccion & { hora: string };
 
-const MOCK_TIMES: Record<number, string> = {
-  1: '06:00', 2: '11:34', 3: '09:00', 4: '07:15', 5: '11:00',
-  6: '08:30', 7: '06:45', 8: '09:20', 9: '12:09', 10: '09:00',
+/** Mapea la fila del backend (snake_case en inglés) al tipo de dominio. */
+const mapSavedTranslation = (row: SavedTranslation): HistoryItem => {
+  const date = new Date(row.created_at);
+  return {
+    id_traduccion: row.translation_id,
+    texto_entrada: row.input_text,
+    texto_traducido: row.output_text,
+    tipo: row.type,
+    fecha_traduccion: date.toLocaleDateString(),
+    hora: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    is_deleted: row.is_deleted,
+  };
 };
 
 type TipoConfig = {
@@ -61,7 +63,7 @@ type TipoConfig = {
   darkTextColor: string;
 };
 
-const keyExtractor = (item: Traduccion) => String(item.id_traduccion);
+const keyExtractor = (item: HistoryItem) => String(item.id_traduccion);
 
 export const HistoryScreen: React.FC = () => {
   const { width } = useWindowDimensions();
@@ -70,50 +72,83 @@ export const HistoryScreen: React.FC = () => {
   const C = useColors();
   const { isDark } = useTheme();
   const { t } = useTranslation();
-  const [items, setItems] = useState<Traduccion[]>(MOCK_HISTORY);
+  const [items, setItems] = useState<HistoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState<string>('');
+
+  const filtered = items.filter((p) =>
+    p.texto_entrada.toLowerCase().includes(query.toLowerCase())
+  );
+
+  // Recarga el historial cada vez que la pantalla recibe foco, así las
+  // traducciones recién guardadas en TranslationScreen aparecen de inmediato.
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      (async () => {
+        try {
+          const rows = await translationsService.list({ limit: 100 });
+          if (active) setItems(rows.map(mapSavedTranslation));
+        } catch {
+          // Backend offline o sesión inválida — mostramos el estado vacío.
+          if (active) setItems([]);
+        } finally {
+          if (active) setLoading(false);
+        }
+      })();
+      return () => { active = false; };
+    }, []),
+  );
 
   const TIPO_CONFIG: Record<string, TipoConfig> = {
     sena_texto: {
       label: t('historySenaTexto'),
       icon: 'hand-left-outline',
-      gradient:     [C.primaryBg, C.primaryHeader],
+      gradient: [C.primaryBg, C.primaryHeader],
       darkGradient: [C.primaryBg, C.primaryBg],
-      textColor:     C.primary,
+      textColor: C.primary,
       darkTextColor: C.primary,
     },
     texto_sena: {
       label: t('historyTextoSena'),
       icon: 'text-outline',
-      gradient:     ['#DBEAFE', '#BFDBFE'],
+      gradient: ['#DBEAFE', '#BFDBFE'],
       darkGradient: ['#162644', '#111B35'],
-      textColor:     '#2563EB',
+      textColor: '#2563EB',
       darkTextColor: '#60A5FA',
     },
     voz_sena: {
       label: t('historyVozSena'),
       icon: 'mic-outline',
-      gradient:     ['#D1FAE5', '#A7F3D0'],
+      gradient: ['#D1FAE5', '#A7F3D0'],
       darkGradient: ['#0D2B1E', '#0A1E16'],
-      textColor:     '#059669',
+      textColor: '#059669',
       darkTextColor: '#34D399',
     },
   };
 
-  const handleDelete = useCallback((id: number) => {
-    Alert.alert(t('historyDeleteTitle'), t('historyConfirmDelete'), [
-      { text: t('cancel'), style: 'cancel' },
-      {
-        text: t('historyDeleteBtn'), style: 'destructive',
-        onPress: () => setItems(prev => prev.filter(item => item.id_traduccion !== id)),
-      },
-    ]);
+  const handleDelete = useCallback(async (id: number) => {
+    const ok = await showConfirm({
+      title: t('historyDeleteTitle'),
+      message: t('historyConfirmDelete'),
+      confirmText: t('historyDeleteBtn'),
+      cancelText: t('cancel'),
+      destructive: true,
+    });
+    if (!ok) return;
+    try {
+      await translationsService.remove(id); // Borrado lógico en el backend
+      setItems(prev => prev.filter(item => item.id_traduccion !== id));
+    } catch {
+      await showAlert({ title: t('error'), message: t('historyDeleteError'), icon: 'error' });
+    }
   }, [t]);
 
-  const handleReuse = useCallback((item: Traduccion) => {
-    Alert.alert(t('historyReuseTitle'), `${t('historyReuseMsg')}\n\n"${item.texto_entrada}"`);
+  const handleReuse = useCallback((item: HistoryItem) => {
+    showAlert({ title: t('historyReuseTitle'), message: `${t('historyReuseMsg')}\n\n"${item.texto_entrada}"` });
   }, [t]);
 
-  const renderItem: ListRenderItem<Traduccion> = useCallback(({ item }) => {
+  const renderItem: ListRenderItem<HistoryItem> = useCallback(({ item }) => {
     const config = TIPO_CONFIG[item.tipo] ?? TIPO_CONFIG['texto_sena'];
     const badgeColor = isDark ? config.darkTextColor : config.textColor;
     return (
@@ -133,7 +168,7 @@ export const HistoryScreen: React.FC = () => {
             <Ionicons name="calendar-outline" size={12} color={C.textHint} />
             <Text style={[styles.cardMetaText, { color: C.textHint }]}>{item.fecha_traduccion}</Text>
             <Ionicons name="time-outline" size={12} color={C.textHint} style={{ marginLeft: 8 }} />
-            <Text style={[styles.cardMetaText, { color: C.textHint }]}>{MOCK_TIMES[item.id_traduccion]}</Text>
+            <Text style={[styles.cardMetaText, { color: C.textHint }]}>{item.hora}</Text>
           </View>
           <View style={styles.cardActions}>
             <TouchableOpacity style={[styles.actionBtn, { backgroundColor: C.primaryBg }]} onPress={() => handleReuse(item)}>
@@ -160,8 +195,18 @@ export const HistoryScreen: React.FC = () => {
             <Text style={[styles.countText, { color: C.primary }]}>{items.length} {t('historyRecords')}</Text>
           </View>
         </View>
-
-        {items.length === 0 ? (
+        <TextInput
+          style={[styles.input, { backgroundColor: C.surface, color: C.textPrimary, borderColor: C.border }]}
+          value={query}
+          onChangeText={setQuery}
+          placeholder={t('historyFilter')}
+          placeholderTextColor={C.textHint}
+        />
+        {loading ? (
+          <View style={styles.empty}>
+            <ActivityIndicator size="large" color={C.primary} />
+          </View>
+        ) : filtered.length === 0 ? (
           <View style={styles.empty}>
             <View style={[styles.emptyIcon, { backgroundColor: C.primaryBg }]}>
               <Ionicons name="time-outline" size={40} color={C.primary} />
@@ -171,7 +216,7 @@ export const HistoryScreen: React.FC = () => {
           </View>
         ) : (
           <FlatList
-            data={items}
+            data={filtered}
             key={numCols}
             numColumns={numCols}
             keyExtractor={keyExtractor}
@@ -226,6 +271,28 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 4,
   },
+  input: {
+    backgroundColor: '#fff',
+    borderRadius: 90,
+    maxWidth: 500,
+    width: '100%',       
+    alignSelf: 'center',
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 30,
+    borderWidth: 2,
+    borderColor: '#974a99',
+  },
+  texto_entrada: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#222',
+  },
+  tipo: {
+    fontSize: 13,
+    color: '#888',
+    marginTop: 4,
+  },
   typeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -245,16 +312,16 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   cardFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    gap: 10,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
     paddingTop: 12,
   },
-  cardMeta: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  cardMeta: { flexDirection: 'row', alignItems: 'center', gap: 4, flexWrap: 'wrap' },
   cardMetaText: { fontSize: 12, color: Colors.textHint },
-  cardActions: { flexDirection: 'row', gap: 8 },
+  cardActions: { flexDirection: 'row', gap: 8, justifyContent: 'flex-end' },
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
