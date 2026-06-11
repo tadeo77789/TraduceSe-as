@@ -18,7 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
 import { Input } from '../../components/common/Input';
-import { useColors, useTheme } from '../../../state/ThemeContext';
+import { useColors } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
 
 export const NewPasswordScreen: React.FC = () => {
@@ -32,9 +32,11 @@ export const NewPasswordScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isWide = width >= 768;
-  const C = useColors();
-  const { isDark } = useTheme();
-  const rootBg = isDark ? '#0F0B1A' : '#EDE9FE';
+  // Si la pantalla viene de Perfil usa el tema/acento del usuario; si viene del flujo de
+  // recuperación desde Login usa paleta fija morada/clara para mantener el branding del flujo.
+  const themedC = useColors();
+  const C = fromProfile ? themedC : Colors;
+  const rootBg = C.background;
   const { t } = useTranslation();
 
   const handleConfirm = () => {
@@ -63,10 +65,10 @@ export const NewPasswordScreen: React.FC = () => {
   const Logo = (
     <>
       <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
-        <Ionicons name="chevron-back" size={22} color={Colors.primary} />
+        <Ionicons name="chevron-back" size={22} color={C.primary} />
       </TouchableOpacity>
       <View style={styles.logoCorner}>
-        <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.logoBox}>
+        <LinearGradient colors={[C.primaryLight, C.primary]} style={styles.logoBox}>
           <Text style={styles.logoEmoji}>👌</Text>
         </LinearGradient>
         <Text style={[styles.brandName, { color: C.textPrimary }]}>TraduceSeña</Text>
@@ -83,7 +85,7 @@ export const NewPasswordScreen: React.FC = () => {
       bounces={false}
     >
       <View style={styles.formInner}>
-      <View style={[styles.card, { backgroundColor: C.surface }]}>
+      <View style={[styles.card, { backgroundColor: C.primaryBg, shadowColor: C.primary }]}>
         <Text style={[styles.title, { color: C.textPrimary }]}>{t('newPasswordTitle')}</Text>
 
         <Input
@@ -93,7 +95,7 @@ export const NewPasswordScreen: React.FC = () => {
           onChangeText={v => { setPassword(v); setErrors(prev => ({ ...prev, password: undefined })); }}
           isPassword
           leftIcon="lock-closed-outline"
-          accentColor={Colors.primary}
+          accentColor={C.primary}
           hint={t('newPasswordHint')}
           error={errors.password}
           containerStyle={styles.inputSpacing}
@@ -106,14 +108,14 @@ export const NewPasswordScreen: React.FC = () => {
           onChangeText={v => { setConfirm(v); setErrors(prev => ({ ...prev, confirm: undefined })); }}
           isPassword
           leftIcon="lock-closed-outline"
-          accentColor={Colors.primary}
+          accentColor={C.primary}
           error={errors.confirm}
           containerStyle={styles.inputSpacing}
         />
 
         <View style={styles.btnWrapper}>
           <TouchableOpacity
-            style={[styles.submitBtn, loading && styles.btnDisabled]}
+            style={[styles.submitBtn, { backgroundColor: C.primary }, loading && styles.btnDisabled]}
             onPress={handleConfirm}
             disabled={loading}
           >

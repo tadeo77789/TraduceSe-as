@@ -68,51 +68,75 @@ function InputBase({ // Define el componente funcional interno InputBase (se exp
   return ( // Retorna el árbol JSX del componente Input
     <View style={[styles.container, containerStyle]}>{/* Contenedor externo: aplica marginBottom base y estilos personalizados opcionales */}
       {label && <Text style={[styles.label, { color: C.textSecondary }]}>{label}</Text>}{/* Muestra la etiqueta encima del campo solo si la prop label existe; usa color secundario del tema actual */}
-      <View // Contenedor del campo de texto con íconos
-        style={[ // Combina estilos condicionalmente
-          styles.inputWrapper, // Estilo base: fila horizontal, centrado, fondo, borde y overflow
-          { height: sizeTokens.height, backgroundColor: C.inputBg }, // Altura según tamaño y color de fondo del tema
-          focused && [styles.inputFocused, { backgroundColor: C.surface, borderColor: accent, shadowColor: accent }],
-          error ? styles.inputError : null, // Si hay error: aplica borde rojo y fondo rosado claro
-        ]}
-      >{/* Cierra apertura del View wrapper del input */}
-        {leftIcon && ( // Renderiza el ícono izquierdo solo si la prop leftIcon existe
-          <Ionicons
-            name={leftIcon} // Nombre del ícono Ionicons a renderizar (ej: 'person-outline', 'mail-outline')
-            size={18} // Tamaño del ícono: 18px
-            color={focused ? accent : C.textSecondary}
-            style={styles.leftIcon} // Aplica margen izquierdo y centrado vertical al ícono
-          />
-        )}{/* Cierra bloque condicional del leftIcon */}
-        <TextInput
-          style={[ // Combina estilos del campo de texto
-            styles.input, // Estilo base: flex 1, stretch vertical, fontSize 15
-            { paddingHorizontal: sizeTokens.paddingHorizontal, color: C.textPrimary }, // Padding horizontal según tamaño y color de texto del tema
-            leftIcon ? styles.inputWithLeft : null, // Si hay ícono izquierdo: agrega paddingLeft extra para no solaparse con el ícono
-          ]}
-          placeholderTextColor={C.textHint} // Color del placeholder: tono gris suave del tema para no confundirse con texto real
-          secureTextEntry={isPassword && !showPassword} // Oculta el texto como puntos si isPassword=true Y showPassword=false
-          autoCapitalize="none" // Desactiva la capitalización automática (importante para emails y contraseñas)
-          textAlignVertical="center" // Centra el texto verticalmente dentro del campo (especialmente en Android)
-          onFocus={() => setFocused(true)} // Cuando el campo recibe foco: activa el estado focused para cambiar estilos
-          onBlur={() => setFocused(false)} // Cuando el campo pierde el foco: desactiva el estado focused
-          {...props} // Pasa todas las props restantes de TextInput (placeholder, value, onChangeText, keyboardType, etc.)
-        />{/* Cierra TextInput */}
-        {isPassword && ( // Renderiza el toggle de visibilidad solo si isPassword=true
-          <TouchableOpacity onPress={() => setShowPassword(v => !v)} style={styles.rightIcon}>{/* Botón táctil: alterna showPassword entre true/false al presionar; usa padding estilo rightIcon */}
+      <View style={styles.fieldRow}>{/* Fila que agrupa el ícono izquierdo (caja externa) y el wrapper del input como elementos hermanos */}
+        {leftIcon && ( // Renderiza el ícono izquierdo como una caja independiente fuera del input
+          <View
+            style={[
+              styles.leftIconBox, // Caja base: dimensiones, bordes, fondo y centrado
+              { height: sizeTokens.height, width: sizeTokens.height, backgroundColor: C.inputBg }, // Cuadrada del mismo alto que el input y fondo del tema
+              focused && [styles.leftIconBoxFocused, { backgroundColor: C.surface, borderColor: accent, shadowColor: accent }], // Resalta la caja del ícono cuando el input está enfocado
+              error ? styles.leftIconBoxError : null, // Si hay error: aplica borde rojo a la caja del ícono también
+            ]}
+          >
             <Ionicons
-              name={showPassword ? 'eye-off-outline' : 'eye-outline'} // Ícono dinámico: ojo cerrado si showPassword=true (contraseña visible), ojo abierto si showPassword=false
-              size={20} // Tamaño del ícono de visibilidad: 20px
-              color={focused ? accent : C.textSecondary}
+              name={leftIcon} // Nombre del ícono Ionicons a renderizar (ej: 'person-outline', 'mail-outline', 'lock-closed-outline')
+              size={20} // Tamaño del ícono: 20px (un poco mayor porque ocupa todo el cuadro)
+              color={focused ? accent : C.textSecondary} // Toma el color de acento al enfocar; secundario en reposo
             />
-          </TouchableOpacity> // Cierra TouchableOpacity del toggle de contraseña
-        )}{/* Cierra bloque condicional de isPassword */}
-        {rightIcon && !isPassword && ( // Renderiza el ícono derecho personalizado solo si rightIcon existe Y no es campo de contraseña (evita conflicto con el toggle)
-          <TouchableOpacity onPress={onRightIconPress} style={styles.rightIcon}>{/* Botón táctil: ejecuta onRightIconPress al presionar; usa padding estilo rightIcon */}
-            <Ionicons name={rightIcon} size={20} color={C.textSecondary} />{/* Muestra el ícono derecho personalizado en color secundario del tema */}
-          </TouchableOpacity> // Cierra TouchableOpacity del rightIcon personalizado
-        )}{/* Cierra bloque condicional de rightIcon */}
-      </View>{/* Cierra View wrapper del input */}
+          </View>
+        )}{/* Cierra bloque condicional del leftIcon externo */}
+        <View // Contenedor del campo de texto con ícono derecho
+          style={[ // Combina estilos condicionalmente
+            styles.inputWrapper, // Estilo base: fila horizontal, centrado, fondo, borde y overflow
+            { height: sizeTokens.height, backgroundColor: C.inputBg }, // Altura según tamaño y color de fondo del tema
+            { flex: 1 }, // Ocupa el espacio restante de la fila después de la caja del ícono externo
+            leftIcon ? styles.inputWrapperAttached : null, // Si hay ícono externo: pega el wrapper al ícono (sin redondeo izquierdo y sin borde izquierdo) para formar una sola barra
+            focused && [styles.inputFocused, { backgroundColor: C.surface, borderColor: accent, shadowColor: accent }],
+            error ? styles.inputError : null, // Si hay error: aplica borde rojo y fondo rosado claro
+          ]}
+        >{/* Cierra apertura del View wrapper del input */}
+          <TextInput
+            style={[ // Combina estilos del campo de texto
+              styles.input, // Estilo base: flex 1, stretch vertical, fontSize 15
+              { paddingHorizontal: sizeTokens.paddingHorizontal, color: C.textPrimary }, // Padding horizontal según tamaño y color de texto del tema
+              (isPassword || rightIcon) ? styles.inputWithRight : null, // Si hay ícono derecho (toggle de contraseña o personalizado): agrega paddingRight extra para que el texto no quede pegado al ícono
+            ]}
+            placeholderTextColor={C.textHint} // Color del placeholder: tono gris suave del tema para no confundirse con texto real
+            secureTextEntry={isPassword && !showPassword} // Oculta el texto como puntos si isPassword=true Y showPassword=false
+            autoCapitalize="none" // Desactiva la capitalización automática (importante para emails y contraseñas)
+            textAlignVertical="center" // Centra el texto verticalmente dentro del campo (especialmente en Android)
+            onFocus={() => setFocused(true)} // Cuando el campo recibe foco: activa el estado focused para cambiar estilos
+            onBlur={() => setFocused(false)} // Cuando el campo pierde el foco: desactiva el estado focused
+            {...props} // Pasa todas las props restantes de TextInput (placeholder, value, onChangeText, keyboardType, etc.)
+          />{/* Cierra TextInput */}
+          {isPassword && ( // Renderiza el ojo: como botón si el campo es editable, decorativo si no
+            props.editable === false ? (
+              <View style={styles.rightIcon} pointerEvents="none">
+                <Ionicons name="eye-outline" size={20} color={C.textSecondary} />
+              </View>
+            ) : (
+              <TouchableOpacity onPress={() => setShowPassword(v => !v)} style={styles.rightIcon}>
+                <Ionicons
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color={focused ? accent : C.textSecondary}
+                />
+              </TouchableOpacity>
+            )
+          )}{/* Cierra bloque condicional de isPassword */}
+          {rightIcon && !isPassword && ( // Renderiza el ícono derecho personalizado solo si rightIcon existe Y no es campo de contraseña (evita conflicto con el toggle)
+            onRightIconPress ? (
+              <TouchableOpacity onPress={onRightIconPress} style={styles.rightIcon}>
+                <Ionicons name={rightIcon} size={20} color={C.textSecondary} />
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.rightIcon} pointerEvents="none">
+                <Ionicons name={rightIcon} size={20} color={C.textSecondary} />
+              </View>
+            )
+          )}{/* Cierra bloque condicional de rightIcon */}
+        </View>{/* Cierra View wrapper del input */}
+      </View>{/* Cierra fieldRow */}
       {hint && !error && <Text style={styles.hint}>{hint}</Text>}{/* Muestra el texto de ayuda solo si hint existe Y no hay error (el error tiene prioridad visual) */}
       {error && <Text style={styles.errorText}>{error}</Text>}{/* Muestra el mensaje de error debajo del campo solo si error existe */}
     </View> // Cierra View contenedor principal del componente
@@ -130,15 +154,47 @@ const styles = StyleSheet.create({ // Crea la hoja de estilos optimizada nativa 
     color: Colors.textSecondary, // Línea 127 — color de texto secundario (gris) como fallback estático
     marginBottom: 6, // Línea 128 — separa la etiqueta del campo con 6px de margen inferior
   }, // Cierra estilo label
-  inputWrapper: { // Estilo del contenedor que agrupa ícono izquierdo + TextInput + ícono derecho
-    flexDirection: 'row', // Línea 131 — dispone los hijos en fila horizontal (ícono-input-ícono)
-    alignItems: 'stretch', // Línea 132 — los hijos se estiran para ocupar toda la altura del contenedor
-    backgroundColor: Colors.inputBg, // Línea 133 — fondo gris muy claro como valor estático fallback
-    borderRadius: BorderRadius.md, // Línea 134 — esquinas redondeadas medianas del design system
-    borderWidth: BorderWidth.medium, // Línea 135 — borde mediano del design system (normalmente 1.5px)
-    borderColor: 'transparent', // Línea 136 — borde transparente por defecto (se colorea al enfocar o al haber error)
-    overflow: 'hidden', // Línea 137 — recorta el contenido que sobresalga del borderRadius
+  fieldRow: { // Fila externa que agrupa la caja del ícono izquierdo y el wrapper del input pegados como una sola barra
+    flexDirection: 'row', // Coloca el ícono y el wrapper como columnas en una sola fila
+    alignItems: 'stretch', // Que ambos elementos compartan la misma altura
+  }, // Cierra estilo fieldRow
+  leftIconBox: { // Caja del ícono izquierdo: zona visual del ícono pegada al input (juntos forman una sola barra)
+    alignItems: 'center', // Centra el ícono horizontalmente dentro del cuadrado
+    justifyContent: 'center', // Centra el ícono verticalmente dentro del cuadrado
+    borderTopLeftRadius: BorderRadius.md, // Esquina superior izquierda redondeada (extremo izquierdo de la barra)
+    borderBottomLeftRadius: BorderRadius.md, // Esquina inferior izquierda redondeada (extremo izquierdo de la barra)
+    borderTopRightRadius: 0, // Lado derecho sin redondear: queda plano contra el input para verse continuo
+    borderBottomRightRadius: 0, // Lado derecho sin redondear: queda plano contra el input para verse continuo
+    borderWidth: BorderWidth.medium, // Mismo grosor de borde que el input para mantener coherencia visual
+    borderColor: 'transparent', // Borde transparente por defecto (se colorea al enfocar el input o al haber error)
+  }, // Cierra estilo leftIconBox
+  leftIconBoxFocused: { // Estilos adicionales aplicados a la caja del ícono cuando el input está enfocado
+    borderColor: Colors.primary, // Borde morado para acompañar al input enfocado
+    backgroundColor: '#fff', // Fondo blanco igual al input enfocado
+    shadowColor: Colors.primary, // Sombra morada para reforzar el efecto de foco
+    shadowOffset: { width: 0, height: 0 }, // Sombra sin desplazamiento (glow perimetral)
+    shadowOpacity: 0.15, // Opacidad sutil al 15%
+    shadowRadius: 6, // Difusión de 6px
+    elevation: 2, // Elevación equivalente en Android
+  }, // Cierra estilo leftIconBoxFocused
+  leftIconBoxError: { // Estilos adicionales aplicados a la caja del ícono cuando hay un error en el input
+    borderColor: Colors.error, // Borde rojo para acompañar el estado de error del input
+    backgroundColor: '#FFF5F5', // Fondo rosado muy claro igual al input en error
+  }, // Cierra estilo leftIconBoxError
+  inputWrapper: { // Estilo del contenedor que agrupa el TextInput y el ícono derecho (el izquierdo ahora va afuera)
+    flexDirection: 'row', // Dispone los hijos en fila horizontal (input-ícono derecho)
+    alignItems: 'stretch', // Los hijos se estiran para ocupar toda la altura del contenedor
+    backgroundColor: Colors.inputBg, // Fondo gris muy claro como valor estático fallback
+    borderRadius: BorderRadius.md, // Esquinas redondeadas medianas del design system
+    borderWidth: BorderWidth.medium, // Borde mediano del design system (normalmente 1.5px)
+    borderColor: 'transparent', // Borde transparente por defecto (se colorea al enfocar o al haber error)
+    overflow: 'hidden', // Recorta el contenido que sobresalga del borderRadius
   }, // Cierra estilo inputWrapper
+  inputWrapperAttached: { // Variante aplicada cuando hay ícono externo a la izquierda: el wrapper queda pegado a la caja del ícono formando una sola barra
+    borderTopLeftRadius: 0, // Sin redondeo en la esquina superior izquierda para que se funda con el ícono
+    borderBottomLeftRadius: 0, // Sin redondeo en la esquina inferior izquierda para que se funda con el ícono
+    borderLeftWidth: 0, // Sin borde izquierdo: evita el "doble borde" en el punto de unión con el ícono (el borde derecho del ícono actúa como divisor)
+  }, // Cierra estilo inputWrapperAttached
   inputFocused: { // Estilo adicional aplicado cuando el campo tiene el foco activo
     borderColor: Colors.primary, // Línea 140 — borde se vuelve púrpura al enfocar para indicar campo activo
     backgroundColor: '#fff', // Línea 141 — fondo blanco puro al enfocar para mejor legibilidad
@@ -159,13 +215,9 @@ const styles = StyleSheet.create({ // Crea la hoja de estilos optimizada nativa 
     fontSize: 15, // Línea 156 — tamaño de fuente 15px para el texto ingresado
     color: Colors.textPrimary, // Línea 157 — color de texto primario como fallback estático
   }, // Cierra estilo input
-  inputWithLeft: { // Estilo adicional aplicado al TextInput cuando hay ícono izquierdo
-    paddingLeft: 6, // Línea 160 — agrega 6px de padding izquierdo extra para separar el texto del ícono izquierdo
-  }, // Cierra estilo inputWithLeft
-  leftIcon: { // Estilo del ícono izquierdo dentro del campo
-    marginLeft: 14, // Línea 163 — margen izquierdo de 14px para separar el ícono del borde del contenedor
-    alignSelf: 'center', // Línea 164 — centra verticalmente el ícono respecto al campo
-  }, // Cierra estilo leftIcon
+  inputWithRight: { // Estilo adicional aplicado al TextInput cuando hay ícono derecho (contraseña o personalizado)
+    paddingRight: 12, // Agrega 12px de padding derecho extra para que el texto/cursor no quede pegado al ícono ni al borde activo (focused)
+  }, // Cierra estilo inputWithRight
   rightIcon: { // Estilo del botón/ícono derecho (tanto el toggle de contraseña como rightIcon personalizado)
     paddingHorizontal: 12, // Línea 167 — padding horizontal de 12px para agrandar el área táctil
     alignSelf: 'center', // Línea 168 — centra verticalmente el ícono respecto al campo

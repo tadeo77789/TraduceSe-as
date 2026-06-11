@@ -31,6 +31,7 @@ export function useLoginForm() {
     if (!email) e.email = t('loginEmailRequired');
     else if (!/\S+@\S+\.\S+/.test(email)) e.email = t('loginEmailInvalid');
     if (!password) e.password = t('loginPasswordRequired');
+    else if (password.length < 8) e.password = t('registerPasswordShort');
     setErrors(e);
     return Object.keys(e).length === 0;
   }, [email, password, t]);

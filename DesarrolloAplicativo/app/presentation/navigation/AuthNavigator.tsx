@@ -22,6 +22,8 @@ import { RegisterScreen } from '../screens/Auth/RegisterScreen'; // Importa la p
 import { ForgotPasswordScreen } from '../screens/Auth/ForgotPasswordScreen'; // Importa la pantalla donde el usuario ingresa su correo para recuperar contraseña — fuente: app/presentation/screens/Auth/ForgotPasswordScreen.tsx
 import { VerifyCodeScreen } from '../screens/Auth/VerifyCodeScreen'; // Importa la pantalla de verificación del código OTP de 6 dígitos enviado al correo — fuente: app/presentation/screens/Auth/VerifyCodeScreen.tsx
 import { NewPasswordScreen } from '../screens/Auth/NewPasswordScreen'; // Importa la pantalla donde el usuario establece su nueva contraseña tras verificar el OTP — fuente: app/presentation/screens/Auth/NewPasswordScreen.tsx
+import { TermsScreen } from '../screens/Profile/TermsScreen';
+import { PrivacyPolicyScreen } from '../screens/Profile/PrivacyPolicyScreen';
 
 export type AuthStackParams = { // Define y exporta el tipo TypeScript que mapea cada ruta del stack con sus parámetros esperados
   Landing: undefined; // Ruta 'Landing' no recibe parámetros de navegación
@@ -30,6 +32,8 @@ export type AuthStackParams = { // Define y exporta el tipo TypeScript que mapea
   ForgotPassword: { fromProfile?: boolean } | undefined;
   VerifyCode: { fromProfile?: boolean } | undefined;
   NewPassword: { fromProfile?: boolean } | undefined;
+  Terms: undefined;
+  PrivacyPolicy: undefined;
 }; // Cierra la definición del tipo AuthStackParams
 
 const Stack = createNativeStackNavigator<AuthStackParams>(); // Crea la instancia del stack navigator tipada con AuthStackParams; expone Stack.Navigator y Stack.Screen
@@ -42,5 +46,7 @@ export const AuthNavigator: React.FC = () => ( // Define y exporta el componente
     <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     <Stack.Screen name="VerifyCode" component={VerifyCodeScreen} />
     <Stack.Screen name="NewPassword" component={NewPasswordScreen} />
+    <Stack.Screen name="Terms" component={TermsScreen} />
+    <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
   </Stack.Navigator>
 ); // Cierra el retorno implícito y la definición del componente AuthNavigator
