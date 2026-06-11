@@ -55,6 +55,31 @@ export interface Traduccion {
   is_deleted: boolean;
 }
 
+// ─── Agente de reconocimiento de señas ───────────────────────────────────────
+export type SignAgentStatus =
+  | 'idle'
+  | 'starting'
+  | 'detecting'
+  | 'low_confidence'
+  | 'no_hands'
+  | 'error';
+
+export interface SignDetectionResult {
+  /** Texto reconocido (letra, palabra o frase). Vacío si no hay detección. */
+  text: string;
+  /** Confianza 0..1 reportada por el modelo. */
+  confidence: number;
+  /** Estado interpretable del frame. */
+  status: SignAgentStatus;
+  /** Marca temporal ISO del frame analizado. */
+  timestamp: string;
+  /** Vector normalizado de 63 features (21 puntos × xyz) cuando hay mano. */
+  features?: number[];
+  /** Origen del resultado: KNN entrenado, geométrico de respaldo, o
+   *  clasificador de movimiento (señas dinámicas y palabras entrenadas). */
+  source?: 'knn' | 'geometric' | 'mock' | 'motion';
+}
+
 // ─── Léxico ──────────────────────────────────────────────────────────────────
 export type TipoLexico = 'letra' | 'numero' | 'palabra' | 'frase';
 

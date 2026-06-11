@@ -20,17 +20,21 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../constants/colors';
 import { useColors } from '../../../state/ThemeContext';
 import { useTranslation } from '../../../i18n';
+import { useAuth } from '../../../state/AuthContext';
+import { isAdmin } from '../../../utils/adminAccess';
 
 export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route }) => {
   const currentTab = route.name;
   const C = useColors();
   const { t } = useTranslation();
+  const { user } = useAuth();
 
   const TAB_ITEMS: { name: string; label: string; icon: string; iconActive: string }[] = [
     { name: 'Translation', label: t('tabTranslation'), icon: 'language-outline',  iconActive: 'language'  },
     { name: 'Alphabet',    label: t('tabAlphabet'),    icon: 'hand-left-outline',  iconActive: 'hand-left' },
     { name: 'Stats',       label: t('tabStats'),       icon: 'bar-chart-outline',  iconActive: 'bar-chart' },
     { name: 'History',     label: t('tabHistory'),     icon: 'time-outline',       iconActive: 'time'      },
+    ...(isAdmin(user) ? [{ name: 'Admin', label: t('tabAdmin'), icon: 'shield-outline', iconActive: 'shield' }] : []),
   ];
 
   const goTo = (name: string) => navigation.navigate(name);
