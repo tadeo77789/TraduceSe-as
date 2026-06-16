@@ -399,7 +399,6 @@ Todas las pantallas de la app usan `useTranslation()`:
 | NewPasswordScreen | ✅ |
 | TranslationScreen | ✅ |
 | AlphabetScreen | ✅ |
-| AlarmsScreen | ✅ |
 | HistoryScreen | ✅ |
 | StatsScreen | ✅ |
 | ProfileScreen | ✅ |

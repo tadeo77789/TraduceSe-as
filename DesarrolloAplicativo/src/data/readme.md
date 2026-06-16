@@ -12,7 +12,6 @@ Esta capa abstrae el origen de los datos. Las pantallas y casos de uso no necesi
 |---|---|
 | `api/translationApi.ts` | Funciones para enviar texto/audio/imágenes al backend y recibir la traducción |
 | `api/authApi.ts` | Peticiones HTTP de login, registro y recuperación de contraseña |
-| `api/alarmApi.ts` | CRUD de alarmas contra el backend |
 | `api/lexiconApi.ts` | Búsqueda de palabras y señas en el catálogo LSC |
 | `api/statsApi.ts` | Obtención de datos de estadísticas de uso |
 | `local/storageService.ts` | Acceso a `AsyncStorage` para guardar token, preferencias y caché |

@@ -12,7 +12,6 @@ Esta capa actúa como intermediaria entre la capa de presentación (pantallas) y
 |---|---|
 | `TranslationUseCase.ts` | Lógica para procesar los tres modos de traducción: seña→texto, texto→seña, voz→seña |
 | `AuthUseCase.ts` | Reglas de registro, inicio de sesión, logout y recuperación de contraseña |
-| `AlarmUseCase.ts` | Crear, activar, desactivar y eliminar alarmas visuales para usuarios sordos |
 | `LexiconUseCase.ts` | Búsqueda y consulta del léxico de la Lengua de Señas Colombiana |
 | `StatsUseCase.ts` | Cálculo y agregación de estadísticas de uso por usuario |
 | `ProfileUseCase.ts` | Actualización de perfil, cambio de tema e idioma con soporte de deshacer (patrón Command) |
