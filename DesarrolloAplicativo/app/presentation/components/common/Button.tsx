@@ -27,9 +27,9 @@ import {
   TextStyle, // Importa TextStyle: tipo TypeScript para estilos de componentes Text — de 'react-native'
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient'; // Importa LinearGradient: componente que dibuja un degradado lineal de colores — de 'expo-linear-gradient'
-import { Colors } from '../../../constants/colors'; // Importa Colors: paleta de colores centralizada del design system — de app/constants/colors.ts
-import { useColors } from '../../../state/ThemeContext'; // Importa useColors: hook que retorna los colores del tema activo (claro/oscuro + acento) — de app/state/ThemeContext.tsx
-import { BorderRadius, ComponentSizes, FontWeight, Shadows } from '../../../constants/theme'; // Importa tokens de diseño: BorderRadius (radios de borde), ComponentSizes (alturas y paddings), FontWeight (pesos de fuente), Shadows (sombras) — de app/constants/theme.ts
+import { Colors } from '../../../shared/constants/colors'; // Importa Colors: paleta de colores centralizada del design system — de app/constants/colors.ts
+import { useColors } from '../../../shared/state/ThemeContext'; // Importa useColors: hook que retorna los colores del tema activo (claro/oscuro + acento) — de app/state/ThemeContext.tsx
+import { BorderRadius, ComponentSizes, FontWeight, Shadows } from '../../../shared/constants/theme'; // Importa tokens de diseño: BorderRadius (radios de borde), ComponentSizes (alturas y paddings), FontWeight (pesos de fuente), Shadows (sombras) — de app/constants/theme.ts
 
 interface ButtonProps { // Define la interfaz TypeScript con todas las props que acepta el botón — inicio del bloque de tipos
   title: string; // title: texto visible en el botón — tipo string, obligatorio

@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
-import { useColors } from '../../../state/ThemeContext';
+import { useColors } from '../../../shared/state/ThemeContext';
 
 type Variant = 'flat' | 'elevated';
 

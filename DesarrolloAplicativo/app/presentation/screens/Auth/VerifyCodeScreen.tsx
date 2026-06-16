@@ -21,9 +21,9 @@ import { AuthStackParams } from '../../navigation/AuthNavigator';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors } from '../../../constants/colors';
-import { useColors } from '../../../state/ThemeContext';
-import { useTranslation } from '../../../i18n';
+import { Colors } from '../../../shared/constants/colors';
+import { useColors } from '../../../shared/state/ThemeContext';
+import { useTranslation } from '../../../shared/i18n';
 
 const CODE_LENGTH = 6;
   

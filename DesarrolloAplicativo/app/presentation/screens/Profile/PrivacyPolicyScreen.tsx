@@ -6,8 +6,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useColors } from '../../../state/ThemeContext';
-import { useTranslation, type TranslationKey } from '../../../i18n';
+import { useColors } from '../../../shared/state/ThemeContext';
+import { useTranslation, type TranslationKey } from '../../../shared/i18n';
 
 const SECTION_KEYS: { title: TranslationKey; body: TranslationKey }[] = [
   { title: 'privacySection1Title',  body: 'privacySection1Body'  },

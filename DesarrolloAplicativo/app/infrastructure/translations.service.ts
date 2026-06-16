@@ -10,8 +10,8 @@
  *                   'geometric', opcional)
  */
 import { api, getCurrentUserId } from './api.service';
-import { ENDPOINTS } from '../config/api.config';
-import type { TipoTraduccion } from '../types';
+import { ENDPOINTS } from '../shared/config/api.config';
+import type { TipoTraduccion } from '../shared/types';
 
 export interface SaveTranslationInput {
   inputText: string;

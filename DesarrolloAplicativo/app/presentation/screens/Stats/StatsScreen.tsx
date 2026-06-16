@@ -12,9 +12,9 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import { AppHeader } from '../../components/common/AppHeader';
-import { Colors } from '../../../constants/colors';
-import { useColors, useTheme } from '../../../state/ThemeContext';
-import { useTranslation } from '../../../i18n';
+import { Colors } from '../../../shared/constants/colors';
+import { useColors, useTheme } from '../../../shared/state/ThemeContext';
+import { useTranslation } from '../../../shared/i18n';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 

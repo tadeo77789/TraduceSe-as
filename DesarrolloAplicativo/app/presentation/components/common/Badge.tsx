@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle, StyleProp } from 'react-native';
-import { useColors } from '../../../state/ThemeContext';
+import { useColors } from '../../../shared/state/ThemeContext';
 
 interface BadgeProps {
   label: string;

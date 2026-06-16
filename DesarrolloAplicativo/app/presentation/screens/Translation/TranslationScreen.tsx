@@ -16,12 +16,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { AppHeader } from '../../components/common/AppHeader';
-import { Colors } from '../../../constants/colors';
-import { useColors } from '../../../state/ThemeContext';
-import { useTranslation } from '../../../i18n';
-import { useSignAgent } from '../../../hooks/useSignAgent';
-import { translationsService } from '../../../services/translations.service';
-import type { SignAgentStatus } from '../../../types';
+import { Colors } from '../../../shared/constants/colors';
+import { useColors } from '../../../shared/state/ThemeContext';
+import { useTranslation } from '../../../shared/i18n';
+import { useSignAgent } from '../../../shared/hooks/useSignAgent';
+import { translationsService } from '../../../infrastructure/translations.service';
+import type { SignAgentStatus } from '../../../shared/types';
 
 type Mode = 'sena_texto' | 'texto_sena';
 

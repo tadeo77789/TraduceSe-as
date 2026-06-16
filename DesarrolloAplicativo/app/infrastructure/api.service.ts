@@ -8,8 +8,8 @@
  */
 import axios, { AxiosInstance } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL, API_TIMEOUT } from '../config/api.config';
-import type { User } from '../types';
+import { API_BASE_URL, API_TIMEOUT } from '../shared/config/api.config';
+import type { User } from '../shared/types';
 
 export const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,

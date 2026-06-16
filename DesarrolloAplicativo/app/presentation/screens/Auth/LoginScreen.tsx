@@ -27,12 +27,12 @@ import {
 import { useNavigation } from '@react-navigation/native'; // Hook para acceder al objeto de navegación entre pantallas
 import { useSafeAreaInsets } from 'react-native-safe-area-context'; // Hook que devuelve los insets del área segura (notch, barra de estado)
 import { Ionicons } from '@expo/vector-icons'; // Librería de iconos vectoriales de Expo
-import { Colors } from '../../../constants/colors'; // Paleta de colores centralizada — ruta: app/constants/colors.ts
+import { Colors } from '../../../shared/constants/colors'; // Paleta de colores centralizada — ruta: app/constants/colors.ts
 import { Input } from '../../components/common/Input'; // Componente reutilizable de campo de texto con íconos y errores — ruta: app/presentation/components/common/Input.tsx
-import { useLoginForm } from '../../../hooks/useLoginForm'; // Hook personalizado con la lógica del formulario de login (estado, validación, submit) — ruta: app/hooks/useLoginForm.ts
+import { useLoginForm } from '../../../shared/hooks/useLoginForm'; // Hook personalizado con la lógica del formulario de login (estado, validación, submit) — ruta: app/hooks/useLoginForm.ts
 import { googleIcon, facebookIcon } from '../../../assets/icons/socialIcons'; // Logos de Google y Facebook como ImageSourcePropType — para cambiarlos editar app/assets/icons/socialIcons.ts
-import { useTranslation } from '../../../i18n';
-import { useColors } from '../../../state/ThemeContext';
+import { useTranslation } from '../../../shared/i18n';
+import { useColors } from '../../../shared/state/ThemeContext';
 
 
 export const LoginScreen: React.FC = () => { // Declara y exporta el componente funcional LoginScreen tipado como React.FC

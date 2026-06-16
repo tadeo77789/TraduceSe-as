@@ -4,7 +4,7 @@
  * Esta interfaz permite intercambiar la implementación (mock, Claude Vision,
  * TFLite local, etc.) sin tocar la pantalla de traducción.
  */
-import type { SignDetectionResult } from '../../types';
+import type { SignDetectionResult } from '../../shared/types';
 
 export interface VisionFrame {
   /** Imagen base64 sin prefijo data: (jpeg recomendado). */

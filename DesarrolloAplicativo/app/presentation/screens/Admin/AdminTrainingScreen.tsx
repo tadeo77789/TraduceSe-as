@@ -17,9 +17,9 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppHeader } from '../../components/common/AppHeader';
-import { useColors } from '../../../state/ThemeContext';
-import { useTranslation } from '../../../i18n';
-import { useSignAgent } from '../../../hooks/useSignAgent';
+import { useColors } from '../../../shared/state/ThemeContext';
+import { useTranslation } from '../../../shared/i18n';
+import { useSignAgent } from '../../../shared/hooks/useSignAgent';
 import {
   recordSample,
   getSampleCounts,
@@ -28,8 +28,8 @@ import {
   recordGesture,
   getGestureCounts,
   clearGestureLabel,
-} from '../../../services/vision';
-import { showInfo, showError, showConfirm } from '../../../utils/dialogs';
+} from '../../../infrastructure/vision';
+import { showInfo, showError, showConfirm } from '../../../shared/utils/dialogs';
 import type { AdminStackParams } from '../../navigation/AdminStackNavigator';
 
 type Nav = NativeStackNavigationProp<AdminStackParams, 'Training'>;

@@ -20,11 +20,11 @@ import { HistoryScreen } from '../screens/History/HistoryScreen'; // Importa la 
 import { ProfileStackNavigator } from './ProfileStackNavigator'; // Importa el stack anidado del tab de perfil (contiene ProfileScreen) — fuente: app/presentation/navigation/ProfileStackNavigator.tsx
 import { AdminStackNavigator } from './AdminStackNavigator';
 import { WebTopBar } from '../components/common/WebTopBar'; // Importa la barra de navegación superior usada en web en lugar de la barra de tabs inferior — fuente: app/presentation/components/common/WebTopBar.tsx
-import { Colors } from '../../constants/colors'; // Importa la paleta de colores estáticos de la app — fuente: app/constants/colors.ts
-import { useColors } from '../../state/ThemeContext'; // Importa el hook que provee los colores reactivos según el tema (claro/oscuro) activo — fuente: app/state/ThemeContext.tsx
-import { useTranslation } from '../../i18n';
-import { useAuth } from '../../state/AuthContext';
-import { isAdmin } from '../../utils/adminAccess';
+import { Colors } from '../../shared/constants/colors'; // Importa la paleta de colores estáticos de la app — fuente: app/constants/colors.ts
+import { useColors } from '../../shared/state/ThemeContext'; // Importa el hook que provee los colores reactivos según el tema (claro/oscuro) activo — fuente: app/state/ThemeContext.tsx
+import { useTranslation } from '../../shared/i18n';
+import { useAuth } from '../../shared/state/AuthContext';
+import { isAdmin } from '../../shared/utils/adminAccess';
 
 export type MainTabParams = { // Define y exporta el tipo TypeScript que mapea cada tab con sus parámetros esperados
   Translation: undefined; // Ruta 'Translation' no recibe parámetros de navegación

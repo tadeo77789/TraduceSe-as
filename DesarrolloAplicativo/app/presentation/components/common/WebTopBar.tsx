@@ -17,11 +17,11 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { BottomTabHeaderProps } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../../constants/colors';
-import { useColors } from '../../../state/ThemeContext';
-import { useTranslation } from '../../../i18n';
-import { useAuth } from '../../../state/AuthContext';
-import { isAdmin } from '../../../utils/adminAccess';
+import { Colors } from '../../../shared/constants/colors';
+import { useColors } from '../../../shared/state/ThemeContext';
+import { useTranslation } from '../../../shared/i18n';
+import { useAuth } from '../../../shared/state/AuthContext';
+import { isAdmin } from '../../../shared/utils/adminAccess';
 
 export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route }) => {
   const currentTab = route.name;

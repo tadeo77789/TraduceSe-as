@@ -16,7 +16,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CameraView } from 'expo-camera';
-import { signVisionProvider } from '../services/vision';
+import { signVisionProvider } from '../../infrastructure/vision';
 import type { SignDetectionResult, SignAgentStatus } from '../types';
 
 export interface UseSignAgentOptions {

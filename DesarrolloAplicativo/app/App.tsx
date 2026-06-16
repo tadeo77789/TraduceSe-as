@@ -3,9 +3,9 @@ import { StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { AuthProvider } from './state/AuthContext';
-import { ThemeProvider, useTheme } from './state/ThemeContext';
-import { LanguageProvider } from './state/LanguageContext';
+import { AuthProvider } from './shared/state/AuthContext';
+import { ThemeProvider, useTheme } from './shared/state/ThemeContext';
+import { LanguageProvider } from './shared/state/LanguageContext';
 import { AppNavigator } from './presentation/navigation/AppNavigator';
 
 function AppContent() {

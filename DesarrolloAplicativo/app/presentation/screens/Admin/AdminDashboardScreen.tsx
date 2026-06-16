@@ -14,18 +14,18 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { AppHeader } from '../../components/common/AppHeader';
-import { useColors } from '../../../state/ThemeContext';
-import { useTranslation } from '../../../i18n';
-import { useAuth } from '../../../state/AuthContext';
+import { useColors } from '../../../shared/state/ThemeContext';
+import { useTranslation } from '../../../shared/i18n';
+import { useAuth } from '../../../shared/state/AuthContext';
 import {
   getSampleCounts,
   signVisionProvider,
   exportTrainingJson,
   importTrainingJson,
-} from '../../../services/vision';
-import { useLanguage } from '../../../state/LanguageContext';
-import { downloadTextFile, pickTextFile, isFileIOSupported } from '../../../utils/fileIO';
-import { showSuccess, showError, showInfo, showChoice } from '../../../utils/dialogs';
+} from '../../../infrastructure/vision';
+import { useLanguage } from '../../../shared/state/LanguageContext';
+import { downloadTextFile, pickTextFile, isFileIOSupported } from '../../../shared/utils/fileIO';
+import { showSuccess, showError, showInfo, showChoice } from '../../../shared/utils/dialogs';
 import type { AdminStackParams } from '../../navigation/AdminStackNavigator';
 
 const ALPHABET_LSC = [

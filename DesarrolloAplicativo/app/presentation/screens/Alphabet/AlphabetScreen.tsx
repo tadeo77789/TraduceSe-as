@@ -40,9 +40,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Asset } from 'expo-asset';
 import { AppHeader } from '../../components/common/AppHeader';
-import { Colors } from '../../../constants/colors';
-import { useColors, useTheme } from '../../../state/ThemeContext';
-import { useTranslation, type TranslationKey } from '../../../i18n';
+import { Colors } from '../../../shared/constants/colors';
+import { useColors, useTheme } from '../../../shared/state/ThemeContext';
+import { useTranslation, type TranslationKey } from '../../../shared/i18n';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 interface LetterItem { letter: string; imageUrl: string }
