@@ -100,8 +100,8 @@ ios/
 .metro-health-check*
 
 # Caché de react-native-webview y otros módulos nativos
-DesarrolloAplicativo/app/android/
-DesarrolloAplicativo/app/ios/
+DesarrolloAplicativo/src/android/
+DesarrolloAplicativo/src/ios/
 
 # ─────────────────────────────────────────────
 # BUILD / COMPILADOS — archivos generados
