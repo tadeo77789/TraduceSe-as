@@ -8,9 +8,9 @@
  */
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ProfileScreen } from '../screens/Profile/ProfileScreen';
-import { TermsScreen } from '../screens/Profile/TermsScreen';
-import { PrivacyPolicyScreen } from '../screens/Profile/PrivacyPolicyScreen';
+import { ProfileScreen } from '../../feature/Profile/pages/ProfileScreen';
+import { TermsScreen } from '../../feature/Profile/pages/TermsScreen';
+import { PrivacyPolicyScreen } from '../../feature/Profile/pages/PrivacyPolicyScreen';
 
 export type ProfileStackParams = {
   ProfileMain: undefined;

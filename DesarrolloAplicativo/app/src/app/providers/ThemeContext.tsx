@@ -1,8 +1,8 @@
 // @ubicacion app/state/ThemeContext.tsx
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ThemeMode } from '../types';
-import { Colors, DarkColors, GreenColors, GreenDarkColors } from '../constants/colors';
+import { ThemeMode } from '../../shared/types';
+import { Colors, DarkColors, GreenColors, GreenDarkColors } from '../../shared/constants/colors';
 
 const THEME_STORAGE_KEY  = '@app_theme';
 const ACCENT_STORAGE_KEY = '@app_color_accent';

@@ -12,7 +12,7 @@
 import React from 'react'; // Importa React; necesario para usar JSX — fuente: node_modules/react
 import { ActivityIndicator, View, StyleSheet } from 'react-native'; // Importa componentes nativos: ActivityIndicator (spinner), View (contenedor), StyleSheet (estilos) — fuente: node_modules/react-native
 import { NavigationContainer } from '@react-navigation/native'; // Importa el contenedor raíz de navegación que envuelve toda la app — fuente: node_modules/@react-navigation/native
-import { useAuth } from '../../shared/state/AuthContext'; // Importa el hook de autenticación que provee isAuthenticated e isLoading — fuente: app/state/AuthContext.tsx
+import { useAuth } from '../providers/AuthContext'; // Importa el hook de autenticación que provee isAuthenticated e isLoading — fuente: app/state/AuthContext.tsx
 import { AuthNavigator } from './AuthNavigator'; // Importa el stack de navegación del flujo de autenticación (Login, Register, etc.) — fuente: app/presentation/navigation/AuthNavigator.tsx
 import { MainStackNavigator } from './MainStackNavigator'; // Importa el stack raíz para usuarios autenticados (tabs + flujo de contraseña) — fuente: app/presentation/navigation/MainStackNavigator.tsx
 import { Colors } from '../../shared/constants/colors'; // Importa la paleta de colores centralizada de la app — fuente: app/constants/colors.ts

@@ -6,8 +6,8 @@
  */
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { AdminDashboardScreen } from '../screens/Admin/AdminDashboardScreen';
-import { AdminTrainingScreen } from '../screens/Admin/AdminTrainingScreen';
+import { AdminDashboardScreen } from '../../feature/Admin/pages/AdminDashboardScreen';
+import { AdminTrainingScreen } from '../../feature/Admin/pages/AdminTrainingScreen';
 
 export type AdminStackParams = {
   Dashboard: undefined;

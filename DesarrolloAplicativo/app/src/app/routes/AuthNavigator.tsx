@@ -16,14 +16,14 @@
  */
 import React from 'react'; // Importa React; necesario para usar JSX — fuente: node_modules/react
 import { createNativeStackNavigator } from '@react-navigation/native-stack'; // Importa la función que crea un stack de navegación nativo con animaciones del SO — fuente: node_modules/@react-navigation/native-stack
-import { LandingScreen } from '../screens/LandingScreen'; // Importa la pantalla de bienvenida con slider y botones de CTA — fuente: app/presentation/screens/LandingScreen.tsx
-import { LoginScreen } from '../screens/Auth/LoginScreen'; // Importa la pantalla de inicio de sesión con formulario de email y contraseña — fuente: app/presentation/screens/Auth/LoginScreen.tsx
-import { RegisterScreen } from '../screens/Auth/RegisterScreen'; // Importa la pantalla de creación de cuenta nueva — fuente: app/presentation/screens/Auth/RegisterScreen.tsx
-import { ForgotPasswordScreen } from '../screens/Auth/ForgotPasswordScreen'; // Importa la pantalla donde el usuario ingresa su correo para recuperar contraseña — fuente: app/presentation/screens/Auth/ForgotPasswordScreen.tsx
-import { VerifyCodeScreen } from '../screens/Auth/VerifyCodeScreen'; // Importa la pantalla de verificación del código OTP de 6 dígitos enviado al correo — fuente: app/presentation/screens/Auth/VerifyCodeScreen.tsx
-import { NewPasswordScreen } from '../screens/Auth/NewPasswordScreen'; // Importa la pantalla donde el usuario establece su nueva contraseña tras verificar el OTP — fuente: app/presentation/screens/Auth/NewPasswordScreen.tsx
-import { TermsScreen } from '../screens/Profile/TermsScreen';
-import { PrivacyPolicyScreen } from '../screens/Profile/PrivacyPolicyScreen';
+import { LandingScreen } from '../../feature/homescreen/pages/LandingScreen'; // Importa la pantalla de bienvenida con slider y botones de CTA — fuente: app/presentation/screens/LandingScreen.tsx
+import { LoginScreen } from '../../feature/auth/pages/LoginScreen'; // Importa la pantalla de inicio de sesión con formulario de email y contraseña — fuente: app/presentation/screens/Auth/LoginScreen.tsx
+import { RegisterScreen } from '../../feature/auth/pages/RegisterScreen'; // Importa la pantalla de creación de cuenta nueva — fuente: app/presentation/screens/Auth/RegisterScreen.tsx
+import { ForgotPasswordScreen } from '../../feature/auth/pages/ForgotPasswordScreen'; // Importa la pantalla donde el usuario ingresa su correo para recuperar contraseña — fuente: app/presentation/screens/Auth/ForgotPasswordScreen.tsx
+import { VerifyCodeScreen } from '../../feature/auth/pages/VerifyCodeScreen'; // Importa la pantalla de verificación del código OTP de 6 dígitos enviado al correo — fuente: app/presentation/screens/Auth/VerifyCodeScreen.tsx
+import { NewPasswordScreen } from '../../feature/auth/pages/NewPasswordScreen'; // Importa la pantalla donde el usuario establece su nueva contraseña tras verificar el OTP — fuente: app/presentation/screens/Auth/NewPasswordScreen.tsx
+import { TermsScreen } from '../../feature/Profile/pages/TermsScreen';
+import { PrivacyPolicyScreen } from '../../feature/Profile/pages/PrivacyPolicyScreen';
 
 export type AuthStackParams = { // Define y exporta el tipo TypeScript que mapea cada ruta del stack con sus parámetros esperados
   Landing: undefined; // Ruta 'Landing' no recibe parámetros de navegación

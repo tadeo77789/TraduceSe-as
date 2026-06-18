@@ -10,9 +10,9 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MainTabNavigator } from './MainTabNavigator';
-import { ForgotPasswordScreen } from '../screens/Auth/ForgotPasswordScreen';
-import { VerifyCodeScreen } from '../screens/Auth/VerifyCodeScreen';
-import { NewPasswordScreen } from '../screens/Auth/NewPasswordScreen';
+import { ForgotPasswordScreen } from '../../feature/auth/pages/ForgotPasswordScreen';
+import { VerifyCodeScreen } from '../../feature/auth/pages/VerifyCodeScreen';
+import { NewPasswordScreen } from '../../feature/auth/pages/NewPasswordScreen';
 
 export type MainStackParams = {
   MainTabs: undefined;

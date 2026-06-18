@@ -13,10 +13,10 @@ import React from 'react'; // Importa React; necesario para usar JSX — fuente:
 import { Platform, StyleSheet, useWindowDimensions } from 'react-native'; // Importa Platform (detección de SO), StyleSheet (estilos) y useWindowDimensions (dimensiones del viewport) — fuente: node_modules/react-native
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'; // Importa la función que crea un navegador de pestañas en la parte inferior de la pantalla — fuente: node_modules/@react-navigation/bottom-tabs
 import { Ionicons } from '@expo/vector-icons'; // Importa la librería de íconos vectoriales Ionicons usada en la barra de tabs — fuente: node_modules/@expo/vector-icons
-import { TranslationScreen } from '../screens/Translation/TranslationScreen'; // Importa la pantalla principal de traducción de señas — fuente: app/presentation/screens/Translation/TranslationScreen.tsx
-import { AlphabetScreen } from '../screens/Alphabet/AlphabetScreen'; // Importa la pantalla del alfabeto de señas — fuente: app/presentation/screens/Alphabet/AlphabetScreen.tsx
-import { StatsScreen } from '../screens/Stats/StatsScreen'; // Importa la pantalla de estadísticas de uso — fuente: app/presentation/screens/Stats/StatsScreen.tsx
-import { HistoryScreen } from '../screens/History/HistoryScreen'; // Importa la pantalla del historial de traducciones — fuente: app/presentation/screens/History/HistoryScreen.tsx
+import { TranslationScreen } from '../../feature/Translation/TranslationScreen'; // Importa la pantalla principal de traducción de señas — fuente: app/presentation/screens/Translation/TranslationScreen.tsx
+import { AlphabetScreen } from '../../feature/Alphabet/pages/AlphabetScreen'; // Importa la pantalla del alfabeto de señas — fuente: app/presentation/screens/Alphabet/AlphabetScreen.tsx
+import { StatsScreen } from '../../feature/Stats/pages/StatsScreen'; // Importa la pantalla de estadísticas de uso — fuente: app/presentation/screens/Stats/StatsScreen.tsx
+import { HistoryScreen } from '../../feature/History/pages/HistoryScreen'; // Importa la pantalla del historial de traducciones — fuente: app/presentation/screens/History/HistoryScreen.tsx
 import { ProfileStackNavigator } from './ProfileStackNavigator'; // Importa el stack anidado del tab de perfil (contiene ProfileScreen) — fuente: app/presentation/navigation/ProfileStackNavigator.tsx
 import { AdminStackNavigator } from './AdminStackNavigator';
 import { WebTopBar } from '../components/common/WebTopBar'; // Importa la barra de navegación superior usada en web en lugar de la barra de tabs inferior — fuente: app/presentation/components/common/WebTopBar.tsx

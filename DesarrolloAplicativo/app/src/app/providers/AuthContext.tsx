@@ -18,9 +18,9 @@
  */
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'; // Importa React y los hooks necesarios: createContext (crear contexto), useContext (consumir contexto), useState (estado local), useEffect (efectos secundarios), useCallback (memorizar funciones), useMemo (memorizar valores) — fuente: node_modules/react
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Importa AsyncStorage para persistir datos clave-valor de forma asíncrona en el dispositivo (token y usuario) — fuente: node_modules/@react-native-async-storage/async-storage
-import { api } from '../../infrastructure/api.service'; // Instancia de Axios apuntando al backend — fuente: app/infrastructure/api.service.ts
+import { api } from '../../feature/Translation/services/api.service'; // Instancia de Axios apuntando al backend — fuente: app/infrastructure/api.service.ts
 import { ENDPOINTS } from '../config/api.config'; // Rutas de la API (login, register, ...) — fuente: app/config/api.config.ts
-import { User, AuthState, LoginPayload, RegisterPayload } from '../types'; // Importa los tipos TypeScript: User (datos del usuario), AuthState (estado de autenticación), LoginPayload (datos del formulario de login), RegisterPayload (datos del formulario de registro) — fuente: app/types/index.ts
+import { User, AuthState, LoginPayload, RegisterPayload } from '../../shared/types'; // Importa los tipos TypeScript: User (datos del usuario), AuthState (estado de autenticación), LoginPayload (datos del formulario de login), RegisterPayload (datos del formulario de registro) — fuente: app/types/index.ts
 
 /** Forma del usuario que devuelve el backend (tabla public.users). */
 interface BackendUser {
