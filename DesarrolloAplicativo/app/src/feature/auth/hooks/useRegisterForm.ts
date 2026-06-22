@@ -11,8 +11,8 @@
  */
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
-import { useAuth } from '../state/AuthContext';
-import { useTranslation } from '../i18n';
+import { useAuth } from '../../../app/providers/AuthContext';
+import { useTranslation } from '../../../app/config/i18n';
 
 interface RegisterForm {
   nombre: string;

@@ -13,14 +13,14 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AuthStackParams } from '../../navigation/AuthNavigator';
+import { AuthStackParams } from '../../../app/routes/AuthNavigator';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../shared/constants/colors';
-import { Input } from '../../components/common/Input';
-import { useColors } from '../../../shared/state/ThemeContext';
-import { useTranslation } from '../../../shared/i18n';
+import { Input } from '../../../shared/components/common/Input';
+import { useColors } from '../../../app/providers/ThemeContext';
+import { useTranslation } from '../../../app/config/i18n';
 
 type NavigationProps = NativeStackNavigationProp<AuthStackParams>;
 

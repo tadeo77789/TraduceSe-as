@@ -28,9 +28,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../shared/constants/colors';
-import { Input } from '../../components/common/Input';
-import { useRegisterForm } from '../../../shared/hooks/useRegisterForm';
-import { useTranslation } from '../../../shared/i18n';
+import { Input } from '../../../shared/components/common/Input';
+import { useRegisterForm } from '../hooks/useRegisterForm';
+import { useTranslation } from '../../../app/config/i18n';
 
 export const RegisterScreen: React.FC = () => {
   const navigation = useNavigation();

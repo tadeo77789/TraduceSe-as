@@ -17,7 +17,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CameraView } from 'expo-camera';
 import { signVisionProvider } from '../../infrastructure/vision';
-import type { SignDetectionResult, SignAgentStatus } from '../types';
+import type { SignDetectionResult, SignAgentStatus } from '../../../shared/types';
 
 export interface UseSignAgentOptions {
   /** Intervalo entre capturas, ms. Default 1500. */

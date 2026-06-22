@@ -15,11 +15,11 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { AppHeader } from '../../components/common/AppHeader';
+import { AppHeader } from '../../../shared/components/common/AppHeader';
 import { Colors } from '../../../shared/constants/colors';
-import { useColors } from '../../../shared/state/ThemeContext';
-import { useTranslation } from '../../../shared/i18n';
-import { useSignAgent } from '../../../shared/hooks/useSignAgent';
+import { useColors } from '../../../app/providers/ThemeContext';
+import { useTranslation } from '../../../app/config/i18n';
+import { useSignAgent } from '../../../feature/Translation/hooks/useSignAgent';
 import { translationsService } from '../../../infrastructure/translations.service';
 import type { SignAgentStatus } from '../../../shared/types';
 

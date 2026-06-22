@@ -13,10 +13,10 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { AppHeader } from '../../components/common/AppHeader';
-import { useColors } from '../../../shared/state/ThemeContext';
-import { useTranslation } from '../../../shared/i18n';
-import { useAuth } from '../../../shared/state/AuthContext';
+import { AppHeader } from '../../../shared/components/common/AppHeader';
+import { useColors } from '../../../app/providers/ThemeContext';
+import { useTranslation } from '../../../app/config/i18n';
+import { useAuth } from '../../../app/providers/AuthContext';
 import {
   getSampleCounts,
   signVisionProvider,

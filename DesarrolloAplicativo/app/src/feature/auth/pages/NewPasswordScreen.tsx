@@ -17,9 +17,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../shared/constants/colors';
-import { Input } from '../../components/common/Input';
-import { useColors } from '../../../shared/state/ThemeContext';
-import { useTranslation } from '../../../shared/i18n';
+import { Input } from '../../../shared/components/common/Input';
+import { useColors } from '../../../app/providers/ThemeContext';
+import { useTranslation } from '../../../app/config/i18n';
 
 export const NewPasswordScreen: React.FC = () => {
   const navigation = useNavigation();
