@@ -70,15 +70,6 @@ entity "MultimediaResource" as multimedia {
   lexicon_id : INT (FK)
 }
 
-entity "Alarm" as alarm {
-  * alarm_id : INT (PK)
-  --
-  time : TIME
-  message : VARCHAR(255)
-  active : BOOLEAN
-  user_id : INT (FK)
-}
-
 entity "UsageEvent" as usageEvent {
   * event_id : INT (PK)
   --
@@ -110,7 +101,6 @@ entity "PasswordResetToken" as resetToken {
 user ||--o{ userAuth
 user ||--o{ userRole
 user ||--o{ translation
-user ||--o{ alarm
 user ||--o{ usageEvent
 user ||--o{ userSession
 user ||--o{ resetToken

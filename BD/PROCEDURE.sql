@@ -23,19 +23,3 @@ $$;
 
 
 CALL create_user_with_role('Carlos', 25, 'carlos@email.com', '1234', 1);
-
-
-CREATE OR REPLACE PROCEDURE deactivate_user_alarms(p_user_id INT)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    UPDATE alarm
-    SET is_active = false
-    WHERE user_id = p_user_id;
-END;
-$$;
-
-
-CALL deactivate_user_alarms(1);
-
-SELECT * FROM alarm;

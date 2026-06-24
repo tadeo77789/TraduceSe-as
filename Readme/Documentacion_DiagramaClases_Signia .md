@@ -117,7 +117,7 @@ Fábrica concreta para traducciones de voz → seña. El usuario habla y el sist
 
 ### 3.5 NotificacionFactory *(abstracta)*
 
-Clase base abstracta para crear notificaciones. Define el contrato común independientemente de si la notificación es un push móvil o una alarma programada.
+Clase base abstracta para crear notificaciones. Define el contrato común independientemente del canal por el que se entregue la notificación al usuario.
 
 | Nombre | Descripción |
 |---|---|
@@ -138,18 +138,7 @@ Crea notificaciones push que se envían al dispositivo móvil del usuario a trav
 
 ---
 
-### 3.7 AlarmaFactory
-
-Crea alarmas visuales programadas que se activan a una hora específica para alertar al usuario sordo mediante señales visuales en pantalla.
-
-| Nombre | Descripción |
-|---|---|
-| **▶ Métodos** | |
-| `crearNotificacion()` | Instancia un AlarmaObserver con hora y mensaje configurados, lista para activarse en el momento programado. |
-
----
-
-### 3.8 INotificacion *(interfaz producto)*
+### 3.7 INotificacion *(interfaz producto)*
 
 Interfaz compartida entre los patrones Factory Method y Observer. Define el contrato mínimo que debe cumplir cualquier objeto notificable, independientemente de su tipo concreto.
 
@@ -227,27 +216,7 @@ Observer que gestiona las notificaciones push del sistema. Cuando ocurre un even
 
 ---
 
-### 4.5 AlarmaObserver
-
-Observer que gestiona alarmas visuales programadas. Al ser una aplicación para personas sordas, las alarmas son completamente visuales (parpadeo de pantalla, vibración) en lugar de sonoras.
-
-| Nombre | Descripción |
-|---|---|
-| **⚙ Atributos** | |
-| `id` | Identificador único de la alarma. |
-| `hora` | Hora exacta a la que debe activarse la alarma. |
-| `mensaje` | Texto que se muestra en pantalla cuando la alarma se dispara. |
-| `activa` | Indica si la alarma está habilitada (true) o deshabilitada (false). |
-| **▶ Métodos** | |
-| `actualizar(evento, datos)` | Recibe eventos del gestor para reaccionar a cambios de configuración de alarmas. |
-| `enviar()` | Dispara la alarma visual en el momento configurado. |
-| `cancelar()` | Cancela la alarma antes de que se active. |
-| `activar()` | Habilita la alarma para que se ejecute a la hora programada. |
-| `desactivar()` | Deshabilita la alarma sin eliminarla, permitiendo reactivarla después. |
-
----
-
-### 4.6 EventoUsoObserver
+### 4.5 EventoUsoObserver
 
 Observer que registra estadísticas de uso de la aplicación. Cada vez que el usuario navega a una sección o realiza una acción, este observer guarda la información para generar reportes de uso (RF6 del SRS).
 
@@ -538,7 +507,6 @@ La siguiente tabla resume todas las relaciones de asociación definidas en el di
 | `DispositivoUsuario` | 1 — 0..* | `NotificacionObserver` | Un dispositivo puede recibir múltiples notificaciones push. |
 | `TraduccionFactory` | crea → | `Traduccion` | Las tres fábricas concretas producen objetos Traduccion de distintos tipos. |
 | `NotificacionPushFactory` | crea → | `NotificacionObserver` | Esta fábrica produce notificaciones push listas para enviarse. |
-| `AlarmaFactory` | crea → | `AlarmaObserver` | Esta fábrica produce alarmas visuales programadas. |
 | `GestorEventos` | 1 → 0..* | `IObserver` | El gestor notifica a todos sus observers cuando ocurre un evento. |
 | `InvokerPerfil` | invoca → | `ICommand` | El invocador ejecuta y deshace los comandos de perfil según el historial. |
 | `ICommand` | modifica → | `Usuario` | Los tres comandos concretos modifican atributos del objeto Usuario. |
@@ -551,7 +519,7 @@ La siguiente tabla resume todas las relaciones de asociación definidas en el di
 |---|---|---|---|
 | **Singleton** | `DatabaseConnection`, `ConfiguracionApp` | Múltiples instancias de conexión o configuración inconsistente | Una sola conexión a BD y un único estado de configuración en toda la app |
 | **Factory Method** | `TraduccionFactory`, `NotificacionFactory` | Crear objetos de tipos distintos sin acoplar el código cliente al tipo concreto | Agregar nuevos tipos de traducción o notificación sin modificar el código existente |
-| **Observer** | `GestorEventos` + 3 observers | Propagar eventos del sistema a múltiples destinos sin acoplamiento directo | Notificaciones, alarmas y estadísticas reaccionan automáticamente a eventos de traducción y navegación |
+| **Observer** | `GestorEventos` + 2 observers | Propagar eventos del sistema a múltiples destinos sin acoplamiento directo | Notificaciones y estadísticas reaccionan automáticamente a eventos de traducción y navegación |
 | **Command** | `InvokerPerfil` + 3 comandos | Acciones de perfil sin historial ni posibilidad de deshacer | El usuario puede revertir cambios accidentales de idioma, tema o contraseña |
 
 ---

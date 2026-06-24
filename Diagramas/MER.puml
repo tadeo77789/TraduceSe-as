@@ -70,15 +70,6 @@ entity "RecursosMultimedia" as RecursosMultimedia {
   id_lexico : INT <>
 }
 
-entity "Alarma" as Alarma {
-  * id_alarma : INT 
-  --
-  hora : TIME
-  mensaje : VARCHAR(255)
-  activa : BOOLEAN
-  id_usuario : INT 
-}
-
 entity "eventoUso" as eventoUso {
   * id_eventos : INT 
   --
@@ -109,7 +100,6 @@ entity "PasswordResetToken" as PasswordResetToken {
 usuario   ||--{ usuarioAuth
 usuario   ||--{ UsuarioRol
 usuario   ||--{ traduccion
-usuario   ||--{ Alarma
 usuario   ||--{ eventoUso
 usuario   ||--{ seccionuso
 usuario   ||--{ PasswordResetToken
