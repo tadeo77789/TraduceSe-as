@@ -24,7 +24,7 @@
  *  5) Crear un `labels.json` con `["A", "B", ...]` y hostearlo en
  *     `TFJS_LABELS_URL`.
  */
-import { TFJS_MODEL_URL, TFJS_LABELS_URL } from '../../shared/config/api.config';
+import { TFJS_MODEL_URL, TFJS_LABELS_URL } from '../../../../app/config/api.config';
 import type { SignDetectionResult, SignVisionProvider, VisionFrame } from './types';
 
 // ── Carga perezosa de deps opcionales ───────────────────────────────────────

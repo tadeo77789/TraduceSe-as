@@ -1,4 +1,4 @@
-import { useLanguage, type LanguageCode } from '../state/LanguageContext';
+import { useLanguage, type LanguageCode } from '../../providers/LanguageContext';
 import es from './locales/es';
 import en from './locales/en';
 import fr from './locales/fr';

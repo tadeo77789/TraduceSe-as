@@ -15,7 +15,7 @@
  * El layout se adapta automáticamente: en pantallas anchas (≥ 768 px) el
  * contenido centra a un máximo de 960 px de ancho.
  */
-import React, { useState, useRef } from 'react'; // Importa React y los hooks useState (estado) y useRef (referencia a elementos) desde 'react'
+import React, { useState, useRef } from 'react';
 import {
   View, // Contenedor genérico tipo caja, equivalente a un div
   Text, // Componente para mostrar texto en pantalla
@@ -48,9 +48,9 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
   const { t } = useTranslation();
 
   const SLIDES = [
-    { id: '1', image: require('../../assets/images/traducion-real.png'),         title: t('slide1Title'), caption: t('slide1Caption') },
-    { id: '2', image: require('../../assets/images/comunicate-sinbarreras.png'), title: t('slide2Title'), caption: t('slide2Caption') },
-    { id: '3', image: require('../../assets/images/alfabeto.png'),               title: t('slide3Title'), caption: t('slide3Caption') },
+    { id: '1', image: require('../../../assets/images/traducion-real.png'),         title: t('slide1Title'), caption: t('slide1Caption') },
+    { id: '2', image: require('../../../assets/images/comunicate-sinbarreras.png'), title: t('slide2Title'), caption: t('slide2Caption') },
+    { id: '3', image: require('../../../assets/images/alfabeto.png'),               title: t('slide3Title'), caption: t('slide3Caption') },
   ];
 
   const FEATURES = [
@@ -81,7 +81,7 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
     setActiveSlide(next); // Actualiza el estado para sincronizar los dots con el slide activo
   }; // Cierre del handler goToSlide
 
-  return ( // Inicio del retorno JSX del componente LandingScreen
+  return ( 
     <View style={styles.root}>{/* Contenedor raíz que ocupa toda la pantalla con fondo gris claro */}
 
       {/* ── Header ───────────────────────────────────────────── */}
@@ -91,7 +91,7 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
           <View style={styles.logoRow}>{/* Fila horizontal que agrupa el ícono y el nombre de la app */}
             <LinearGradient colors={Colors.gradientPrimary} style={styles.logoBox}>{/* Caja cuadrada con degradado morado que contiene la imagen del logo */}
               <Image
-                source={require('../../assets/images/icono.png')}
+                source={require('../../../assets/images/icono.png')}
                 style={styles.logoImage}
                 resizeMode="contain"
               />{/* Imagen del icono que actúa como logotipo de la app */}
@@ -101,15 +101,15 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
 
           {/* Acciones de auth */}
           <View style={styles.authRow}>{/* Fila horizontal que agrupa los botones de Registrarse e Ingresar */}
-            <TouchableOpacity // Botón táctil para ir a la pantalla de registro
-              style={[styles.registerBtn, isNarrow && styles.btnNarrow]} // En pantallas estrechas reduce el padding del botón
-              onPress={() => navigation.navigate('Register' as never)} // Al presionar navega a la pantalla Register
+            <TouchableOpacity
+              style={[styles.registerBtn, isNarrow && styles.btnNarrow]} 
+              onPress={() => navigation.navigate('Register' as never)} 
             >{/* Cierre de la apertura del TouchableOpacity de Registrarse */}
               <Text style={[styles.registerBtnText, isNarrow && styles.btnTextNarrow]}>{t('register')}</Text>{/* Texto del botón de registro: en pantallas estrechas reduce el tamaño de fuente */}
             </TouchableOpacity>{/* Cierre del botón Registrarse */}
-            <TouchableOpacity // Botón táctil para ir a la pantalla de login
-              style={[styles.loginBtn, isNarrow && styles.btnNarrow]} // En pantallas estrechas reduce el padding del botón
-              onPress={() => navigation.navigate('Login' as never)} // Al presionar navega a la pantalla Login
+            <TouchableOpacity 
+              style={[styles.loginBtn, isNarrow && styles.btnNarrow]} 
+              onPress={() => navigation.navigate('Login' as never)} 
             >{/* Cierre de la apertura del TouchableOpacity de Ingresar */}
               <Ionicons name="log-in-outline" size={isNarrow ? 16 : 18} color={Colors.primary} />{/* Ícono de flecha de ingreso: tamaño 16 en pantallas estrechas, 18 en normales */}
               <Text style={[styles.loginBtnText, isNarrow && styles.btnTextNarrow]}>{t('login')}</Text>{/* Texto del botón de login: en pantallas estrechas reduce el tamaño de fuente */}
@@ -122,11 +122,11 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
         <View style={[styles.innerContent, isWide && styles.innerContentWide]}>{/* Contenedor del contenido principal: en pantallas anchas centra el contenido a máximo 960px */}
 
           {/* ── Notificación push ────────────────────────────── */}
-          {showNotif && ( // Renderiza la tarjeta de notificación solo si showNotif es true (no ha sido descartada)
+          {showNotif && ( 
             <View style={styles.notifCard}>{/* Tarjeta de notificación simulada con fondo blanco, bordes redondeados y sombra morada */}
               <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.notifIconBg}>{/* Fondo degradado morado del ícono de la notificación */}
                 <Image
-                  source={require('../../assets/images/icono.png')}
+                  source={require('../../../assets/images/icono.png')}
                   style={styles.notifIconImage}
                   resizeMode="contain"
                 />{/* Imagen del icono como ícono de la notificación push */}
@@ -139,9 +139,9 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
                 <Text style={styles.notifTitle}>{t('notifTitle')}</Text>{/* Título principal de la notificación en negrita */}
                 <Text style={styles.notifMsg}>{t('notifMsg')}</Text>{/* Mensaje descriptivo de la notificación en color secundario */}
                 <View style={styles.notifActions}>{/* Fila de acciones de la notificación con dos botones */}
-                  <TouchableOpacity // Botón de acción primaria de la notificación
-                    style={styles.notifActionBtn} // Aplica fondo morado con bordes redondeados al botón
-                    onPress={() => navigation.navigate('Login' as never)} // Al presionar navega a la pantalla de Login
+                  <TouchableOpacity
+                    style={styles.notifActionBtn} 
+                    onPress={() => navigation.navigate('Login' as never)} 
                   >{/* Cierre de la apertura del TouchableOpacity de "Abrir app" */}
                     <Text style={styles.notifActionText}>{t('openApp')}</Text>{/* Texto del botón de acción principal en blanco */}
                   </TouchableOpacity>{/* Cierre del botón "Abrir app" */}
@@ -153,7 +153,7 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
               <TouchableOpacity onPress={() => setShowNotif(false)} style={styles.notifClose}>{/* Botón X en la esquina de la tarjeta para cerrar la notificación */}
                 <Ionicons name="close" size={16} color={Colors.textHint} />{/* Ícono de cierre (X) en color gris suave */}
               </TouchableOpacity>{/* Cierre del botón de cierre de notificación */}
-            </View> // Cierre de notifCard
+            </View> 
           )}{/* Cierre del renderizado condicional de la notificación */}
 
           {/* ── Hero text ────────────────────────────────────── */}
@@ -184,49 +184,49 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
             <Text style={styles.sliderHeading}>{t('sliderTitle')}</Text>{/* Título de la sección del slider en tamaño 20 y peso 800 */}
 
             <View style={styles.sliderWrapper}>{/* Contenedor del slider con overflow hidden para recortar bordes y sombra */}
-              <FlatList // Lista horizontal de slides con paginación
-                ref={sliderRef} // Referencia para controlar el scroll programáticamente desde goToSlide
-                data={SLIDES} // Fuente de datos del slider: el arreglo SLIDES definido arriba
-                horizontal // Habilita el scroll horizontal en el FlatList
-                pagingEnabled // Hace que el scroll se detenga exactamente en cada slide (paginación)
-                showsHorizontalScrollIndicator={false} // Oculta la barra de scroll horizontal
-                onScroll={onScroll} // Llama al handler onScroll para actualizar el slide activo al hacer scroll
-                scrollEventThrottle={16} // Limita los eventos de scroll a ~60fps para optimizar el rendimiento
-                keyExtractor={item => item.id} // Extrae la clave única de cada slide usando su propiedad id
-                getItemLayout={(_, index) => ({ // Función para calcular el layout de cada item sin renderizarlo (optimización)
-                  length: SLIDE_WIDTH, // Ancho de cada slide (calculado dinámicamente según el dispositivo)
-                  offset: SLIDE_WIDTH * index, // Desplazamiento horizontal del slide en la lista
-                  index, // Índice del slide
-                })} // Cierre de getItemLayout
-                renderItem={({ item }) => ( // Función que renderiza cada slide individualmente
+              <FlatList 
+                ref={sliderRef} 
+                data={SLIDES}
+                horizontal 
+                pagingEnabled 
+                showsHorizontalScrollIndicator={false} 
+                onScroll={onScroll} 
+                scrollEventThrottle={16}
+                keyExtractor={item => item.id} 
+                getItemLayout={(_, index) => ({ 
+                  length: SLIDE_WIDTH, 
+                  offset: SLIDE_WIDTH * index, 
+                  index, 
+                })} 
+                renderItem={({ item }) => ( 
                   <View style={[styles.slide, { width: SLIDE_WIDTH }]}>{/* Contenedor del slide con altura fija y ancho dinámico */}
-                    <Image // Imagen de fondo del slide
-                      source={item.image} // Fuente de la imagen local definida en el objeto del slide
-                      style={styles.slideImage} // Aplica ancho y alto al 100% para cubrir todo el slide
-                      resizeMode="cover" // Escala la imagen para cubrir el contenedor sin deformarla
+                    <Image 
+                      source={item.image} 
+                      style={styles.slideImage} 
+                      resizeMode="cover" 
                     />{/* Cierre de Image */}
-                    <LinearGradient // Degradado oscuro sobre la imagen para mejorar legibilidad del texto
-                      colors={['transparent', 'rgba(0,0,0,0.65)']} // De transparente arriba a negro semiopaco abajo
-                      style={styles.slideOverlay} // Posicionado absolutamente en la parte inferior del slide
+                    <LinearGradient 
+                      colors={['transparent', 'rgba(0,0,0,0.65)']} 
+                      style={styles.slideOverlay}
                     />{/* Cierre del LinearGradient del overlay */}
                     <View style={styles.slideTextBox}>{/* Contenedor del texto del slide, posicionado en la esquina inferior izquierda */}
                       <Text style={styles.slideTitle}>{item.title}</Text>{/* Título del slide en blanco y negrita sobre la imagen */}
                       <Text style={styles.slideCaption}>{item.caption}</Text>{/* Descripción del slide en blanco semiopaco con interlineado */}
                     </View>{/* Cierre de slideTextBox */}
-                  </View> // Cierre del contenedor del slide
-                )} // Cierre de renderItem
+                  </View> 
+                )} 
               />{/* Cierre de FlatList */}
 
               {/* Flechas */}
-              <TouchableOpacity // Flecha izquierda del slider para ir al slide anterior
-                style={[styles.arrow, styles.arrowLeft]} // Posicionada absolutamente en el borde izquierdo del slider
-                onPress={() => goToSlide('prev')} // Al presionar llama a goToSlide con dirección 'prev'
+              <TouchableOpacity 
+                style={[styles.arrow, styles.arrowLeft]} 
+                onPress={() => goToSlide('prev')} 
               >{/* Cierre de la apertura del TouchableOpacity de flecha izquierda */}
                 <Ionicons name="chevron-back" size={20} color="#fff" />{/* Ícono de flecha hacia atrás en blanco */}
               </TouchableOpacity>{/* Cierre de la flecha izquierda */}
-              <TouchableOpacity // Flecha derecha del slider para ir al slide siguiente
-                style={[styles.arrow, styles.arrowRight]} // Posicionada absolutamente en el borde derecho del slider
-                onPress={() => goToSlide('next')} // Al presionar llama a goToSlide con dirección 'next'
+              <TouchableOpacity 
+                style={[styles.arrow, styles.arrowRight]} 
+                onPress={() => goToSlide('next')} 
               >{/* Cierre de la apertura del TouchableOpacity de flecha derecha */}
                 <Ionicons name="chevron-forward" size={20} color="#fff" />{/* Ícono de flecha hacia adelante en blanco */}
               </TouchableOpacity>{/* Cierre de la flecha derecha */}
@@ -234,16 +234,16 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
 
             {/* Dots */}
             <View style={styles.dots}>{/* Fila centrada de dots indicadores del slide activo */}
-              {SLIDES.map((_, i) => ( // Itera sobre SLIDES para crear un dot por cada slide
-                <TouchableOpacity // Dot tocable para navegar directamente a un slide específico
-                  key={i} // Clave única del dot basada en su índice
-                  onPress={() => { // Al presionar el dot navega al slide correspondiente
-                    sliderRef.current?.scrollToIndex({ index: i, animated: true }); // Desplaza el FlatList al slide del dot presionado con animación
-                    setActiveSlide(i); // Actualiza el estado del slide activo al índice del dot presionado
-                  }} // Cierre del handler onPress del dot
+              {SLIDES.map((_, i) => ( 
+                <TouchableOpacity 
+                  key={i} 
+                  onPress={() => { 
+                    sliderRef.current?.scrollToIndex({ index: i, animated: true });
+                    setActiveSlide(i); 
+                  }} 
                 >{/* Cierre de la apertura del TouchableOpacity del dot */}
                   <View style={[styles.dot, i === activeSlide ? styles.dotActive : styles.dotInactive]} />{/* Dot visual: ancho y color morado si es el activo, gris y pequeño si no lo es */}
-                </TouchableOpacity> // Cierre del TouchableOpacity del dot
+                </TouchableOpacity> 
               ))}{/* Cierre del map de dots */}
             </View>{/* Cierre del contenedor de dots */}
           </View>{/* Cierre de sliderSection */}
@@ -283,7 +283,7 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
 
             <View style={styles.lscImageCard}>
               <Image
-                source={require('../../assets/images/historial.png')}
+                source={require('../../../assets/images/historial.png')}
                 style={styles.lscImage}
                 resizeMode="cover"
               />
@@ -320,7 +320,7 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
 
             <View style={styles.lscBanner}>
               <Image
-                source={require('../../assets/images/alfabeto.png')}
+                source={require('../../../assets/images/alfabeto.png')}
                 style={styles.lscBannerImage}
                 resizeMode="cover"
               />
@@ -348,9 +348,9 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
               <Ionicons name="chatbubble-ellipses" size={28} color={Colors.primaryLighter} style={styles.quoteIcon} />{/* Ícono de burbuja de chat que representa la cita del testimonio */}
               <Text style={styles.testimonialQuote}>{t('testimonialQuote')}</Text>
               <View style={styles.testimonialAuthor}>{/* Fila horizontal con avatar e información del autor del testimonio */}
-                <Image // Imagen circular del avatar del autor del testimonio
-                  source={require('../../assets/images/testimonial.jpg')} // Imagen local del avatar — ruta: app/assets/images/testimonial.jpg
-                  style={styles.testimonialAvatar} // Aplica tamaño 44x44 y borderRadius 22 para hacerla circular
+                <Image 
+                  source={require('../../../assets/images/testimonial.jpg')} 
+                  style={styles.testimonialAvatar} 
                 />{/* Cierre de Image del avatar */}
                 <View>{/* Contenedor de texto con el nombre y rol del autor */}
                   <Text style={styles.testimonialName}>{t('testimonialName')}</Text>
@@ -365,25 +365,25 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
             <Text style={styles.ctaTitle}>{t('ctaTitle')}</Text>
             <Text style={styles.ctaSubtitle}>{t('ctaSubtitle')}</Text>{/* Subtítulo descriptivo del CTA en color secundario */}
 
-            <TouchableOpacity // Botón principal del CTA para ir a registro
+            <TouchableOpacity
               onPress={() => navigation.navigate('Register' as never)} // Al presionar navega a la pantalla de registro
-              activeOpacity={0.85} // Reduce la opacidad a 85% al presionar para dar feedback visual
-              style={styles.ctaBtnWrapper} // Aplica ancho completo, bordes redondeados y sombra morada intensa
+              activeOpacity={0.85} 
+              style={styles.ctaBtnWrapper} 
             >{/* Cierre de la apertura del TouchableOpacity del CTA principal */}
-              <LinearGradient // Degradado tricolor morado del botón principal de CTA
+              <LinearGradient 
                 colors={['#9333EA', '#7C3AED', '#6D28D9']} // Degradado de tres tonos de morado
-                start={{ x: 0, y: 0 }} // Inicio del degradado en la esquina superior izquierda
-                end={{ x: 1, y: 1 }} // Fin del degradado en la esquina inferior derecha (diagonal)
-                style={styles.ctaBtn} // Aplica flexDirection row, padding y borderRadius al botón
+                start={{ x: 0, y: 0 }} 
+                end={{ x: 1, y: 1 }} 
+                style={styles.ctaBtn} 
               >{/* Cierre de la apertura del LinearGradient del botón CTA */}
                 <Text style={styles.ctaBtnText}>{t('ctaBtn')}</Text>{/* Texto principal del botón CTA en blanco y negrita */}
                 <Ionicons name="arrow-forward" size={18} color="#fff" />{/* Ícono de flecha hacia adelante en blanco junto al texto del botón */}
               </LinearGradient>{/* Cierre del LinearGradient del botón CTA */}
             </TouchableOpacity>{/* Cierre del botón principal del CTA */}
 
-            <TouchableOpacity // Botón secundario del CTA para usuarios que ya tienen cuenta
-              style={styles.ctaSecondary} // Aplica flexDirection row para alinear los dos textos en línea
-              onPress={() => navigation.navigate('Login' as never)} // Al presionar navega a la pantalla de login
+            <TouchableOpacity 
+              style={styles.ctaSecondary} 
+              onPress={() => navigation.navigate('Login' as never)} 
             >{/* Cierre de la apertura del TouchableOpacity del CTA secundario */}
               <Text style={styles.ctaSecondaryText}>{t('ctaHasAccount')}</Text>
               <Text style={styles.ctaSecondaryLink}>{t('ctaLoginLink')}</Text>{/* Texto morado clicable que dirige al login */}
@@ -392,18 +392,18 @@ export const LandingScreen: React.FC = () => { // Declara y exporta el component
 
         </View>{/* Cierre de innerContent */}
       </ScrollView>{/* Cierre del ScrollView principal */}
-    </View> // Cierre del View raíz del componente
-  ); // Cierre del return
-}; // Cierre del componente LandingScreen
+    </View>
+  );
+}; 
 
-const styles = StyleSheet.create({ // Crea la hoja de estilos del componente con optimización nativa
-  root: { flex: 1, backgroundColor: Colors.backgroundGray }, // Línea 325 — ocupa toda la pantalla con fondo gris claro como color base
+const styles = StyleSheet.create({ 
+  root: { flex: 1, backgroundColor: Colors.backgroundGray }, 
 
   // ── Header ──
-  header: { // Línea 328 — estilos del contenedor del header con color lavanda como WebTopBar
-    backgroundColor: Colors.primaryHeader, // Color de fondo lavanda igual al WebTopBar de usuario
-    borderBottomWidth: 1, // Línea de separación inferior sutil
-    borderBottomColor: Colors.primaryLighter, // Color del borde inferior en morado claro
+  header: { 
+    backgroundColor: Colors.primaryHeader, 
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.primaryLighter, 
     shadowColor: '#7C3AED', // Línea 329 — color de la sombra del header en morado
     shadowOffset: { width: 0, height: 3 }, // Línea 330 — desplazamiento de la sombra: 3px hacia abajo
     shadowOpacity: 0.1, // Línea 331 — opacidad de la sombra al 10%

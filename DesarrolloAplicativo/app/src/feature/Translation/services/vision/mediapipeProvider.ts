@@ -11,7 +11,7 @@
  *
  * Metro resuelve este archivo en plataformas distintas a `web`.
  */
-import { TFJS_MODEL_URL } from '../../shared/config/api.config';
+import { TFJS_MODEL_URL } from '../../../../app/config/api.config';
 import { mockProvider } from './mockProvider';
 import { tfjsProvider } from './tfjsProvider';
 import type { SignVisionProvider } from './types';

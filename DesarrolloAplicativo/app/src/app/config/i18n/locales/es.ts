@@ -71,7 +71,7 @@ const es = {
   ctaTitle: '¿Listo para comenzar?',
   ctaSubtitle: 'Únete y rompe las barreras de la comunicación',
   ctaBtn: 'Crear cuenta gratis',
-  ctaHasAccount: 'Ya tengo cuenta — ',
+  ctaHasAccount: 'Ya tengo cuenta',
   ctaLoginLink: 'Iniciar sesión',
 
   // ── Login ─────────────────────────────────────────────────────────────────

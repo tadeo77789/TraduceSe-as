@@ -69,7 +69,7 @@ const fr: typeof es = {
   ctaTitle: 'Prêt à commencer ?',
   ctaSubtitle: 'Rejoignez-nous et brisez les barrières de communication',
   ctaBtn: 'Créer un compte gratuit',
-  ctaHasAccount: "J'ai déjà un compte — ",
+  ctaHasAccount: "J'ai déjà un compte",
   ctaLoginLink: 'Se connecter',
 
   forgotPasswordLink: 'Mot de passe oublié ?',
