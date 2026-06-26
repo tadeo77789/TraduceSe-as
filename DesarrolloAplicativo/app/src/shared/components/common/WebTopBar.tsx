@@ -18,9 +18,9 @@ import { BottomTabHeaderProps } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../shared/constants/colors';
-import { useColors } from '../../../shared/state/ThemeContext';
-import { useTranslation } from '../../../shared/i18n';
-import { useAuth } from '../../../shared/state/AuthContext';
+import { useColors } from '../../../app/providers/ThemeContext';
+import { useTranslation } from '../../../app/config/i18n';
+import { useAuth } from '../../../app/providers/AuthContext';
 import { isAdmin } from '../../../shared/utils/adminAccess';
 
 export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route }) => {

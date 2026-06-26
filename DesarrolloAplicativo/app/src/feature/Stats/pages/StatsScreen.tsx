@@ -11,10 +11,10 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { AppHeader } from '../../components/common/AppHeader';
+import { AppHeader } from '../../../shared/components/common/AppHeader';
 import { Colors } from '../../../shared/constants/colors';
-import { useColors, useTheme } from '../../../shared/state/ThemeContext';
-import { useTranslation } from '../../../shared/i18n';
+import { useColors, useTheme } from '../../../app/providers/ThemeContext';
+import { useTranslation } from '../../../app/config/i18n';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 

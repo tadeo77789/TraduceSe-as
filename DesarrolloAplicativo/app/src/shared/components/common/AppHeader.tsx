@@ -18,8 +18,8 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../../shared/constants/colors';
-import { useColors } from '../../../shared/state/ThemeContext';
+import { Colors } from '../../constants/colors';
+import { useColors } from '../../../app/providers/ThemeContext';
 import { BorderRadius, Shadows, Spacing } from '../../../shared/constants/theme';
 
 interface AppHeaderProps {

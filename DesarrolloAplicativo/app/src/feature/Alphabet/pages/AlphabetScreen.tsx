@@ -39,10 +39,10 @@ import { WebView } from 'react-native-webview';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Asset } from 'expo-asset';
-import { AppHeader } from '../../components/common/AppHeader';
+import { AppHeader } from '../../../shared/components/common/AppHeader';
 import { Colors } from '../../../shared/constants/colors';
-import { useColors, useTheme } from '../../../shared/state/ThemeContext';
-import { useTranslation, type TranslationKey } from '../../../shared/i18n';
+import { useColors, useTheme } from '../../../app/providers/ThemeContext';
+import { useTranslation, type TranslationKey } from '../../../app/config/i18n';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 interface LetterItem { letter: string; imageUrl: string }

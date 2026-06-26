@@ -20,7 +20,7 @@ import { Colors } from '../../../shared/constants/colors';
 import { useColors } from '../../../app/providers/ThemeContext';
 import { useTranslation } from '../../../app/config/i18n';
 import { useSignAgent } from '../../../feature/Translation/hooks/useSignAgent';
-import { translationsService } from '../../../infrastructure/translations.service';
+import { translationsService } from '../services/translations.service';
 import type { SignAgentStatus } from '../../../shared/types';
 
 type Mode = 'sena_texto' | 'texto_sena';

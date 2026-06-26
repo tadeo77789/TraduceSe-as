@@ -32,8 +32,8 @@ import {
 import { useNavigation } from '@react-navigation/native'; // Hook para acceder al objeto de navegación (navegar entre pantallas)
 import { Ionicons } from '@expo/vector-icons'; // Librería de iconos vectoriales de Expo (Ionicons es uno de los conjuntos disponibles)
 import { LinearGradient } from 'expo-linear-gradient'; // Componente de Expo para aplicar degradados lineales de color
-import { Colors } from '../../shared/constants/colors'; // Paleta de colores centralizada del proyecto — ruta: app/constants/colors.ts
-import { useTranslation } from '../../shared/i18n'; 
+import { Colors } from '../../../shared/constants/colors'; // Paleta de colores centralizada del proyecto — ruta: app/constants/colors.ts
+import { useTranslation } from '../../../app/config/i18n';
 
 export const LandingScreen: React.FC = () => { // Declara y exporta el componente funcional LandingScreen tipado como React.FC
   const navigation = useNavigation(); // Obtiene el objeto de navegación para poder navegar entre pantallas

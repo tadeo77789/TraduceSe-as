@@ -16,10 +16,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AppHeader } from '../../components/common/AppHeader';
-import { useColors } from '../../../shared/state/ThemeContext';
-import { useTranslation } from '../../../shared/i18n';
-import { useSignAgent } from '../../../shared/hooks/useSignAgent';
+import { AppHeader } from '../../../shared/components/common/AppHeader';
+import { useColors } from '../../../app/providers/ThemeContext';
+import { useTranslation } from '../../../app/config/i18n';
+import { useSignAgent } from '../../Translation/hooks/useSignAgent';
 import {
   recordSample,
   getSampleCounts,
@@ -28,9 +28,9 @@ import {
   recordGesture,
   getGestureCounts,
   clearGestureLabel,
-} from '../../../infrastructure/vision';
+} from '../../../feature/Translation/services/vision';
 import { showInfo, showError, showConfirm } from '../../../shared/utils/dialogs';
-import type { AdminStackParams } from '../../navigation/AdminStackNavigator';
+import type { AdminStackParams } from '../../../app/routes/AdminStackNavigator';
 
 type Nav = NativeStackNavigationProp<AdminStackParams, 'Training'>;
 

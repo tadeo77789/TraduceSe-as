@@ -14,17 +14,17 @@ import {
   Platform,
   useWindowDimensions,
 } from 'react-native';
-import { AppHeader } from '../../components/common/AppHeader';
+import { AppHeader } from '../../../shared/components/common/AppHeader';
 import { Colors } from '../../../shared/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Input } from '../../components/common/Input';
-import { Button } from '../../components/common/Button';
+import { Input } from '../../../shared/components/common/Input';
+import { Button } from '../../../shared/components/common/Button';
 import { useNavigation } from '@react-navigation/native';
-import { useAuth } from '../../../shared/state/AuthContext';
-import { useTheme, useColors, type ColorAccent } from '../../../shared/state/ThemeContext';
-import { useLanguage, LANGUAGE_NAMES, type LanguageCode } from '../../../shared/state/LanguageContext';
-import { useTranslation } from '../../../shared/i18n';
+import { useAuth } from '../../../app/providers/AuthContext';
+import { useTheme, useColors, type ColorAccent } from '../../../app/providers/ThemeContext';
+import { useLanguage, LANGUAGE_NAMES, type LanguageCode } from '../../../app/providers/LanguageContext';
+import { useTranslation } from '../../../app/config/i18n';
 
 const LANG_CODES: LanguageCode[] = ['es', 'en', 'fr', 'pt'];
 

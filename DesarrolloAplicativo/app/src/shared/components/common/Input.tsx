@@ -30,7 +30,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Importa Ionicons: librería de íconos vectoriales (eye, person, etc.) — de '@expo/vector-icons'
 import { Colors } from '../../../shared/constants/colors'; // Importa Colors: paleta de colores centralizada del design system — de app/constants/colors.ts
-import { useColors } from '../../../shared/state/ThemeContext'; // Importa useColors: hook que retorna los colores del tema actual (claro/oscuro) — de app/state/ThemeContext.tsx
+import { useColors } from '../../../app/providers/ThemeContext'; // Importa useColors: hook que retorna los colores del tema actual (claro/oscuro) — de app/state/ThemeContext.tsx
 import { BorderRadius, BorderWidth, ComponentSizes, FontWeight, TextStyles } from '../../../shared/constants/theme'; // Importa tokens de diseño: BorderRadius (radios), BorderWidth (anchos de borde), ComponentSizes (alturas), FontWeight (pesos), TextStyles (estilos de texto predefinidos) — de app/constants/theme.ts
 
 interface InputProps extends TextInputProps { // Define la interfaz InputProps extendiendo todas las props nativas de TextInput — inicio del bloque de tipos

@@ -27,14 +27,14 @@ import {
   TextInput,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { AppHeader } from '../../components/common/AppHeader';
+import { AppHeader } from '../../../shared/components/common/AppHeader';
 import { Colors } from '../../../shared/constants/colors';
-import { useColors, useTheme } from '../../../shared/state/ThemeContext';
+import { useColors, useTheme } from '../../../app/providers/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Traduccion } from '../../../shared/types';
-import { useTranslation } from '../../../shared/i18n';
-import { translationsService, type SavedTranslation } from '../../../infrastructure/translations.service';
+import { useTranslation } from '../../../app/config/i18n';
+import { translationsService, type SavedTranslation } from '../../../feature/Translation/services/translations.service';
 import { showAlert, showConfirm } from '../../../shared/utils/dialogs';
 
 /** Item del historial: el tipo de dominio + hora formateada para la tarjeta. */

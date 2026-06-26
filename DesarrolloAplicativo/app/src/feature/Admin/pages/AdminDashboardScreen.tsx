@@ -22,11 +22,11 @@ import {
   signVisionProvider,
   exportTrainingJson,
   importTrainingJson,
-} from '../../../infrastructure/vision';
-import { useLanguage } from '../../../shared/state/LanguageContext';
+} from '../../../feature/Translation/services/vision';
+import { useLanguage } from '../../../app/providers/LanguageContext';
 import { downloadTextFile, pickTextFile, isFileIOSupported } from '../../../shared/utils/fileIO';
 import { showSuccess, showError, showInfo, showChoice } from '../../../shared/utils/dialogs';
-import type { AdminStackParams } from '../../navigation/AdminStackNavigator';
+import type { AdminStackParams } from '../../../app/routes/AdminStackNavigator';
 
 const ALPHABET_LSC = [
   'A', 'B', 'C', 'D', 'E', 'F', 'G',

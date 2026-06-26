@@ -6,7 +6,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useColors } from '../../../shared/state/ThemeContext';
+import { useColors } from '../../../app/providers/ThemeContext';
 
 interface ChipProps {
   label: string;
