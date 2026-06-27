@@ -1,8 +1,5 @@
-// Archivo: app/presentation/screens/LandingScreen.tsx
-/**
- * @file LandingScreen.tsx
- * @description Pantalla de bienvenida pública (antes de autenticarse).
- */
+
+
 import React, { useState, useRef } from 'react';
 import {
   View,

@@ -1,25 +1,4 @@
-/**
- * @file AlphabetScreen.tsx
- * @description Pantalla del alfabeto LSC con visor 3D integrado.
- *
- * Layout:
- *  ┌──────────────────────────────────┐
- *  │  Header (AppHeader)              │
- *  ├──────────────────────────────────┤
- *  │  Grilla A–Z (FlatList)           │
- *  │  (cartas con badge de letra)     │
- *  └──────────────────────────────────┘
- *
- *  Al tocar una carta → sheet se desliza desde abajo:
- *  ┌──────────────────────────────────┐
- *  │  [Badge letra]         [✕]       │  gradiente
- *  ├──────────────────────────────────┤
- *  │       Visor 3D (WebView)         │
- *  ├──────────────────────────────────┤
- *  │  💡 Tip de la seña               │
- *  │  Toca fuera para cerrar          │
- *  └──────────────────────────────────┘
- */
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
@@ -44,7 +23,6 @@ import { Colors } from '../../../shared/constants/colors';
 import { useColors, useTheme } from '../../../app/providers/ThemeContext';
 import { useTranslation, type TranslationKey } from '../../../app/config/i18n';
 
-// ─── Tipos ───────────────────────────────────────────────────────────────────
 interface LetterItem { letter: string; imageUrl: string }
 
 const ALPHABET: LetterItem[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -54,7 +32,6 @@ const ALPHABET: LetterItem[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     imageUrl: `https://www.lifeprint.com/asl101/images-handshapes/${letter.toLowerCase()}.gif`,
   }));
 
-// ─── Paleta de acento por letra (ciclo de 6) ─────────────────────────────────
 const ACCENTS = [
   { bg: '#EDE9FE', fg: '#7C3AED' },
   { bg: '#DBEAFE', fg: '#2563EB' },
@@ -73,12 +50,9 @@ const DARK_ACCENTS = [
   { bg: '#2A0A10', fg: '#FB7185' },
 ];
 
-// ─── Assets locales (resueltos por expo-asset en iOS y Android) ──────────────
-// Se cargan en useEffect; hasta que estén listos el WebView no se monta.
 const HTML_ASSET  = require('../../../assets/model_viewer.html');
 const MODEL_ASSET = require('../../../assets/signia_model.glb');
 
-// ─── Componente ──────────────────────────────────────────────────────────────
 export const AlphabetScreen: React.FC = () => {
   const { width, height } = useWindowDimensions();
   const C = useColors();
@@ -97,13 +71,12 @@ export const AlphabetScreen: React.FC = () => {
   const [viewerUri,  setViewerUri]  = useState<string | null>(null);
   const [modelUri,   setModelUri]   = useState<string | null>(null);
 
-  // Resuelve rutas al montar. En web el modelo va como query param en la URL del HTML.
   useEffect(() => {
     if (Platform.OS === 'web') {
       Asset.loadAsync([MODEL_ASSET]).then(([glb]) => {
         const mUri = glb.localUri ?? glb.uri;
         setModelUri(mUri);
-        // Embede la URL del modelo en la URL del visor para evitar postMessage
+
         setViewerUri(`/model_viewer.html?model=${encodeURIComponent(mUri)}`);
       }).catch(err => console.error('[AlphabetScreen] GLB load error:', err));
     } else {
@@ -114,19 +87,16 @@ export const AlphabetScreen: React.FC = () => {
     }
   }, []);
 
-  // ── Layout responsive ──────────────────────────────────────────────────
   const COLS      = width >= 1024 ? 9 : width >= 768 ? 7 : 5;
   const GAP       = 10;
   const H_PAD     = 20;
   const ITEM_SIZE = Math.floor((width - H_PAD * 2 - (COLS - 1) * GAP) / COLS);
   const ITEM_H    = ITEM_SIZE + 28;
 
-  // Visor 3D dentro del modal centrado de 320px de ancho
   const VIEWER_H = height < 600 ? 200 : 250;
 
   const sheetAnim = useRef(new Animated.Value(500)).current;
 
-  // ── Animación del sheet ────────────────────────────────────────────────
   const openSheet = useCallback(() => {
     setSheetOpen(true);
     Animated.parallel([
@@ -163,7 +133,6 @@ export const AlphabetScreen: React.FC = () => {
     });
   }, [sheetAnim, backdropAnim]);
 
-  // ── Envío de animación (injectJavaScript en web, postMessage en nativo) ──
   const sendPlayAnimation = useCallback((animName: string) => {
     if (Platform.OS === 'web') {
       webViewRef.current?.injectJavaScript(`playAnimation(${JSON.stringify(animName)}); true;`);
@@ -174,15 +143,12 @@ export const AlphabetScreen: React.FC = () => {
     }
   }, []);
 
-  // ── Enviar LOAD_MODEL (solo nativo, en web ya va en la URL) ────────────
   const sendLoadModel = useCallback((uri: string) => {
     webViewRef.current?.postMessage(
       JSON.stringify({ type: 'LOAD_MODEL', url: uri })
     );
   }, []);
 
-  // En web: modelReady=true al cargar el HTML (MODEL_LOADED no llega por iframe)
-  // En nativo: esperar el mensaje MODEL_LOADED
   const onWebViewLoad = useCallback(() => {
     webViewLoaded.current = true;
     if (Platform.OS === 'web') {
@@ -192,7 +158,6 @@ export const AlphabetScreen: React.FC = () => {
     }
   }, [modelUri, sendLoadModel]);
 
-  // Nativo: si modelUri llega después de que el WebView ya cargó
   useEffect(() => {
     if (Platform.OS !== 'web' && modelUri && webViewLoaded.current) {
       sendLoadModel(modelUri);
@@ -206,20 +171,17 @@ export const AlphabetScreen: React.FC = () => {
     } catch (_) {}
   }, []);
 
-  // ── Reproducir animación cuando cambia la letra seleccionada ──────────
   useEffect(() => {
     if (selected && modelReady) {
       sendPlayAnimation(`Letra_${selected.letter}`);
     }
   }, [selected, modelReady, sendPlayAnimation]);
 
-  // ── Repetir animación de la letra actual ───────────────────────────
   const replayAnimation = useCallback(() => {
     if (!selected || !modelReady) return;
     sendPlayAnimation(`Letra_${selected.letter}`);
   }, [selected, modelReady, sendPlayAnimation]);
 
-  // ── Navegación prev / next entre letras ───────────────────────────
   const navigateLetter = useCallback((direction: 'prev' | 'next') => {
     if (!selected) return;
     const idx = ALPHABET.findIndex(a => a.letter === selected.letter);
@@ -228,7 +190,7 @@ export const AlphabetScreen: React.FC = () => {
       : (idx - 1 + ALPHABET.length) % ALPHABET.length;
     const nextLetter = ALPHABET[nextIdx];
     setSelected(nextLetter);
-    // El WebView ya tiene el modelo cargado; disparar animación directamente
+
     if (modelReady) {
       webViewRef.current?.postMessage(
         JSON.stringify({ type: 'PLAY_ANIMATION', animation: `Letra_${nextLetter.letter}` })
@@ -236,13 +198,11 @@ export const AlphabetScreen: React.FC = () => {
     }
   }, [selected, modelReady]);
 
-  // ── Selección de letra ─────────────────────────────────────────────────
   const handleSelect = useCallback((item: LetterItem) => {
     setSelected(item);
     openSheet();
   }, [openSheet]);
 
-  // ── Render de carta ────────────────────────────────────────────────────
   const renderItem: ListRenderItem<LetterItem> = useCallback(({ item, index }) => {
     const ac = PALETTE[index % PALETTE.length];
     return (
@@ -279,16 +239,13 @@ export const AlphabetScreen: React.FC = () => {
     length: ITEM_H, offset: ITEM_H * Math.floor(i / COLS), index: i,
   }), [ITEM_H, COLS]);
 
-  // Acento de la letra seleccionada
   const selIdx    = selected ? ALPHABET.findIndex(a => a.letter === selected.letter) : 0;
   const selAccent = PALETTE[selIdx % PALETTE.length];
 
-  // ── JSX ────────────────────────────────────────────────────────────────
   return (
     <View style={[styles.root, { backgroundColor: C.backgroundGray }]}>
       <AppHeader />
 
-      {/* ── Cabecera de sección ─────────────────────────────────────────── */}
       <View style={styles.sectionHeader}>
         <View>
           <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>{t('alphabetTitle')}</Text>
@@ -299,7 +256,6 @@ export const AlphabetScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* ── Grilla A-Z ──────────────────────────────────────────────────── */}
       <FlatList
         data={ALPHABET}
         key={COLS}
@@ -313,29 +269,27 @@ export const AlphabetScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       />
 
-      {/* ── Modal centrado con visor 3D ──────────────────────────────────── */}
       {sheetOpen && (
         <Animated.View
           style={[styles.modalOverlay, { opacity: backdropAnim, pointerEvents: 'box-none' }]}
         >
-          {/* Toca fuera para cerrar */}
+
           <TouchableWithoutFeedback onPress={closeSheet}>
             <View style={StyleSheet.absoluteFillObject} />
           </TouchableWithoutFeedback>
 
-          {/* Carta modal centrada */}
           <Animated.View
             style={[
               styles.sheet,
               { transform: [{ translateY: sheetAnim }], backgroundColor: C.surface, shadowColor: C.primary },
             ]}
           >
-          {/* ── Header del sheet ──────────────────────────────────────────── */}
+
           <LinearGradient
             colors={[selAccent.bg, C.surface] as [string, string]}
             style={styles.sheetHeader}
           >
-            {/* Flecha anterior */}
+
             <TouchableOpacity
               style={[styles.navBtn, { backgroundColor: C.inputBg }]}
               onPress={() => navigateLetter('prev')}
@@ -344,7 +298,6 @@ export const AlphabetScreen: React.FC = () => {
               <Ionicons name="chevron-back" size={16} color={C.textSecondary} />
             </TouchableOpacity>
 
-            {/* Badge de letra */}
             <View style={[
               styles.sheetLetterBadge,
               isDark
@@ -356,7 +309,6 @@ export const AlphabetScreen: React.FC = () => {
               </Text>
             </View>
 
-            {/* Título */}
             <View style={styles.sheetTitleBlock}>
               <Text style={[styles.sheetTitle, { color: C.textPrimary }]}>
                 {t('alphabetSign')} <Text style={{ color: selAccent.fg }}>{selected?.letter ?? ''}</Text>
@@ -364,7 +316,6 @@ export const AlphabetScreen: React.FC = () => {
               <Text style={[styles.sheetSubtitle, { color: C.textSecondary }]}>LSC</Text>
             </View>
 
-            {/* Flecha siguiente */}
             <TouchableOpacity
               style={[styles.navBtn, { backgroundColor: C.inputBg }]}
               onPress={() => navigateLetter('next')}
@@ -373,13 +324,11 @@ export const AlphabetScreen: React.FC = () => {
               <Ionicons name="chevron-forward" size={16} color={C.textSecondary} />
             </TouchableOpacity>
 
-            {/* Botón cerrar */}
             <TouchableOpacity style={[styles.closeBtn, { backgroundColor: C.inputBg }]} onPress={closeSheet}>
               <Ionicons name="close" size={18} color={C.textSecondary} />
             </TouchableOpacity>
           </LinearGradient>
 
-          {/* ── Visor 3D ──────────────────────────────────────────────────── */}
           <View style={[styles.viewerWrap, { height: VIEWER_H, backgroundColor: C.inputBg, shadowColor: C.primary }]}>
             {viewerUri ? (
               <WebView
@@ -397,7 +346,6 @@ export const AlphabetScreen: React.FC = () => {
               />
             ) : null}
 
-            {/* Overlay de carga */}
             {!modelReady && (
               <View style={[styles.loadingOverlay, { backgroundColor: C.inputBg }]}>
                 <View style={[styles.loadingPill, { backgroundColor: C.surface, shadowColor: C.primary }]}>
@@ -408,7 +356,6 @@ export const AlphabetScreen: React.FC = () => {
             )}
           </View>
 
-          {/* ── Botón Repetir ─────────────────────────────────────────────── */}
           <TouchableOpacity
             style={[
               styles.replayBtn,
@@ -422,7 +369,6 @@ export const AlphabetScreen: React.FC = () => {
             <Text style={[styles.replayText, { color: selAccent.fg }]}>{t('alphabetRepeat')}</Text>
           </TouchableOpacity>
 
-          {/* ── Tip de la seña ────────────────────────────────────────────── */}
           <View style={[styles.tipRow, { borderLeftColor: selAccent.fg, backgroundColor: C.inputBg }]}>
             <View style={[styles.tipIcon, { backgroundColor: selAccent.fg }]}>
               <Ionicons name="hand-left" size={13} color="#fff" />
@@ -440,11 +386,9 @@ export const AlphabetScreen: React.FC = () => {
   );
 };
 
-// ─── Estilos ─────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.backgroundGray ?? '#F8F9FC' },
 
-  /* ── Cabecera de sección ──────────────────────────────────────────────── */
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -475,7 +419,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  /* ── Grilla ───────────────────────────────────────────────────────────── */
   gridContent: { paddingHorizontal: 20 },
   gridRow: { gap: 10, marginBottom: 10 },
 
@@ -501,7 +444,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  /* ── Overlay + centrado ──────────────────────────────────────────────── */
   modalOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.50)',
@@ -510,7 +452,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  /* ── Tarjeta modal centrada ──────────────────────────────────────────── */
   sheet: {
     width: 320,
     backgroundColor: '#fff',
@@ -590,7 +531,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  /* ── Visor 3D ─────────────────────────────────────────────────────────── */
   viewerWrap: {
     marginHorizontal: 16,
     borderRadius: 20,
@@ -632,7 +572,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  /* ── Tip ──────────────────────────────────────────────────────────────── */
   tipRow: {
     flexDirection: 'row',
     alignItems: 'center',

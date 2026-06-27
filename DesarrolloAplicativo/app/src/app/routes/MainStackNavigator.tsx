@@ -1,12 +1,4 @@
-/**
- * @file MainStackNavigator.tsx
- * @description Stack raíz para usuarios autenticados.
- *
- * Coloca `MainTabNavigator` como pantalla base y expone las pantallas del
- * flujo de cambio de contraseña (ForgotPassword → VerifyCode → NewPassword)
- * por encima de los tabs, de modo que la barra inferior no sea visible al
- * navegar por ese flujo.
- */
+
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MainTabNavigator } from './MainTabNavigator';

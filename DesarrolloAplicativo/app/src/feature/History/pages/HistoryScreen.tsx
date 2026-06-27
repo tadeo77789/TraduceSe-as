@@ -1,19 +1,4 @@
-/**
- * @file HistoryScreen.tsx
- * @description Pantalla del historial de traducciones del usuario.
- *
- * Muestra las traducciones guardadas en tarjetas con:
- * - Badge de tipo de traducción (`sena_texto`, `texto_sena`, `voz_sena`) con color diferenciado.
- * - Texto de entrada, fecha y hora.
- * - Acciones: "Reusar" (confirmación con Alert) y "Eliminar" (confirmación con Alert).
- *
- * Cuando la lista está vacía muestra un estado vacío con mensaje descriptivo.
- * En tablet (≥ 768 px) la grilla usa 2 columnas.
- *
- * Los datos se cargan del backend (`GET /api/translations/history`) cada vez
- * que la pantalla recibe foco; "Eliminar" hace borrado lógico vía
- * `DELETE /api/translations/:id`.
- */
+
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -37,10 +22,8 @@ import { useTranslation } from '../../../app/config/i18n';
 import { translationsService, type SavedTranslation } from '../../../feature/Translation/services/translations.service';
 import { showAlert, showConfirm } from '../../../shared/utils/dialogs';
 
-/** Item del historial: el tipo de dominio + hora formateada para la tarjeta. */
 type HistoryItem = Traduccion & { hora: string };
 
-/** Mapea la fila del backend (snake_case en inglés) al tipo de dominio. */
 const mapSavedTranslation = (row: SavedTranslation): HistoryItem => {
   const date = new Date(row.created_at);
   return {
@@ -80,8 +63,6 @@ export const HistoryScreen: React.FC = () => {
     p.texto_entrada.toLowerCase().includes(query.toLowerCase())
   );
 
-  // Recarga el historial cada vez que la pantalla recibe foco, así las
-  // traducciones recién guardadas en TranslationScreen aparecen de inmediato.
   useFocusEffect(
     useCallback(() => {
       let active = true;
@@ -90,7 +71,7 @@ export const HistoryScreen: React.FC = () => {
           const rows = await translationsService.list({ limit: 100 });
           if (active) setItems(rows.map(mapSavedTranslation));
         } catch {
-          // Backend offline o sesión inválida — mostramos el estado vacío.
+
           if (active) setItems([]);
         } finally {
           if (active) setLoading(false);
@@ -137,7 +118,7 @@ export const HistoryScreen: React.FC = () => {
     });
     if (!ok) return;
     try {
-      await translationsService.remove(id); // Borrado lógico en el backend
+      await translationsService.remove(id);
       setItems(prev => prev.filter(item => item.id_traduccion !== id));
     } catch {
       await showAlert({ title: t('error'), message: t('historyDeleteError'), icon: 'error' });
@@ -153,16 +134,14 @@ export const HistoryScreen: React.FC = () => {
     const badgeColor = isDark ? config.darkTextColor : config.textColor;
     return (
       <View style={[styles.card, { backgroundColor: C.surface }]}>
-        {/* Badge de tipo */}
+
         <LinearGradient colors={isDark ? config.darkGradient : config.gradient} style={styles.typeBadge}>
           <Ionicons name={config.icon} size={13} color={badgeColor} />
           <Text style={[styles.typeBadgeText, { color: badgeColor }]}>{config.label}</Text>
         </LinearGradient>
 
-        {/* Contenido */}
         <Text style={[styles.cardText, { color: C.textPrimary }]} numberOfLines={2}>{item.texto_entrada}</Text>
 
-        {/* Footer */}
         <View style={[styles.cardFooter, { borderTopColor: C.border }]}>
           <View style={styles.cardMeta}>
             <Ionicons name="calendar-outline" size={12} color={C.textHint} />
@@ -259,7 +238,6 @@ const styles = StyleSheet.create({
   countText: { fontSize: 13, color: Colors.primary, fontWeight: '700' },
   list: { gap: 12, paddingBottom: 28 },
 
-  // Card
   card: {
     flex: 1,
     backgroundColor: '#fff',
@@ -275,7 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 90,
     maxWidth: 500,
-    width: '100%',       
+    width: '100%',
     alignSelf: 'center',
     padding: 12,
     fontSize: 16,
@@ -334,7 +312,6 @@ const styles = StyleSheet.create({
   actionBtnDanger: { backgroundColor: '#FFF5F5' },
   actionText: { fontSize: 12, fontWeight: '600' },
 
-  // Empty state
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 },
   emptyIcon: {
     width: 88,

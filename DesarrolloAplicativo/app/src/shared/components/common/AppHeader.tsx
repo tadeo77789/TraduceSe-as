@@ -1,18 +1,4 @@
-/**
- * @file AppHeader.tsx
- * @description Header de navegación para plataforma móvil.
- *
- * En **web** el componente retorna `null` — la navegación web está en `WebTopBar`.
- * En **móvil** muestra una barra con degradado púrpura que contiene:
- * - Logo + nombre de la app (cuando no hay botón de volver).
- * - Botón de regreso (cuando `showBack = true`).
- * - Icono de perfil (cuando `showProfile = true`).
- *
- * @prop showBack - Muestra el botón de regreso. Default: false.
- * @prop showProfile - Muestra el ícono de perfil. Default: false.
- * @prop onBack - Callback del botón de regreso.
- * @prop onProfile - Callback del ícono de perfil.
- */
+
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,10 +15,6 @@ interface AppHeaderProps {
   onProfile?: () => void;
 }
 
-/**
- * Header para móvil — en web la barra de navegación es MainWebNavigator.
- * En web este componente se oculta (la nav está en el top bar del navigator).
- */
 export const AppHeader: React.FC<AppHeaderProps> = ({
   showBack = false,
   showProfile = false,

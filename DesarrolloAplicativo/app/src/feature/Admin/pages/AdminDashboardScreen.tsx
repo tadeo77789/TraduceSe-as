@@ -1,4 +1,4 @@
-// Archivo: app/presentation/screens/Admin/AdminDashboardScreen.tsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -55,7 +55,6 @@ export const AdminDashboardScreen: React.FC = () => {
 
   useEffect(() => { refresh(); }, [refresh]);
 
-  // Refrescar al volver a la pantalla
   useEffect(() => {
     const unsub = navigation.addListener('focus', refresh);
     return unsub;
@@ -103,7 +102,7 @@ export const AdminDashboardScreen: React.FC = () => {
       return;
     }
     if (totalSamples === 0) {
-      // No hay nada que reemplazar — directamente merge.
+
       performImport('merge');
       return;
     }
@@ -143,7 +142,6 @@ export const AdminDashboardScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* ── Estado de la IA ── */}
           <View style={[styles.section, { backgroundColor: C.surface, borderColor: C.border }]}>
             <View style={styles.sectionHeader}>
               <Ionicons name="sparkles" size={16} color={C.primary} />
@@ -172,7 +170,6 @@ export const AdminDashboardScreen: React.FC = () => {
               </Text>
             </View>
 
-            {/* Barras por letra */}
             <Text style={[styles.subSectionTitle, { color: C.textSecondary }]}>{t('adminSamplesPerLetter')}</Text>
             <View style={styles.barsList}>
               {ALPHABET_LSC.map(letter => {
@@ -191,7 +188,6 @@ export const AdminDashboardScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* ── Sistema ── */}
           <View style={[styles.section, { backgroundColor: C.surface, borderColor: C.border }]}>
             <View style={styles.sectionHeader}>
               <Ionicons name="hardware-chip-outline" size={16} color={C.primary} />
@@ -204,7 +200,6 @@ export const AdminDashboardScreen: React.FC = () => {
             <SystemRow label={t('adminAdminUser')} value={user?.email ?? '—'} C={C} />
           </View>
 
-          {/* ── Acciones rápidas ── */}
           <View style={[styles.section, { backgroundColor: C.surface, borderColor: C.border }]}>
             <View style={styles.sectionHeader}>
               <Ionicons name="flash-outline" size={16} color={C.primary} />

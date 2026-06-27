@@ -1,10 +1,4 @@
-/**
- * @file services/vision/mockProvider.ts
- * @description Provider mock determinista. Recorre el alfabeto LSC y palabras
- * frecuentes para que la pantalla de traducción reaccione como si la IA real
- * estuviera detectando. La progresión usa el hash del frame para que parezca
- * dependiente de la imagen y no un simple timer.
- */
+
 import type { SignDetectionResult, SignVisionProvider, VisionFrame } from './types';
 
 const ALPHABET_LSC = [
@@ -17,7 +11,6 @@ const COMMON_WORDS = ['HOLA', 'GRACIAS', 'POR FAVOR', 'SÍ', 'NO', 'BIEN', 'AYUD
 
 const VOCAB = [...ALPHABET_LSC, ...COMMON_WORDS];
 
-/** Hash rápido (djb2) sobre una porción del base64 para variar resultados. */
 const hashFrame = (base64: string): number => {
   const sample = base64.length > 256 ? base64.slice(0, 128) + base64.slice(-128) : base64;
   let h = 5381;
@@ -37,7 +30,6 @@ export const mockProvider: SignVisionProvider = {
     const h = hashFrame(frame.base64);
     const dice = h % 100;
 
-    // Simulación: 15% sin manos, 15% baja confianza, 70% detecta seña.
     if (dice < 15) {
       return {
         text: '',
@@ -56,8 +48,6 @@ export const mockProvider: SignVisionProvider = {
       };
     }
 
-    // Variar entre letras y palabras según el contador para que el demo
-    // muestre progresión: alfabeto durante los primeros frames y luego palabras.
     const useWord = frameCounter % 5 === 0;
     const pool = useWord ? COMMON_WORDS : ALPHABET_LSC;
     const text = pool[h % pool.length];

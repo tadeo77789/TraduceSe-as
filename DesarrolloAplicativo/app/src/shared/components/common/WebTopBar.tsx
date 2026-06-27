@@ -1,17 +1,4 @@
-/**
- * @file WebTopBar.tsx
- * @description Barra de navegación superior para la versión web de la app.
- *
- * Reemplaza la barra de tabs inferior en plataformas web (`Platform.OS === 'web'`).
- * Muestra el logo, los links de navegación con ícono + etiqueta y el botón de perfil.
- * El tab activo se resalta con fondo lavanda y línea inferior púrpura.
- *
- * Recibe `BottomTabHeaderProps` de React Navigation y usa `navigation.navigate`
- * para cambiar entre tabs.
- *
- * Nota: El tab `Profile` se muestra como botón de avatar circular a la derecha,
- * no dentro de los links centrales.
- */
+
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { BottomTabHeaderProps } from '@react-navigation/bottom-tabs';
@@ -43,7 +30,6 @@ export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route })
     <View style={[styles.bar, { backgroundColor: C.primaryHeader, borderBottomColor: C.border, shadowColor: C.primary }]}>
       <View style={styles.inner}>
 
-        {/* Logo */}
         <TouchableOpacity style={styles.logoRow} onPress={() => goTo('Translation')}>
           <LinearGradient colors={C.gradientPrimary} style={styles.logoBox}>
             <Image
@@ -55,7 +41,6 @@ export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route })
           <Text style={[styles.appName, { color: C.textPrimary }]}>TraduceSeña</Text>
         </TouchableOpacity>
 
-        {/* Links de navegación */}
         <View style={styles.links}>
           {TAB_ITEMS.map(tab => {
             const focused = currentTab === tab.name;
@@ -79,7 +64,6 @@ export const WebTopBar: React.FC<BottomTabHeaderProps> = ({ navigation, route })
           })}
         </View>
 
-        {/* Perfil */}
         <TouchableOpacity
           style={[styles.avatarCircle, { backgroundColor: C.primaryBg }, currentTab === 'Profile' && { backgroundColor: C.primary }]}
           onPress={() => goTo('Profile')}

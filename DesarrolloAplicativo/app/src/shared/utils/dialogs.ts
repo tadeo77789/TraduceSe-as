@@ -1,9 +1,4 @@
-/**
- * @file utils/dialogs.ts
- * @description Fallback nativo: usa Alert.alert de React Native. No tiene
- * iconos lindos como SweetAlert2 pero respeta la API. Para nativo "lindo"
- * habría que usar `react-native-awesome-alerts` o un modal propio.
- */
+
 import { Alert } from 'react-native';
 
 type DialogIcon = 'success' | 'error' | 'warning' | 'info' | 'question';
@@ -11,7 +6,7 @@ type DialogIcon = 'success' | 'error' | 'warning' | 'info' | 'question';
 interface AlertOptions {
   title?: string;
   message?: string;
-  /** Ignorado en nativo (Alert.alert no soporta iconos). */
+
   icon?: DialogIcon;
 }
 

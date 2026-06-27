@@ -1,8 +1,4 @@
-/**
- * @file Chip.tsx
- * @description Chip seleccionable con icono opcional. Útil para filtros de idioma,
- * categorías o consejos. El estado activo usa el acento del tema.
- */
+
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

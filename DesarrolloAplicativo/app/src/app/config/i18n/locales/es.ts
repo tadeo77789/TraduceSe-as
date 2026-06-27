@@ -1,5 +1,5 @@
 const es = {
-  // ── Común ─────────────────────────────────────────────────────────────────
+
   appName: 'TraduceSeña',
   appTagline: 'Lengua de Señas Colombiana',
   cancel: 'Cancelar',
@@ -17,7 +17,6 @@ const es = {
   networkError: 'Sin conexión a internet',
   now: 'Ahora',
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
   email: 'Correo electrónico',
   password: 'Contraseña',
   confirmPassword: 'Confirmar contraseña',
@@ -36,7 +35,6 @@ const es = {
   cameraPermission: 'Se necesita permiso de cámara',
   micPermission: 'Se necesita permiso de micrófono',
 
-  // ── Tabs ──────────────────────────────────────────────────────────────────
   tabTranslation: 'Traducción',
   tabAlphabet: 'Alfabeto',
   tabStats: 'Estadística',
@@ -44,7 +42,6 @@ const es = {
   tabAdmin: 'Admin',
   tabProfile: 'Perfil',
 
-  // ── Landing ───────────────────────────────────────────────────────────────
   register: 'Registrarse',
   login: 'Ingresar',
   notifTitle: '¡Practica hoy tu seña diaria!',
@@ -74,14 +71,12 @@ const es = {
   ctaHasAccount: 'Ya tengo cuenta',
   ctaLoginLink: 'Iniciar sesión',
 
-  // ── Login ─────────────────────────────────────────────────────────────────
   forgotPasswordLink: '¿Has olvidado tu contraseña?',
   loginBtn: 'Ingresar',
   loginBtnLoading: 'Ingresando...',
   emailPlaceholder: 'Correo electrónico',
   passwordPlaceholder: 'Contraseña',
 
-  // ── Registro ──────────────────────────────────────────────────────────────
   registerTitle: 'Crea tu Cuenta',
   registerNameLabel: 'Nombre',
   registerNamePlaceholder: 'Escribe tu nombre completo',
@@ -103,7 +98,6 @@ const es = {
   registerPasswordShort: 'Mínimo 8 caracteres',
   registerErrorMsg: 'No se pudo crear la cuenta. Intenta de nuevo.',
 
-  // ── Login validación ──────────────────────────────────────────────────────
   loginEmailRequired: 'El correo es obligatorio',
   loginEmailInvalid: 'Correo inválido',
   loginPasswordRequired: 'La contraseña es obligatoria',
@@ -120,7 +114,6 @@ const es = {
   loginAnd: 'y',
   loginPrivacyLink: 'Política de privacidad',
 
-  // ── Recuperar contraseña ──────────────────────────────────────────────────
   forgotTitle: 'Recuperar contraseña',
   forgotTitleFromProfile: 'Cambiar contraseña',
   forgotSubtitle: 'Ingresa tu correo y te enviaremos un código de verificación',
@@ -133,7 +126,6 @@ const es = {
   forgotRemembered: '¿Recordaste tu contraseña?',
   forgotLoginLink: 'Inicia sesión',
 
-  // ── Verificar código ──────────────────────────────────────────────────────
   verifyTitle: 'Verifica tu identidad',
   verifySubtitle: 'Te enviamos un código de 6 dígitos a tu correo electrónico. Ingrésalo para continuar.',
   verifyBtn: 'Confirmar',
@@ -142,7 +134,6 @@ const es = {
   verifyResendLink: 'Reenviar',
   verifyErrorIncomplete: 'Ingresa el código completo',
 
-  // ── Nueva contraseña ──────────────────────────────────────────────────────
   newPasswordTitle: 'Nueva contraseña',
   newPasswordNewLabel: 'Nueva contraseña',
   newPasswordNewPlaceholder: 'Nueva contraseña',
@@ -154,7 +145,6 @@ const es = {
   newPasswordErrorShort: 'La contraseña debe tener mínimo 8 caracteres',
   newPasswordErrorMismatch: 'Las contraseñas no coinciden',
 
-  // ── Traducción ────────────────────────────────────────────────────────────
   modeCamera: 'Seña → Texto',
   modeText: 'Texto → Seña',
   startCamera: 'Iniciar cámara',
@@ -189,7 +179,6 @@ const es = {
   cameraPermissionTitle: 'Permiso de cámara',
   cameraPermissionMsg: 'Se necesita acceso a la cámara para traducir señas.',
 
-  // ── Agente de señas ──────────────────────────────────────────────────────
   agentStarting: 'Activando cámara...',
   agentDetecting: 'Reconociendo seña...',
   agentLowConfidence: 'Confianza baja, repite la seña',
@@ -201,7 +190,6 @@ const es = {
   agentBackspace: 'Borrar',
   agentSpace: 'Espacio',
 
-  // ── Entrenamiento del agente ─────────────────────────────────────────────
   trainTitle: 'Entrenar IA',
   trainHint: 'Haz la seña frente a la cámara y pulsa la letra correcta',
   trainNoHand: 'Necesito ver tu mano para guardar la muestra',
@@ -230,7 +218,6 @@ const es = {
   trainGestureDeleteTitle: 'Borrar gesto',
   trainGestureDeleteConfirm: '¿Borrar todas las tomas de "{label}"?',
 
-  // ── Admin ────────────────────────────────────────────────────────────────
   adminDashboardTitle: 'Panel de administración',
   adminDashboardSubtitle: 'Estado de la IA y métricas de la app',
   adminAiState: 'Estado de la IA',
@@ -261,7 +248,6 @@ const es = {
   adminFileIONotSupported: 'Función disponible solo en web por ahora',
   adminBack: 'Volver',
 
-  // ── Alfabeto ──────────────────────────────────────────────────────────────
   alphabetTitle: 'Alfabeto LSC',
   alphabetLetters: 'letras',
   alphabetTip: 'Toca una letra para ver la seña en 3D',
@@ -295,7 +281,6 @@ const es = {
   alphabetTipY: 'Pulgar y meñique extendidos, otros doblados.',
   alphabetTipZ: 'Índice extendido traza la letra Z en el aire.',
 
-  // ── Historial ─────────────────────────────────────────────────────────────
   historyTitle: 'Historial',
   historyRecords: 'registros',
   historyFilter: 'escribe la traduccion que buscas...',
@@ -312,7 +297,6 @@ const es = {
   historyDeleteBtn: 'Eliminar',
   historyDeleteError: 'No se pudo eliminar el registro. Intenta de nuevo.',
 
-  // ── Estadísticas ──────────────────────────────────────────────────────────
   kpiTranslations: 'Traducciones',
   kpiActiveUsers: 'Usuarios activos',
   kpiHoursLearned: 'Horas aprendidas',
@@ -329,7 +313,6 @@ const es = {
   sectionAlphabet: 'Alfabeto',
   sectionHistory: 'Historial',
 
-  // ── Perfil ────────────────────────────────────────────────────────────────
   profileAccount: 'Cuenta',
   profileChangePassword: 'Cambiar contraseña',
   profilePreferences: 'Preferencias',
@@ -350,7 +333,6 @@ const es = {
   profileTranslations: 'Traducciones',
   profileLearned: 'Señas aprendidas',
 
-  // ── General / Léxico ──────────────────────────────────────────────────────
   searchSigns: 'Buscar señas...',
   allCategories: 'Todas',
   letters: 'Letras',
@@ -375,7 +357,6 @@ const es = {
   editProfile: 'Editar perfil',
   logout: 'Cerrar sesión',
 
-  // ── Términos y Condiciones ────────────────────────────────────────────────
   termsScreenTitle: 'Términos y Condiciones',
   termsIntroTitle: 'TraduceSeña',
   termsIntroSub: 'Lengua de Señas Colombiana — SENA 2025',
@@ -400,7 +381,6 @@ const es = {
   termsSection9Title: '9. Contacto',
   termsSection9Body: 'Para dudas o consultas relacionadas con estos términos, puede contactarnos en:\n\nCorreo: aleosea777@gmail.com\nInstitución: SENA — Análisis y Desarrollo de Software\nAño: 2025',
 
-  // ── Política de Privacidad ────────────────────────────────────────────────
   privacyScreenTitle: 'Política de Privacidad',
   privacyIntroTitle: 'TraduceSeña',
   privacyIntroSub: 'Política de Privacidad — SENA 2025',

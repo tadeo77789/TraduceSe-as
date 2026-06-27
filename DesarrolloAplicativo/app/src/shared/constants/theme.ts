@@ -1,18 +1,5 @@
-/**
- * @file theme.ts
- * @description Tokens avanzados del sistema de diseño (design tokens).
- * Incluye: `Spacing` (grid de 8pt), `FontSize`, `FontWeight`, `LineHeight`,
- * `LetterSpacing`, `TextStyles` (estilos de texto precompuestos),
- * `BorderRadius`, `BorderWidth`, `Shadows`, `ZIndex`, `ComponentSizes`
- * (alturas y paddings de botones/inputs/iconos/avatares) y `Animation`.
- * Más granular que `sizes.ts`; usar para estilos de componentes reutilizables.
- */
 
-// ─── Design System Tokens ─────────────────────────────────────────────────────
-// Generado a partir de: design_token_generator.py brand=#7C3AED style=modern
-// Adaptado para React Native (sin unidades CSS, valores numéricos)
 
-// ─── Espaciado — Grid de 8pt ──────────────────────────────────────────────────
 export const Spacing = {
   0:   0,
   1:   4,
@@ -26,7 +13,7 @@ export const Spacing = {
   9:   48,
   10:  56,
   11:  64,
-  // Alias semánticos
+
   xs:  4,
   sm:  8,
   md:  16,
@@ -36,7 +23,6 @@ export const Spacing = {
   '3xl': 128,
 } as const;
 
-// ─── Tipografía ───────────────────────────────────────────────────────────────
 export const FontSize = {
   xs:   10,
   sm:   13,
@@ -78,7 +64,6 @@ export const LetterSpacing = {
   widest:  1.6,
 } as const;
 
-// Estilos de texto precompuestos (para usar en TextStyle)
 export const TextStyles = {
   h1: { fontSize: 48, fontWeight: FontWeight.bold,      lineHeight: 58,  letterSpacing: -0.96 },
   h2: { fontSize: 36, fontWeight: FontWeight.bold,      lineHeight: 47,  letterSpacing: -0.36 },
@@ -92,7 +77,6 @@ export const TextStyles = {
   label:   { fontSize: 12, fontWeight: FontWeight.semibold, lineHeight: 16, letterSpacing: 0.6 },
 } as const;
 
-// ─── Bordes ───────────────────────────────────────────────────────────────────
 export const BorderRadius = {
   none:    0,
   sm:      4,
@@ -110,7 +94,6 @@ export const BorderWidth = {
   thick:  2,
 } as const;
 
-// ─── Sombras (React Native) ───────────────────────────────────────────────────
 export const Shadows = {
   none: {
     shadowColor: 'transparent',
@@ -154,7 +137,7 @@ export const Shadows = {
     shadowRadius: 28,
     elevation: 12,
   },
-  // Sombra de color primario (para botones y cards con acento)
+
   primary: {
     shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 4 },
@@ -171,7 +154,6 @@ export const Shadows = {
   },
 } as const;
 
-// ─── Z-Index ──────────────────────────────────────────────────────────────────
 export const ZIndex = {
   hide:         -1,
   base:          0,
@@ -184,7 +166,6 @@ export const ZIndex = {
   notification: 1070,
 } as const;
 
-// ─── Tamaños de componentes ───────────────────────────────────────────────────
 export const ComponentSizes = {
   button: {
     sm: { height: 36, paddingHorizontal: 14 },
@@ -210,7 +191,6 @@ export const ComponentSizes = {
   },
 } as const;
 
-// ─── Animaciones ─────────────────────────────────────────────────────────────
 export const Animation = {
   duration: {
     instant: 0,

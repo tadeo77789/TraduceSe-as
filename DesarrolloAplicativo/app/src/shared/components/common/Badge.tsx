@@ -1,8 +1,4 @@
-/**
- * @file Badge.tsx
- * @description Insignia compacta para conteos o etiquetas (ej. "26 letras", "3 registros").
- * Hereda el color del tema activo si no se pasa `color`.
- */
+
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import { useColors } from '../../../app/providers/ThemeContext';

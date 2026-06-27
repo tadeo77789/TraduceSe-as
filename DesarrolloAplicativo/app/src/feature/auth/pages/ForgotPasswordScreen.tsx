@@ -1,10 +1,4 @@
-/**
- * @file ForgotPasswordScreen.tsx
- * @description Pantalla de recuperación de contraseña — paso 1: ingreso de correo.
- *
- * @todo Conectar `handleConfirm` con el endpoint real del backend
- *       (`ENDPOINTS.forgotPassword`) para enviar el código OTP.
- */
+
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
@@ -34,8 +28,7 @@ export const ForgotPasswordScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isWide = width >= 768;
-  // Si la pantalla se abre desde Perfil (cambiar contraseña) usa el tema/acento del usuario.
-  // Si se abre desde Login (recuperar contraseña) usa la paleta fija morada/clara.
+
   const themedC = useColors();
   const C = fromProfile ? themedC : Colors;
   const rootBg = C.background;
@@ -54,7 +47,7 @@ export const ForgotPasswordScreen: React.FC = () => {
     }
     setEmailError(undefined);
     setLoading(true);
-    // TODO: llamar al backend para enviar código
+
     setTimeout(() => {
       setLoading(false);
       navigation.navigate('VerifyCode', { fromProfile });
@@ -155,14 +148,12 @@ export const ForgotPasswordScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  // ── Web ──
+
   wideRoot: { flex: 1, backgroundColor: '#EDE9FE', alignItems: 'center', justifyContent: 'center' },
   formPanel: { width: 480 },
 
-  // ── Móvil ──
   mobileRoot: { flex: 1, backgroundColor: '#EDE9FE' },
 
-  // ── Formulario ──
   formScroll: {
     flexGrow: 1,
     paddingHorizontal: 16,
@@ -171,7 +162,6 @@ const styles = StyleSheet.create({
   },
   formInner: {},
 
-  // Botón volver
   backBtn: {
     position: 'absolute',
     top: 20,
@@ -190,7 +180,6 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
-  // Logo
   logoCorner: {
     position: 'absolute',
     top: 11,
@@ -215,7 +204,6 @@ const styles = StyleSheet.create({
   logoEmoji: { fontSize: 22 },
   brandName: { fontSize: 17, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.2 },
 
-  // Card
   card: {
     backgroundColor: '#DDD6FE',
     borderRadius: 20,
@@ -242,7 +230,6 @@ const styles = StyleSheet.create({
 
   inputSpacing: { marginBottom: 14 },
 
-  // Botón enviar
   btnWrapper: { alignItems: 'center', marginTop: 20 },
   submitBtn: {
     backgroundColor: Colors.primary,
@@ -253,7 +240,6 @@ const styles = StyleSheet.create({
   submitBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   btnDisabled: { opacity: 0.6 },
 
-  // Link inferior
   linkRow: { alignItems: 'center', marginTop: 22 },
   linkText: { fontSize: 13, color: Colors.textSecondary },
   linkAccent: { color: Colors.primary, fontWeight: '700' },

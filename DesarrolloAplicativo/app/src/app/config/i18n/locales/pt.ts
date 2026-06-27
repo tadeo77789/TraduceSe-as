@@ -180,7 +180,6 @@ const pt: typeof es = {
   cameraPermissionTitle: 'Permissão de câmera',
   cameraPermissionMsg: 'É necessário acesso à câmera para traduzir sinais.',
 
-  // ── Agente de sinais ─────────────────────────────────────────────────────
   agentStarting: 'Ativando câmera...',
   agentDetecting: 'Reconhecendo sinal...',
   agentLowConfidence: 'Baixa confiança, repita o sinal',
@@ -192,7 +191,6 @@ const pt: typeof es = {
   agentBackspace: 'Apagar',
   agentSpace: 'Espaço',
 
-  // ── Treinamento da IA ────────────────────────────────────────────────────
   trainTitle: 'Treinar IA',
   trainHint: 'Faça o sinal na frente da câmera e toque na letra correta',
   trainNoHand: 'Preciso ver sua mão para salvar a amostra',
@@ -221,7 +219,6 @@ const pt: typeof es = {
   trainGestureDeleteTitle: 'Excluir gesto',
   trainGestureDeleteConfirm: 'Excluir todas as tomadas de "{label}"?',
 
-  // ── Admin ────────────────────────────────────────────────────────────────
   adminDashboardTitle: 'Painel de administração',
   adminDashboardSubtitle: 'Estado da IA e métricas do app',
   adminAiState: 'Estado da IA',

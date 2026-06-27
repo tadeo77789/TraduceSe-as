@@ -1,4 +1,4 @@
-// Archivo: app/presentation/screens/Stats/StatsScreen.tsx
+
 import React, { useState } from 'react';
 import {
   View,
@@ -18,7 +18,6 @@ import { useTranslation } from '../../../app/config/i18n';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
-// ─── Gráfica de barras ────────────────────────────────────────────────────────
 const BarChart: React.FC<{
   data: { label: string; value: number }[];
   colors: [string, string];
@@ -49,7 +48,7 @@ const BarChart: React.FC<{
             <View key={i} style={bar.barGroup}>
               <View style={{ alignItems: 'center' }}>
                 <Text style={[bar.valueLabel, { color: C.textHint }]}>{item.value}</Text>
-                {/* ✅ FIX ③: Math.max(4, ...) para evitar barras invisibles */}
+
                 <View style={[bar.barWrap, { height: Math.max(4, (item.value / max) * chartHeight) }]}>
                   <LinearGradient colors={colors} start={{ x: 0, y: 1 }} end={{ x: 0, y: 0 }} style={bar.bar} />
                 </View>
@@ -70,7 +69,6 @@ const BarChart: React.FC<{
   );
 };
 
-// ─── Gráfica de línea ─────────────────────────────────────────────────────────
 const LineChart: React.FC<{
   data: number[];
   color: string;
@@ -78,7 +76,7 @@ const LineChart: React.FC<{
   showAxes?: boolean;
   height?: number;
 }> = ({ data, color, labels, showAxes, height }) => {
-  // ✅ FIX ②a: inicializar en 0 para esperar la medida real del contenedor
+
   const [containerWidth, setContainerWidth] = useState(0);
   const max = Math.max(...data);
   const chartHeight = height || 80;
@@ -89,7 +87,6 @@ const LineChart: React.FC<{
     if (w > 0) setContainerWidth(w);
   };
 
-  // ✅ FIX ②b: no dibujar hasta tener el ancho real
   if (containerWidth === 0) {
     return <View style={{ height: chartHeight }} onLayout={handleLayout} />;
   }
@@ -153,7 +150,6 @@ const LineChart: React.FC<{
   );
 };
 
-// ─── Leyenda de torta ────────────────────────────────────────────────────────
 const PieChart: React.FC<{ data: { label: string; value: number; color: string }[] }> = ({ data }) => {
   const C = useColors();
   return (
@@ -204,7 +200,6 @@ const pie = StyleSheet.create({
   legendValue: { fontSize: 12, fontWeight: '700', width: 36, textAlign: 'right' },
 });
 
-// ─── Datos ────────────────────────────────────────────────────────────────────
 const WEEKLY_DATA = [
   { label: 'Lun', value: 30 },
   { label: 'Mar', value: 45 },
@@ -225,7 +220,6 @@ const VOLUME_DATA = [
   { label: 'Sem 4', value: 45 },
 ];
 
-// ─── Tabla de cardinalidades ──────────────────────────────────────────────────
 const CardinalityTable: React.FC<{
   rows: { label: string; value: string | number; color?: string }[];
   compact?: boolean;
@@ -283,7 +277,6 @@ const tbl = StyleSheet.create({
   compactValue: { fontSize: 12, fontWeight: '700', width: 52, textAlign: 'right' },
 });
 
-// ─── StatCard ─────────────────────────────────────────────────────────────────
 interface StatCardProps {
   title: string;
   description: string;
@@ -307,7 +300,6 @@ const StatCard: React.FC<StatCardProps> = ({ title, description, accentColor, ch
   );
 };
 
-// ─── Modal de detalle ─────────────────────────────────────────────────────────
 type CardKey = 'weekly' | 'monthly' | 'volume' | 'section';
 
 interface DetailModalProps {
@@ -368,9 +360,9 @@ const DetailModal: React.FC<DetailModalProps> = ({ cardKey, onClose, sectionPie,
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={modal.overlay}>
           <TouchableWithoutFeedback>
-            {/* ✅ FIX ①: maxHeight agregado para que el ScrollView interno funcione */}
+
             <View style={[modal.sheet, { backgroundColor: C.surface, width: sheetMaxWidth }]}>
-              {/* Header */}
+
               <View style={[modal.header, { borderBottomColor: C.border }]}>
                 <Text style={[modal.title, { color: C.textPrimary }]}>{titles[cardKey]}</Text>
                 <TouchableOpacity onPress={onClose} style={[modal.closeBtn, { backgroundColor: C.inputBg }]}>
@@ -392,17 +384,16 @@ const DetailModal: React.FC<DetailModalProps> = ({ cardKey, onClose, sectionPie,
 
 const modal = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  // ✅ FIX ①: maxHeight: '85%' para que el modal no crezca más de la pantalla
+
   sheet: { width: '100%', maxWidth: 560, maxHeight: '85%', borderRadius: 24, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.25, shadowRadius: 30, elevation: 20 },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 18, borderBottomWidth: 1, gap: 12 },
   title: { flex: 1, fontSize: 17, fontWeight: '800' },
   closeBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
-  // ✅ FIX ④: padding y gap ajustados para mejor distribución del contenido
+
   body: { padding: 16, paddingBottom: 24, gap: 12 },
   desc: { fontSize: 13, lineHeight: 20, marginTop: 16 },
 });
 
-// ─── Pantalla principal ───────────────────────────────────────────────────────
 export const StatsScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
@@ -450,7 +441,6 @@ export const StatsScreen: React.FC = () => {
       <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, isDesktop && styles.contentDesktop]} showsVerticalScrollIndicator={false}>
         <View style={[styles.innerWrapper, isDesktop && styles.innerWrapperWide]}>
 
-          {/* KPI Cards */}
           <View style={[styles.kpiGrid, isDesktop && styles.kpiGridDesktop]}>
             {KPI_CARDS.map((kpi, i) => (
               <LinearGradient key={i} colors={isDark ? kpi.darkGradient : kpi.gradient} style={[styles.kpiCard, isDesktop && styles.kpiCardDesktop]}>
@@ -461,7 +451,6 @@ export const StatsScreen: React.FC = () => {
             ))}
           </View>
 
-          {/* Stat Cards */}
           <View style={[styles.cardsGrid, isTablet && styles.cardsGridTablet]}>
             <StatCard title={t('statsWeeklyTitle')} accentColor={C.primary} description={t('statsWeeklyDesc')} onPress={() => setOpenCard('weekly')}>
               <BarChart data={WEEKLY_DATA} colors={[C.primaryLight, C.primary]} />

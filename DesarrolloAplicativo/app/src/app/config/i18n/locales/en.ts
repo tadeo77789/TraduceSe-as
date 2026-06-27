@@ -180,7 +180,6 @@ const en: typeof es = {
   cameraPermissionTitle: 'Camera permission',
   cameraPermissionMsg: 'Camera access is required to translate signs.',
 
-  // ── Sign agent ───────────────────────────────────────────────────────────
   agentStarting: 'Starting camera...',
   agentDetecting: 'Recognizing sign...',
   agentLowConfidence: 'Low confidence, try the sign again',
@@ -192,7 +191,6 @@ const en: typeof es = {
   agentBackspace: 'Delete',
   agentSpace: 'Space',
 
-  // ── Agent training ───────────────────────────────────────────────────────
   trainTitle: 'Train AI',
   trainHint: 'Make the sign in front of the camera and tap the correct letter',
   trainNoHand: 'I need to see your hand to save the sample',
@@ -221,7 +219,6 @@ const en: typeof es = {
   trainGestureDeleteTitle: 'Delete gesture',
   trainGestureDeleteConfirm: 'Delete all takes of "{label}"?',
 
-  // ── Admin ────────────────────────────────────────────────────────────────
   adminDashboardTitle: 'Admin panel',
   adminDashboardSubtitle: 'AI state and app metrics',
   adminAiState: 'AI state',

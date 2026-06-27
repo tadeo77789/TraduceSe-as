@@ -1,4 +1,4 @@
-// Archivo: app/presentation/screens/Auth/LoginScreen.tsx
+
 import React from 'react';
 import {
   View,

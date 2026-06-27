@@ -1,16 +1,5 @@
-/**
- * @file types/index.ts
- * @description Tipos e interfaces TypeScript globales de la app.
- * Define las estructuras de datos principales:
- * - `User` / `AuthState` / `LoginPayload` / `RegisterPayload`: autenticación.
- * - `Traduccion` / `TipoTraduccion`: traducciones de señas.
- * - `LexicoSena` / `RecursoMultimedia` / `TipoLexico`: léxico LSC.
- * - `Notificacion`: notificaciones.
- * - `ThemeMode` / `ThemeState`: tema visual.
- * - `ApiResponse<T>` / `PaginatedResponse<T>`: respuestas genéricas del backend.
- */
 
-// ─── Usuario ────────────────────────────────────────────────────────────────
+
 export interface User {
   id_usuario: number;
   nombre: string;
@@ -22,7 +11,6 @@ export interface User {
   fecha_terminos?: string;
 }
 
-// ─── Autenticación ───────────────────────────────────────────────────────────
 export interface AuthState {
   user: User | null;
   token: string | null;
@@ -43,7 +31,6 @@ export interface RegisterPayload {
   termino_acept: boolean;
 }
 
-// ─── Traducción ──────────────────────────────────────────────────────────────
 export type TipoTraduccion = 'texto_sena' | 'sena_texto' | 'voz_sena';
 
 export interface Traduccion {
@@ -55,7 +42,6 @@ export interface Traduccion {
   is_deleted: boolean;
 }
 
-// ─── Agente de reconocimiento de señas ───────────────────────────────────────
 export type SignAgentStatus =
   | 'idle'
   | 'starting'
@@ -65,22 +51,20 @@ export type SignAgentStatus =
   | 'error';
 
 export interface SignDetectionResult {
-  /** Texto reconocido (letra, palabra o frase). Vacío si no hay detección. */
+
   text: string;
-  /** Confianza 0..1 reportada por el modelo. */
+
   confidence: number;
-  /** Estado interpretable del frame. */
+
   status: SignAgentStatus;
-  /** Marca temporal ISO del frame analizado. */
+
   timestamp: string;
-  /** Vector normalizado de 63 features (21 puntos × xyz) cuando hay mano. */
+
   features?: number[];
-  /** Origen del resultado: KNN entrenado, geométrico de respaldo, o
-   *  clasificador de movimiento (señas dinámicas y palabras entrenadas). */
+
   source?: 'knn' | 'geometric' | 'mock' | 'motion';
 }
 
-// ─── Léxico ──────────────────────────────────────────────────────────────────
 export type TipoLexico = 'letra' | 'numero' | 'palabra' | 'frase';
 
 export interface LexicoSena {
@@ -100,7 +84,6 @@ export interface RecursoMultimedia {
   orden: number;
 }
 
-// ─── Notificaciones ──────────────────────────────────────────────────────────
 export interface Notificacion {
   id_notif: number;
   titulo: string;
@@ -109,7 +92,6 @@ export interface Notificacion {
   created_at: string;
 }
 
-// ─── Tema ────────────────────────────────────────────────────────────────────
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemeState {
@@ -117,7 +99,6 @@ export interface ThemeState {
   isDark: boolean;
 }
 
-// ─── API Response ─────────────────────────────────────────────────────────────
 export interface ApiResponse<T> {
   success: boolean;
   data: T;

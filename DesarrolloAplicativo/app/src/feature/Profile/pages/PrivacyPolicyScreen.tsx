@@ -33,7 +33,7 @@ export const PrivacyPolicyScreen: React.FC = () => {
 
   return (
     <View style={[styles.root, { backgroundColor: C.background }]}>
-      {/* Header */}
+
       <View style={[styles.header, { paddingTop: insets.top + 8, backgroundColor: C.surface, borderBottomColor: C.border }]}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={22} color={C.primary} />
@@ -46,7 +46,7 @@ export const PrivacyPolicyScreen: React.FC = () => {
         contentContainerStyle={[styles.scrollContent, isWide && styles.scrollContentWide]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Intro */}
+
         <View style={[styles.introCard, { backgroundColor: C.primaryBg, borderColor: C.primary }]}>
           <Ionicons name="shield-checkmark" size={28} color={C.primary} style={styles.introIcon} />
           <Text style={[styles.introTitle, { color: C.primary }]}>{t('privacyIntroTitle')}</Text>
@@ -63,7 +63,6 @@ export const PrivacyPolicyScreen: React.FC = () => {
           </Text>
         </View>
 
-        {/* Sections */}
         {SECTION_KEYS.map((s, i) => (
           <View key={i} style={[styles.section, { backgroundColor: C.surface, borderColor: C.border }]}>
             <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>{t(s.title)}</Text>

@@ -1,4 +1,4 @@
-// Archivo: app/presentation/screens/Translation/TranslationScreen.tsx
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
@@ -30,8 +30,6 @@ export const TranslationScreen: React.FC = () => {
   const isTablet = width >= 768;
   const isDesktop = width >= 1024;
 
-  // Tamaño de la cámara: aprovecha el ancho disponible con aspect 3:4 vertical,
-  // pero nunca supera el 55% del alto de la ventana (para que no desborde la pantalla).
   const horizontalPadding = isDesktop ? 96 : 40;
   const wrapperMaxWidth = isTablet ? 760 : width;
   const cameraWidth = Math.min(width - horizontalPadding, wrapperMaxWidth);
@@ -66,7 +64,6 @@ export const TranslationScreen: React.FC = () => {
   const [isActive, setIsActive] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Persistencia silenciosa: si el backend no responde, no rompemos la UX.
   const persistSignTranscript = useCallback(async () => {
     const transcript = agentTranscript.trim();
     if (!transcript) return;
@@ -79,7 +76,7 @@ export const TranslationScreen: React.FC = () => {
         source: agentLastResult?.source ?? 'mediapipe',
       });
     } catch {
-      // Backend offline o sin tabla — silencioso para no bloquear el flujo.
+
     }
   }, [agentTranscript, agentLastResult]);
 
@@ -94,14 +91,14 @@ export const TranslationScreen: React.FC = () => {
         source: 'manual',
       });
     } catch {
-      // Backend offline — silencioso.
+
     }
   }, []);
 
   const handleAction = useCallback(async () => {
     if (mode === 'sena_texto') {
       if (!isActive) {
-        // Solicitar permiso de cámara si no está concedido
+
         if (!permission?.granted) {
           const res = await requestPermission();
           if (!res.granted) {
@@ -120,7 +117,7 @@ export const TranslationScreen: React.FC = () => {
         agentStop();
         setIsActive(false);
         setResult('');
-        // Al detener, persistimos lo reconocido (si hay algo).
+
         await persistSignTranscript();
       }
     } else {
@@ -170,7 +167,6 @@ export const TranslationScreen: React.FC = () => {
       <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, isDesktop && styles.contentDesktop]} showsVerticalScrollIndicator={false}>
         <View style={[styles.innerWrapper, isTablet && styles.innerWrapperWide]}>
 
-          {/* ── Toggle de modo ── */}
           <View style={[styles.modeToggle, { backgroundColor: C.surface, borderColor: C.border, shadowColor: C.primary }]}>
             <TouchableOpacity style={[styles.modeBtn, mode === 'sena_texto' && styles.modeBtnActive]} onPress={() => switchMode('sena_texto')} activeOpacity={0.8}>
               {mode === 'sena_texto' && (
@@ -189,10 +185,9 @@ export const TranslationScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          {/* ── Área de cámara / entrada ── */}
           {mode === 'sena_texto' ? (
             <View style={[styles.cameraCard, { height: cameraHeight, shadowColor: C.primary }]}>
-              {/* Badge EN VIVO */}
+
               {isActive && (
                 <View style={styles.liveBadge}>
                   <View style={styles.liveDot} />
@@ -200,7 +195,6 @@ export const TranslationScreen: React.FC = () => {
                 </View>
               )}
 
-              {/* Cámara real o placeholder */}
               {isActive && cameraGranted ? (
                 <CameraView ref={cameraRef} style={styles.cameraImage} facing="front" />
               ) : (
@@ -211,10 +205,8 @@ export const TranslationScreen: React.FC = () => {
                 />
               )}
 
-              {/* Overlay degradado */}
               <LinearGradient colors={['transparent', 'rgba(0,0,0,0.55)']} style={styles.cameraOverlay} />
 
-              {/* Marco de detección */}
               <View style={styles.detectionFrame}>
                 <View style={[styles.corner, styles.cornerTL]} />
                 <View style={[styles.corner, styles.cornerTR]} />
@@ -222,7 +214,6 @@ export const TranslationScreen: React.FC = () => {
                 <View style={[styles.corner, styles.cornerBR]} />
               </View>
 
-              {/* Indicador de letra pendiente — solo cuando el agente está confirmando */}
               {isActive && agentPendingLetter && (
                 <View style={styles.pendingBubble}>
                   <Text style={styles.pendingLetterText}>{agentPendingLetter}</Text>
@@ -239,7 +230,6 @@ export const TranslationScreen: React.FC = () => {
                 </View>
               )}
 
-              {/* Label inferior */}
               <View style={styles.cameraLabel}>
                 <Ionicons name="camera-outline" size={14} color="#fff" />
                 <Text style={styles.cameraLabelText}>{cameraStatusLabel}</Text>
@@ -269,7 +259,6 @@ export const TranslationScreen: React.FC = () => {
             </View>
           )}
 
-          {/* ── Tips (solo modo seña) ── */}
           {mode === 'sena_texto' && (
             <View style={styles.tipsRow}>
               {TIPS.map((tip, i) => (
@@ -281,7 +270,6 @@ export const TranslationScreen: React.FC = () => {
             </View>
           )}
 
-          {/* ── Resultado ── */}
           <View style={[styles.resultCard, { backgroundColor: C.surface, borderColor: C.border, shadowColor: C.primary }]}>
             <View style={[styles.resultHeader, { borderBottomColor: C.border }]}>
               <LinearGradient colors={[C.primaryBg, C.primaryBg]} style={styles.resultIconBg}>
@@ -351,7 +339,6 @@ export const TranslationScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* ── Botón principal ── */}
           <TouchableOpacity onPress={handleAction} activeOpacity={0.85} disabled={loading} style={[styles.actionBtnWrapper, { shadowColor: C.primary }]}>
             <LinearGradient
               colors={isActive ? ['#DC2626', '#B91C1C'] : [C.primary + 'EE', C.primary, C.primaryDark]}
@@ -391,14 +378,12 @@ const styles = StyleSheet.create({
   innerWrapper: { width: '100%', gap: 18 },
   innerWrapperWide: { maxWidth: 760, alignSelf: 'center' },
 
-  // Toggle
   modeToggle: { flexDirection: 'row', borderRadius: 18, borderWidth: 1.5, overflow: 'hidden', alignSelf: 'center', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 4 },
   modeBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 13, paddingHorizontal: 24, gap: 8, overflow: 'hidden' },
   modeBtnActive: {},
   modeBtnText: { fontSize: 14, fontWeight: '700', color: Colors.textSecondary },
   modeBtnTextActive: { color: '#fff' },
 
-  // Cámara — el alto se calcula dinámicamente en el componente para no exceder el viewport
   cameraCard: { width: '100%', borderRadius: 24, overflow: 'hidden', backgroundColor: '#1a1a2e', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.25, shadowRadius: 20, elevation: 10 },
   cameraImage: { width: '100%', height: '100%' },
   cameraOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 100 },
@@ -415,7 +400,6 @@ const styles = StyleSheet.create({
   cameraLabelText: { color: 'rgba(255,255,255,0.9)', fontSize: 13, fontWeight: '500' },
   cameraConfidence: { color: 'rgba(255,255,255,0.75)', fontSize: 12, fontWeight: '700' },
 
-  // Burbuja de letra pendiente — feedback visual durante la ventana de estabilidad
   pendingBubble: {
     position: 'absolute',
     top: 14,
@@ -444,7 +428,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 
-  // Input card
   inputCard: { borderRadius: 24, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 14, elevation: 4 },
   inputCardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
   inputCardTitle: { fontSize: 15, fontWeight: '700' },
@@ -452,12 +435,10 @@ const styles = StyleSheet.create({
   charCount: { alignItems: 'flex-end', marginTop: 10 },
   charCountText: { fontSize: 11 },
 
-  // Tips
   tipsRow: { gap: 10 },
   tipChip: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14 },
   tipText: { fontSize: 13, fontWeight: '500', flex: 1, lineHeight: 19 },
 
-  // Resultado
   resultCard: { borderRadius: 24, overflow: 'hidden', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 16, elevation: 5, borderWidth: 1.5 },
   resultHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16, borderBottomWidth: 1 },
   resultIconBg: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
@@ -475,7 +456,6 @@ const styles = StyleSheet.create({
   resultEmpty: { alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 12 },
   resultEmptyText: { fontSize: 13, textAlign: 'center', lineHeight: 21, maxWidth: 240 },
 
-  // Botón principal
   actionBtnWrapper: { borderRadius: 20, overflow: 'hidden', alignSelf: 'stretch', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 10 },
   actionBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 18, paddingHorizontal: 36, gap: 10, borderRadius: 20 },
   actionBtnText: { color: '#fff', fontSize: 17, fontWeight: '800', letterSpacing: 0.3 },

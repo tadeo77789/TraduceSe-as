@@ -1,29 +1,18 @@
-/**
- * @file services/vision/motionTemplateStore.ts
- * @description Persistencia de plantillas de GESTOS (señas de palabra con
- * movimiento, ej. "HOLA", "GRACIAS"). A diferencia de `templateStore.ts`
- * (poses estáticas de 1 frame), cada plantilla aquí es una SECUENCIA de
- * frames normalizados — la trayectoria completa del gesto re-muestreada a
- * `SEQ_LEN` pasos. El matcher (DTW en motionClassifier) compara la ventana
- * de movimiento actual contra estas secuencias.
- *
- * Se guardan en AsyncStorage igual que las plantillas estáticas.
- */
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_KEY = '@traduce_senas/gesture_templates_v1';
 
-/** Largo fijo de las secuencias guardadas (frames re-muestreados). */
 export const SEQ_LEN = 16;
-/** Dimensión de cada frame (21 puntos × xyz normalizados). */
+
 export const FRAME_DIM = 63;
 
 export interface GestureTemplate {
-  /** Palabra o frase que representa el gesto. */
+
   label: string;
-  /** Secuencia de SEQ_LEN frames de FRAME_DIM features cada uno. */
+
   frames: number[][];
-  /** Cuándo se grabó. */
+
   createdAt: string;
 }
 
@@ -63,7 +52,7 @@ const persist = async (): Promise<void> => {
     const payload: GesturesPayload = { gestures: cache };
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   } catch {
-    // Si falla la persistencia, seguimos en memoria.
+
   }
 };
 
@@ -77,12 +66,11 @@ const isValidTemplate = (t: Partial<GestureTemplate>): t is GestureTemplate =>
   );
 
 export const gestureStore = {
-  /** Devuelve todas las plantillas de gesto guardadas. */
+
   async getAll(): Promise<GestureTemplate[]> {
     return load();
   },
 
-  /** Cuántas plantillas hay por palabra. */
   async countByLabel(): Promise<Record<string, number>> {
     const all = await load();
     const counts: Record<string, number> = {};
@@ -92,7 +80,6 @@ export const gestureStore = {
     return counts;
   },
 
-  /** Agrega una plantilla nueva. */
   async add(label: string, frames: number[][]): Promise<void> {
     await load();
     if (!cache) cache = [];
@@ -100,7 +87,6 @@ export const gestureStore = {
     await persist();
   },
 
-  /** Borra todas las plantillas de una palabra. */
   async removeLabel(label: string): Promise<void> {
     await load();
     if (!cache) return;
@@ -108,13 +94,11 @@ export const gestureStore = {
     await persist();
   },
 
-  /** Borra todo el dataset de gestos. */
   async clear(): Promise<void> {
     cache = [];
     await persist();
   },
 
-  /** Serializa el dataset de gestos a JSON. */
   async exportJSON(): Promise<string> {
     const all = await load();
     return JSON.stringify(
@@ -124,7 +108,6 @@ export const gestureStore = {
     );
   },
 
-  /** Importa gestos desde un JSON exportado. mode='merge' agrega; 'replace' sobrescribe. */
   async importJSON(json: string, mode: 'merge' | 'replace' = 'merge'): Promise<number> {
     let parsed: unknown;
     try {

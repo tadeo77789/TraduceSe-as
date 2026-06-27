@@ -1,22 +1,4 @@
-/**
- * @file services/vision/mediapipeProvider.web.ts
- * @description Provider de MediaPipe Hands para web. Carga el módulo
- * `@mediapipe/tasks-vision` desde CDN en runtime para evitar que Metro
- * intente bundlear el `vision_bundle.mjs` (que usa import() dinámicos
- * internos no soportados por el transformer de Metro).
- *
- * Detecta los 21 keypoints de la mano y aplica el clasificador geométrico
- * para mapearlos a una letra LSC. Solo se compila en web — Metro resuelve
- * este archivo automáticamente cuando la plataforma es `web`.
- *
- * Señas con movimiento (J, Ñ, RR, Z): el snapshot de cada 1.5 s del agente
- * no alcanza para capturar una trayectoria, así que el provider corre un
- * loop interno de muestreo (~8 fps) que lee directo del <video> de la
- * cámara, extrae landmarks y alimenta el `motionClassifier`. En `detect()`
- * el resultado dinámico tiene prioridad sobre el estático, y mientras la
- * mano se está moviendo las letras estáticas se degradan a low_confidence
- * para no anexar basura a mitad de un trazo.
- */
+
 import { classifyLetterLSC, type Landmark } from './classifier';
 import { normalizeLandmarks } from './normalize';
 import { knnClassify } from './knnClassifier';
@@ -35,7 +17,6 @@ const WASM_BASE = `${CDN_BASE}/wasm`;
 const MODEL_URL =
   'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
 
-// ── Tipos mínimos para evitar dependencia con el paquete npm ────────────────
 interface MpLandmark { x: number; y: number; z: number }
 
 interface MpHandLandmarker {
@@ -57,8 +38,6 @@ interface MpModule {
 let landmarker: MpHandLandmarker | null = null;
 let initPromise: Promise<MpHandLandmarker> | null = null;
 
-/** Carga el módulo en runtime esquivando el análisis estático de Metro.
- *  `new Function('url', 'return import(url)')` se evalúa solo en el browser. */
 const loadMpModule = (): Promise<MpModule> => {
   const dynImport = new Function('u', 'return import(u)') as (u: string) => Promise<MpModule>;
   return dynImport(MODULE_URL);
@@ -97,16 +76,10 @@ const loadImage = (base64: string): Promise<HTMLImageElement> =>
       : `data:image/jpeg;base64,${base64}`;
   });
 
-// ── Loop de muestreo para señas con movimiento ───────────────────────────────
-// Lee directo del <video> de expo-camera a ~8 fps (mucho más barato que
-// takePictureAsync) y alimenta el buffer del motionClassifier. Se mantiene
-// vivo mientras el agente siga llamando a detect(); si pasa MOTION_IDLE_STOP_MS
-// sin detecciones, se autodetiene para no quemar CPU.
 const MOTION_SAMPLE_MS = 120;
 const MOTION_IDLE_STOP_MS = 5000;
 const SAMPLE_MAX_WIDTH = 320;
-/** Recorrido de muñeca (en palmas, ventana ~450 ms) sobre el cual se
- *  considera que la mano está dibujando un gesto y no una pose estática. */
+
 const MOVING_TRAVEL_THRESHOLD = 0.5;
 
 let motionTimer: ReturnType<typeof setInterval> | null = null;
@@ -114,7 +87,6 @@ let lastDetectAt = 0;
 let samplingBusy = false;
 let sampleCanvas: HTMLCanvasElement | null = null;
 
-/** El <video> activo de la cámara (expo-camera web renderiza uno). */
 const findActiveVideo = (): HTMLVideoElement | null => {
   const videos = Array.from(document.querySelectorAll('video'));
   return videos.find(v => v.readyState >= 2 && v.videoWidth > 0 && !v.paused) ?? null;
@@ -134,7 +106,7 @@ const sampleMotionFrame = (): void => {
     stopMotionLoop();
     return;
   }
-  if (!landmarker) return; // El init de detect() lo cargará en breve.
+  if (!landmarker) return;
   const video = findActiveVideo();
   if (!video) return;
 
@@ -152,13 +124,13 @@ const sampleMotionFrame = (): void => {
 
     const res = landmarker.detect(sampleCanvas);
     if (!res.landmarks || res.landmarks.length === 0) {
-      pushMotionGap(); // Pausa sin mano: separa un gesto del siguiente.
+      pushMotionGap();
       return;
     }
     const hand = res.landmarks[0] as Landmark[];
     pushMotionSample(hand, classifyLetterLSC(hand).letter);
   } catch {
-    // Frame fallido: lo saltamos sin romper el loop.
+
   } finally {
     samplingBusy = false;
   }
@@ -177,13 +149,10 @@ export const mediapipeProvider: SignVisionProvider = {
   },
 
   async detect(frame: VisionFrame): Promise<SignDetectionResult> {
-    // Keep-alive del loop de movimiento: corre mientras el agente detecte.
+
     lastDetectAt = Date.now();
     ensureMotionLoop();
 
-    // 0) Señas con movimiento (palabras entrenadas y J/Ñ/RR/Z): el buffer
-    //    del loop interno tiene la trayectoria; tiene prioridad sobre lo
-    //    estático porque un trazo a medias produce poses estáticas falsas.
     try {
       const motion = await classifyMotion();
       if (motion && motion.confidence >= 0.7) {
@@ -196,10 +165,9 @@ export const mediapipeProvider: SignVisionProvider = {
         };
       }
     } catch {
-      // El matcher de gestos nunca debe tumbar la detección estática.
+
     }
 
-    // Frame sintético (sin imagen real) → no podemos detectar.
     if (frame.base64.startsWith('synthetic-') || frame.base64.length < 100) {
       return {
         text: '',
@@ -227,12 +195,8 @@ export const mediapipeProvider: SignVisionProvider = {
       const features = normalizeLandmarks(hand);
       const featuresArray = Array.from(features);
 
-      // Mano dibujando un gesto: no reportamos letras estáticas (serían
-      // poses intermedias del trazo). El agente verá low_confidence y no
-      // anexará nada hasta que el gesto termine o la mano se detenga.
       const handIsMoving = recentWristTravel() >= MOVING_TRAVEL_THRESHOLD;
 
-      // 1) KNN sobre las plantillas entrenadas por el usuario.
       const knn = await knnClassify(features);
       if (knn.used && knn.letter && knn.confidence >= 0.55) {
         return {
@@ -245,7 +209,6 @@ export const mediapipeProvider: SignVisionProvider = {
         };
       }
 
-      // 2) Fallback al clasificador geométrico (9 letras de fábrica).
       const geo = classifyLetterLSC(hand);
       if (!geo.letter) {
         return {

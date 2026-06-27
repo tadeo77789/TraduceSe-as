@@ -1,14 +1,4 @@
-/**
- * @file VerifyCodeScreen.tsx
- * @description Pantalla de verificación OTP — paso 2 del flujo de recuperación de contraseña.
- *
- * Muestra 6 campos individuales de un dígito. El foco avanza automáticamente
- * al siguiente campo al ingresar un dígito, y retrocede con Backspace.
- * Al confirmar el código completo, navega a `NewPasswordScreen`.
- *
- * @todo Conectar `handleConfirm` con `ENDPOINTS.verifyCode` para validar
- *       el código OTP contra el backend.
- */
+
 import React, { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
@@ -26,7 +16,7 @@ import { useColors } from '../../../app/providers/ThemeContext';
 import { useTranslation } from '../../../app/config/i18n';
 
 const CODE_LENGTH = 6;
-  
+
 type NavigationProps = NativeStackNavigationProp<AuthStackParams>;
 
 export const VerifyCodeScreen: React.FC = () => {
@@ -39,15 +29,14 @@ export const VerifyCodeScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isWide = width >= 768;
-  // Si la pantalla viene de Perfil usa el tema/acento del usuario; si viene del flujo de
-  // recuperación desde Login usa paleta fija morada/clara para mantener el branding del flujo.
+
   const themedC = useColors();
   const C = fromProfile ? themedC : Colors;
   const rootBg = C.background;
   const { t } = useTranslation();
 
   const handleChange = (text: string, index: number) => {
-    const digit = text.replace(/\D/g, '').slice(-1); // Filtra cualquier carácter que no sea dígito (teclado físico/web pueden ignorar keyboardType) y deja solo el último
+    const digit = text.replace(/\D/g, '').slice(-1);
     const newCode = [...code];
     newCode[index] = digit;
     setCode(newCode);
@@ -104,7 +93,6 @@ export const VerifyCodeScreen: React.FC = () => {
           {t('verifySubtitle')}
         </Text>
 
-        {/* OTP inputs */}
         <View style={styles.otpRow}>
           {code.map((digit, i) => (
             <TextInput
@@ -174,14 +162,12 @@ export const VerifyCodeScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  // ── Web ──
+
   wideRoot: { flex: 1, backgroundColor: '#EDE9FE', alignItems: 'center', justifyContent: 'center' },
   formPanel: { width: 480 },
 
-  // ── Móvil ──
   mobileRoot: { flex: 1, backgroundColor: '#EDE9FE' },
 
-  // ── Formulario ──
   formScroll: {
     flexGrow: 1,
     paddingHorizontal: 16,
@@ -190,7 +176,6 @@ const styles = StyleSheet.create({
   },
   formInner: {},
 
-  // Botón volver
   backBtn: {
     position: 'absolute',
     top: 20,
@@ -209,7 +194,6 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
-  // Logo
   logoCorner: {
     position: 'absolute',
     top: 11,
@@ -234,7 +218,6 @@ const styles = StyleSheet.create({
   logoEmoji: { fontSize: 22 },
   brandName: { fontSize: 17, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.2 },
 
-  // Card
   card: {
     backgroundColor: '#DDD6FE',
     borderRadius: 20,
@@ -262,7 +245,6 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
 
-  // OTP
   otpRow: { flexDirection: 'row', gap: 10, marginBottom: 28 },
   otpInput: {
     width: 44,
@@ -274,19 +256,18 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     borderWidth: 1,
     borderColor: Colors.border,
-    textAlign: 'center', // Centra el dígito horizontalmente (en web el prop textAlign no siempre se aplica al <input> nativo)
-    textAlignVertical: 'center', // Centra el dígito verticalmente en Android
-    paddingVertical: 0, // Elimina el padding vertical default del <input> en web que descentra el texto
-    paddingHorizontal: 0, // Elimina el padding horizontal default del <input> en web
-    lineHeight: Platform.OS === 'web' ? 50 : undefined, // En web fuerza la altura de línea ≈ height para centrar verticalmente
-    includeFontPadding: false, // Quita el padding extra de fuente en Android
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    lineHeight: Platform.OS === 'web' ? 50 : undefined,
+    includeFontPadding: false,
   },
   otpFilled: {
     borderColor: Colors.primary,
     backgroundColor: '#EDE9FE',
   },
 
-  // Botón confirmar
   btnWrapper: { alignItems: 'center', marginTop: 4 },
   submitBtn: {
     backgroundColor: Colors.primary,
@@ -297,7 +278,6 @@ const styles = StyleSheet.create({
   submitBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   btnDisabled: { opacity: 0.6 },
 
-  // Link inferior
   linkRow: { alignItems: 'center', marginTop: 22 },
   linkText: { fontSize: 13, color: Colors.textSecondary },
   linkAccent: { color: Colors.primary, fontWeight: '700' },

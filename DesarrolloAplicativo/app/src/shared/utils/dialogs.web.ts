@@ -1,10 +1,4 @@
-/**
- * @file utils/dialogs.web.ts
- * @description Wrapper de SweetAlert2 para web. Expone una API mínima que
- * cubre los casos del proyecto: alert simple, success, error, confirm y
- * choice (botones múltiples). Metro carga este archivo solo en web; en
- * nativo se resuelve `dialogs.ts` (fallback a Alert.alert).
- */
+
 import Swal, { type SweetAlertIcon } from 'sweetalert2';
 
 const PRIMARY = '#7C3AED';
@@ -68,13 +62,9 @@ export const showConfirm = async (opts: ConfirmOptions): Promise<boolean> => {
   return res.isConfirmed;
 };
 
-/** Diálogo con botones múltiples. Devuelve la `key` elegida o null si canceló. */
 export const showChoice = async (opts: ChoiceDialogOptions): Promise<string | null> => {
   if (opts.choices.length === 0) return null;
 
-  // SweetAlert2 nativamente soporta confirm + deny + cancel (3 botones).
-  // Si hay 2 opciones las mapeamos a confirm/deny; si hay más, caemos a un
-  // diálogo HTML con botones inline.
   if (opts.choices.length <= 2) {
     const [first, second] = opts.choices;
     const res = await Swal.fire({
@@ -96,7 +86,6 @@ export const showChoice = async (opts: ChoiceDialogOptions): Promise<string | nu
     return null;
   }
 
-  // Más de 2 opciones: render HTML personalizado.
   const buttonsHtml = opts.choices
     .map((c, i) => {
       const bg = c.destructive ? DANGER : PRIMARY;

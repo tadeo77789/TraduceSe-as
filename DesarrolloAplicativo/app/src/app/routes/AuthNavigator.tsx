@@ -1,44 +1,30 @@
-// Ubicación: app/presentation/navigation/AuthNavigator.tsx
-/**
- * @file AuthNavigator.tsx
- * @description Stack de navegación del flujo de autenticación.
- *
- * Define el tipo `AuthStackParams` con las rutas disponibles y monta
- * el stack sin headers visibles. Ruta inicial: `Landing`.
- *
- * Rutas:
- * - `Landing` → pantalla de bienvenida con slider y CTA.
- * - `Login` → inicio de sesión.
- * - `Register` → creación de cuenta.
- * - `ForgotPassword` → recuperación de contraseña (ingreso de correo).
- * - `VerifyCode` → verificación OTP de 6 dígitos.
- * - `NewPassword` → establecer nueva contraseña.
- */
-import React from 'react'; // Importa React; necesario para usar JSX — fuente: node_modules/react
-import { createNativeStackNavigator } from '@react-navigation/native-stack'; // Importa la función que crea un stack de navegación nativo con animaciones del SO — fuente: node_modules/@react-navigation/native-stack
-import { LandingScreen } from '../../feature/homescreen/pages/LandingScreen'; // Importa la pantalla de bienvenida con slider y botones de CTA — fuente: app/presentation/screens/LandingScreen.tsx
-import { LoginScreen } from '../../feature/auth/pages/LoginScreen'; // Importa la pantalla de inicio de sesión con formulario de email y contraseña — fuente: app/presentation/screens/Auth/LoginScreen.tsx
-import { RegisterScreen } from '../../feature/auth/pages/RegisterScreen'; // Importa la pantalla de creación de cuenta nueva — fuente: app/presentation/screens/Auth/RegisterScreen.tsx
-import { ForgotPasswordScreen } from '../../feature/auth/pages/ForgotPasswordScreen'; // Importa la pantalla donde el usuario ingresa su correo para recuperar contraseña — fuente: app/presentation/screens/Auth/ForgotPasswordScreen.tsx
-import { VerifyCodeScreen } from '../../feature/auth/pages/VerifyCodeScreen'; // Importa la pantalla de verificación del código OTP de 6 dígitos enviado al correo — fuente: app/presentation/screens/Auth/VerifyCodeScreen.tsx
-import { NewPasswordScreen } from '../../feature/auth/pages/NewPasswordScreen'; // Importa la pantalla donde el usuario establece su nueva contraseña tras verificar el OTP — fuente: app/presentation/screens/Auth/NewPasswordScreen.tsx
+
+
+import React from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { LandingScreen } from '../../feature/homescreen/pages/LandingScreen';
+import { LoginScreen } from '../../feature/auth/pages/LoginScreen';
+import { RegisterScreen } from '../../feature/auth/pages/RegisterScreen';
+import { ForgotPasswordScreen } from '../../feature/auth/pages/ForgotPasswordScreen';
+import { VerifyCodeScreen } from '../../feature/auth/pages/VerifyCodeScreen';
+import { NewPasswordScreen } from '../../feature/auth/pages/NewPasswordScreen';
 import { TermsScreen } from '../../feature/Profile/pages/TermsScreen';
 import { PrivacyPolicyScreen } from '../../feature/Profile/pages/PrivacyPolicyScreen';
 
-export type AuthStackParams = { 
-  Landing: undefined; 
-  Login: undefined; 
-  Register: undefined; 
+export type AuthStackParams = {
+  Landing: undefined;
+  Login: undefined;
+  Register: undefined;
   ForgotPassword: { fromProfile?: boolean } | undefined;
   VerifyCode: { fromProfile?: boolean } | undefined;
   NewPassword: { fromProfile?: boolean } | undefined;
   Terms: undefined;
   PrivacyPolicy: undefined;
-}; 
+};
 
-const Stack = createNativeStackNavigator<AuthStackParams>(); 
+const Stack = createNativeStackNavigator<AuthStackParams>();
 
-export const AuthNavigator: React.FC = () => ( 
+export const AuthNavigator: React.FC = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="Landing" component={LandingScreen} />
     <Stack.Screen name="Login" component={LoginScreen} />

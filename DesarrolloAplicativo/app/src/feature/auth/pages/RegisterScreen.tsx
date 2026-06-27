@@ -1,17 +1,4 @@
-/**
- * @file RegisterScreen.tsx
- * @description Pantalla de creación de cuenta.
- *
- * Usa `useRegisterForm` para manejar el estado y la validación del formulario.
- * Campos: nombre, correo, contraseña y checkbox de aceptación de términos.
- *
- * Soporta dos layouts:
- * - **Web (≥ 768 px)**: formulario centrado con ancho máximo de 480 px.
- * - **Móvil**: formulario a pantalla completa con fondo lavanda.
- *
- * El logo aparece en la esquina superior izquierda en ambos layouts.
- * Incluye link de navegación a la pantalla de login.
- */
+
 import React from 'react';
 import {
   View,
@@ -49,7 +36,7 @@ export const RegisterScreen: React.FC = () => {
       bounces={false}
     >
       <View style={styles.formInner}>
-      {/* Card formulario */}
+
       <View style={styles.card}>
         <Text style={styles.title}>{t('registerTitle')}</Text>
 
@@ -89,7 +76,6 @@ export const RegisterScreen: React.FC = () => {
           containerStyle={styles.inputSpacing}
         />
 
-        {/* Checkbox términos */}
         <TouchableOpacity
           style={styles.checkRow}
           onPress={() => setField('terminos', !form.terminos)}
@@ -106,7 +92,6 @@ export const RegisterScreen: React.FC = () => {
         </TouchableOpacity>
         {errors.terminos ? <Text style={styles.errorText}>{errors.terminos}</Text> : null}
 
-        {/* Botón registrarse */}
         <View style={styles.btnWrapper}>
           <TouchableOpacity
             style={[styles.registerBtn, loading && styles.btnDisabled]}
@@ -118,7 +103,6 @@ export const RegisterScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Link inicia sesión */}
       <TouchableOpacity
         onPress={() => navigation.navigate('Login' as never)}
         style={styles.loginRow}
@@ -146,7 +130,6 @@ export const RegisterScreen: React.FC = () => {
     </>
   );
 
-  // ── Layout web: centrado ──
   if (isWide) {
     return (
       <View style={styles.wideRoot}>
@@ -158,7 +141,6 @@ export const RegisterScreen: React.FC = () => {
     );
   }
 
-  // ── Layout móvil ──
   return (
     <KeyboardAvoidingView
       style={styles.mobileRoot}
@@ -171,14 +153,12 @@ export const RegisterScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  // ── Web ──
+
   wideRoot: { flex: 1, backgroundColor: '#EDE9FE', alignItems: 'center', justifyContent: 'center' },
   formPanel: { width: 480 },
 
-  // ── Móvil ──
   mobileRoot: { flex: 1, backgroundColor: '#EDE9FE' },
 
-  // ── Formulario ──
   formScroll: {
     flexGrow: 1,
     paddingHorizontal: 16,
@@ -187,7 +167,6 @@ const styles = StyleSheet.create({
   },
   formInner: {},
 
-  // Botón volver
   backBtn: {
     position: 'absolute',
     top: 20,
@@ -206,11 +185,10 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
-  // Logo
   logoCorner: {
     position: 'absolute',
     top: 20,
-    left: 68,          // desplazado para no solaparse con el back button
+    left: 68,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
@@ -231,7 +209,6 @@ const styles = StyleSheet.create({
   logoEmoji: { fontSize: 22 },
   brandName: { fontSize: 17, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.2 },
 
-  // Título
   title: {
     fontSize: 28,
     fontWeight: '800',
@@ -239,7 +216,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
-  // Card
   card: {
     backgroundColor: '#DDD6FE',
     borderRadius: 20,
@@ -253,7 +229,6 @@ const styles = StyleSheet.create({
 
   inputSpacing: { marginBottom: 14 },
 
-  // Checkbox
   checkRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -279,7 +254,6 @@ const styles = StyleSheet.create({
   termsLink: { color: Colors.primary, fontWeight: '600' },
   errorText: { fontSize: 12, color: Colors.error, marginTop: 4, fontWeight: '500' },
 
-  // Botón
   btnWrapper: { alignItems: 'center', marginTop: 20 },
   registerBtn: {
     backgroundColor: Colors.primary,
@@ -290,7 +264,6 @@ const styles = StyleSheet.create({
   registerBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   btnDisabled: { opacity: 0.6 },
 
-  // Link login
   loginRow: { alignItems: 'center', marginTop: 22 },
   loginText: { fontSize: 13, color: Colors.textSecondary },
   loginLink: { color: Colors.primary, fontWeight: '700' },

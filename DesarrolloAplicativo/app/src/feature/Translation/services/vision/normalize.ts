@@ -1,15 +1,4 @@
-/**
- * @file services/vision/normalize.ts
- * @description Normaliza los 21 keypoints de MediaPipe a un vector invariante
- * a posición y escala. Necesario para que el KNN compare poses sin importar
- * dónde está la mano en el cuadro ni qué tan cerca de la cámara está.
- *
- * Estrategia:
- *  1. Trasladar todos los puntos para que la muñeca (índice 0) quede en (0,0,0).
- *  2. Escalar por la distancia muñeca → MCP del dedo medio (índice 9). Esa
- *     distancia es proporcional al tamaño de la mano.
- *  3. Aplanar a un Float32Array de 63 elementos.
- */
+
 import type { Landmark } from './classifier';
 
 const FEATURE_LEN = 63;
@@ -37,7 +26,6 @@ export const normalizeLandmarks = (landmarks: Landmark[]): Float32Array => {
   return out;
 };
 
-/** Distancia euclidiana entre dos vectores de mismas dimensiones. */
 export const euclidean = (a: Float32Array, b: Float32Array): number => {
   let sum = 0;
   for (let i = 0; i < a.length; i++) {

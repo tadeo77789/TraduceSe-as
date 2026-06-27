@@ -1,11 +1,4 @@
-/**
- * @file NewPasswordScreen.tsx
- * @description Pantalla para establecer una nueva contraseña — paso 3 del flujo
- * de recuperación.
- *
- * @todo Conectar `handleConfirm` con `ENDPOINTS.resetPassword` para actualizar
- *       la contraseña en el backend.
- */
+
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
@@ -32,8 +25,7 @@ export const NewPasswordScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isWide = width >= 768;
-  // Si la pantalla viene de Perfil usa el tema/acento del usuario; si viene del flujo de
-  // recuperación desde Login usa paleta fija morada/clara para mantener el branding del flujo.
+
   const themedC = useColors();
   const C = fromProfile ? themedC : Colors;
   const rootBg = C.background;
@@ -49,14 +41,14 @@ export const NewPasswordScreen: React.FC = () => {
     }
     setErrors({});
     setLoading(true);
-    // TODO: llamar al backend
+
     setTimeout(() => {
       setLoading(false);
       if (fromProfile) {
-        // Viene de Perfil → volver a MainTabs (tab Perfil sigue activo)
+
         (navigation as any).popToTop();
       } else {
-        // Viene de "Olvidé contraseña" → ir a Login
+
         navigation.navigate('Login' as never);
       }
     }, 1000);
@@ -152,14 +144,12 @@ export const NewPasswordScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  // ── Web ──
+
   wideRoot: { flex: 1, backgroundColor: '#EDE9FE', alignItems: 'center', justifyContent: 'center' },
   formPanel: { width: 480 },
 
-  // ── Móvil ──
   mobileRoot: { flex: 1, backgroundColor: '#EDE9FE' },
 
-  // ── Formulario ──
   formScroll: {
     flexGrow: 1,
     paddingHorizontal: 16,
@@ -168,7 +158,6 @@ const styles = StyleSheet.create({
   },
   formInner: {},
 
-  // Botón volver
   backBtn: {
     position: 'absolute',
     top: 20,
@@ -187,7 +176,6 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
-  // Logo
   logoCorner: {
     position: 'absolute',
     top: 20,
@@ -212,7 +200,6 @@ const styles = StyleSheet.create({
   logoEmoji: { fontSize: 22 },
   brandName: { fontSize: 17, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.2 },
 
-  // Card
   card: {
     backgroundColor: '#DDD6FE',
     borderRadius: 20,
@@ -233,7 +220,6 @@ const styles = StyleSheet.create({
 
   inputSpacing: { marginBottom: 14 },
 
-  // Botón confirmar
   btnWrapper: { alignItems: 'center', marginTop: 20 },
   submitBtn: {
     backgroundColor: Colors.primary,

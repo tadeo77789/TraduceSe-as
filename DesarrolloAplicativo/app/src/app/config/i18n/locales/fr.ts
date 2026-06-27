@@ -180,7 +180,6 @@ const fr: typeof es = {
   cameraPermissionTitle: 'Autorisation caméra',
   cameraPermissionMsg: 'L\'accès à la caméra est requis pour traduire les signes.',
 
-  // ── Agent de reconnaissance ──────────────────────────────────────────────
   agentStarting: 'Activation de la caméra...',
   agentDetecting: 'Reconnaissance du signe...',
   agentLowConfidence: 'Confiance faible, répétez le signe',
@@ -192,7 +191,6 @@ const fr: typeof es = {
   agentBackspace: 'Supprimer',
   agentSpace: 'Espace',
 
-  // ── Entraînement de l'IA ─────────────────────────────────────────────────
   trainTitle: 'Entraîner l\'IA',
   trainHint: 'Faites le signe devant la caméra et appuyez sur la bonne lettre',
   trainNoHand: 'Je dois voir votre main pour enregistrer l\'échantillon',
@@ -221,7 +219,6 @@ const fr: typeof es = {
   trainGestureDeleteTitle: 'Supprimer le geste',
   trainGestureDeleteConfirm: 'Supprimer toutes les prises de « {label} » ?',
 
-  // ── Admin ────────────────────────────────────────────────────────────────
   adminDashboardTitle: 'Panneau admin',
   adminDashboardSubtitle: 'État de l\'IA et métriques de l\'app',
   adminAiState: 'État de l\'IA',

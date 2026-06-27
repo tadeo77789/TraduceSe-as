@@ -1,7 +1,4 @@
-/**
- * @file ProfileScreen.tsx
- * @description Pantalla de perfil del usuario autenticado.
- */
+
 import React, { useState } from 'react';
 import {
   View,
@@ -28,7 +25,6 @@ import { useTranslation } from '../../../app/config/i18n';
 
 const LANG_CODES: LanguageCode[] = ['es', 'en', 'fr', 'pt'];
 
-// Opciones de color de acento
 const COLOR_ACCENTS: { key: ColorAccent; label: string; color: string; dark: string }[] = [
   { key: 'purple', label: 'Morado', color: '#7C3AED', dark: '#9D60F5' },
   { key: 'green',  label: 'Verde',  color: '#4CAF82', dark: '#5DBF92' },
@@ -90,7 +86,6 @@ export const ProfileScreen: React.FC = () => {
       <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, isWide && styles.contentWide]} showsVerticalScrollIndicator={false}>
         <View style={[styles.innerWrapper, isWide && styles.innerWrapperWide]}>
 
-          {/* Avatar + nombre */}
           <View style={styles.avatarSection}>
             <LinearGradient colors={[C.primaryLight, C.primary]} style={[styles.avatarCircle, { shadowColor: C.primary }]}>
               <Ionicons name="person" size={44} color="#fff" />
@@ -99,7 +94,6 @@ export const ProfileScreen: React.FC = () => {
             <Text style={[styles.userEmail, { color: C.textSecondary }]}>{displayEmail}</Text>
           </View>
 
-          {/* Estadísticas */}
           <View style={styles.statsRow}>
             {USER_STATS.map((stat, i) => (
               <View key={i} style={[styles.statCard, { backgroundColor: C.surface }]}>
@@ -110,7 +104,6 @@ export const ProfileScreen: React.FC = () => {
             ))}
           </View>
 
-          {/* Cuenta */}
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>{t('profileAccount')}</Text>
             <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
@@ -123,12 +116,10 @@ export const ProfileScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Preferencias */}
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>{t('profilePreferences')}</Text>
             <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
 
-              {/* Color de la app */}
               <Text style={[styles.prefGroupLabel, { color: C.textSecondary }]}>Color de la app</Text>
               <View style={styles.accentRow}>
                 {COLOR_ACCENTS.map(accent => {
@@ -158,7 +149,6 @@ export const ProfileScreen: React.FC = () => {
 
               <View style={[styles.divider, { backgroundColor: C.border }]} />
 
-              {/* Modo oscuro */}
               <View style={styles.prefRow}>
                 <View style={styles.prefLeft}>
                   <View style={[styles.prefIcon, { backgroundColor: C.primaryBg }]}>
@@ -178,7 +168,6 @@ export const ProfileScreen: React.FC = () => {
 
               <View style={[styles.divider, { backgroundColor: C.border }]} />
 
-              {/* Notificaciones */}
               <View style={styles.prefRow}>
                 <View style={styles.prefLeft}>
                   <View style={[styles.prefIcon, { backgroundColor: isDark ? 'rgba(16,185,129,0.18)' : '#D1FAE5' }]}>
@@ -196,7 +185,6 @@ export const ProfileScreen: React.FC = () => {
 
               <View style={[styles.divider, { backgroundColor: C.border }]} />
 
-              {/* Idioma */}
               <Text style={[styles.idiomaLabel, { color: C.textSecondary }]}>{t('profileLanguage')}</Text>
               <View style={styles.idiomaRow}>
                 {LANG_CODES.map(code => (
@@ -218,7 +206,6 @@ export const ProfileScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Acerca de */}
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: C.textSecondary }]}>{t('profileAbout')}</Text>
             <View style={[styles.sectionCard, { backgroundColor: C.surface }]}>
@@ -240,7 +227,6 @@ export const ProfileScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Acciones */}
           <View style={styles.actionsSection}>
             <Button title={t('profileLogout')} onPress={handleLogout} fullWidth />
             <Button title={t('profileDeleteAccount')} onPress={handleDeleteAccount} variant="danger" fullWidth />
@@ -276,7 +262,6 @@ const styles = StyleSheet.create({
   forgotRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingTop: 4 },
   forgotLink: { fontSize: 13, fontWeight: '600' },
 
-  // Color accent
   prefGroupLabel: { fontSize: 12, fontWeight: '700', letterSpacing: 0.4, marginBottom: 12 },
   accentRow: { flexDirection: 'row', gap: 10, marginBottom: 4 },
   accentChip: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16, borderWidth: 2 },

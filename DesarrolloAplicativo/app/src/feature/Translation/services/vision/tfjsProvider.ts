@@ -1,33 +1,7 @@
-/**
- * @file services/vision/tfjsProvider.ts
- * @description Provider de vision para mobile basado en `@tensorflow/tfjs`
- * (sin prebuild). Carga un modelo `model.json` exportado de Teachable Machine
- * o entrenado a medida, y clasifica cada frame de la camara.
- *
- * Diseño:
- *  - Los imports de tfjs y jpeg-js son **dinamicos con try/catch** para que
- *    el provider compile y degrade a mock cuando los paquetes aun no estan
- *    instalados en el proyecto.
- *  - El modelo y sus etiquetas se descargan de `TFJS_MODEL_URL` /
- *    `TFJS_LABELS_URL` (configurables en `config/api.config.ts`).
- *  - El frame JPEG (base64) se decodifica con `jpeg-js` y se convierte en
- *    tensor 224x224x3, normalizado a [-1, 1] (convencion de MobileNet).
- *
- * Para activarlo:
- *  1) Instalar deps:
- *       npm install @tensorflow/tfjs jpeg-js
- *  2) Entrenar el modelo en https://teachablemachine.withgoogle.com/train/image
- *  3) Exportar como "Tensorflow.js" → carpeta con `model.json` + pesos.
- *  4) Subir esos archivos a una URL publica accesible desde el dispositivo
- *     (Firebase Hosting, GitHub Pages, S3, etc.) y poner la URL en
- *     `TFJS_MODEL_URL`.
- *  5) Crear un `labels.json` con `["A", "B", ...]` y hostearlo en
- *     `TFJS_LABELS_URL`.
- */
+
 import { TFJS_MODEL_URL, TFJS_LABELS_URL } from '../../../../app/config/api.config';
 import type { SignDetectionResult, SignVisionProvider, VisionFrame } from './types';
 
-// ── Carga perezosa de deps opcionales ───────────────────────────────────────
 type TfModule = {
   loadLayersModel: (url: string) => Promise<TfModel>;
   loadGraphModel: (url: string) => Promise<TfModel>;
@@ -64,13 +38,13 @@ const loadDeps = (): { tf: TfModule | null; jpeg: JpegModule | null } => {
   if (depsTried) return { tf, jpeg };
   depsTried = true;
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+
     tf = require('@tensorflow/tfjs') as TfModule;
   } catch {
     tf = null;
   }
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+
     jpeg = require('jpeg-js') as JpegModule;
   } catch {
     jpeg = null;
@@ -78,15 +52,13 @@ const loadDeps = (): { tf: TfModule | null; jpeg: JpegModule | null } => {
   return { tf, jpeg };
 };
 
-// ── Estado del modelo ────────────────────────────────────────────────────────
 let model: TfModel | null = null;
 let labels: string[] = [];
 let initPromise: Promise<void> | null = null;
 const TARGET_SIZE = 224;
 
 const decodeBase64 = (b64: string): Uint8Array => {
-  // Atob existe en web; en RN Hermes hay polyfill via Buffer global o no.
-  // Usamos un decoder universal sin deps.
+
   const clean = b64.replace(/^data:image\/\w+;base64,/, '');
   if (typeof atob === 'function') {
     const binary = atob(clean);
@@ -94,7 +66,7 @@ const decodeBase64 = (b64: string): Uint8Array => {
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return bytes;
   }
-  // Fallback manual
+
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
   const lookup = new Uint8Array(256);
   for (let i = 0; i < chars.length; i++) lookup[chars.charCodeAt(i)] = i;
@@ -114,8 +86,6 @@ const decodeBase64 = (b64: string): Uint8Array => {
   return out;
 };
 
-/** Reducir/escalar la imagen RGBA decodificada a TARGET_SIZE × TARGET_SIZE
- *  usando nearest-neighbor — barato y suficiente para el clasificador. */
 const resizeToSquare = (
   rgba: Uint8Array,
   srcW: number,
@@ -130,7 +100,7 @@ const resizeToSquare = (
       const srcX = Math.floor(x * xRatio);
       const srcIdx = (srcY * srcW + srcX) * 4;
       const dstIdx = (y * TARGET_SIZE + x) * 3;
-      // Normaliza [0,255] -> [-1,1] (convencion MobileNet)
+
       out[dstIdx] = rgba[srcIdx] / 127.5 - 1;
       out[dstIdx + 1] = rgba[srcIdx + 1] / 127.5 - 1;
       out[dstIdx + 2] = rgba[srcIdx + 2] / 127.5 - 1;
@@ -160,7 +130,7 @@ const initModel = async (): Promise<void> => {
 
   initPromise = (async () => {
     if (tfMod.ready) await tfMod.ready();
-    // Teachable Machine exporta LayersModel; ajustar si tu modelo es GraphModel.
+
     try {
       model = await tfMod.loadLayersModel(TFJS_MODEL_URL);
     } catch {
@@ -177,15 +147,14 @@ export const tfjsProvider: SignVisionProvider = {
   async init() {
     const { tf: tfMod, jpeg: jpegMod } = loadDeps();
     if (!tfMod || !jpegMod) {
-      // Deps no instaladas — degradamos a mock silenciosamente. El primer
-      // `detect` devolvera no_hands y la UI seguira funcional.
+
       return;
     }
     if (!TFJS_MODEL_URL) return;
     try {
       await initModel();
     } catch {
-      // Modelo no accesible — el provider sigue, devolviendo no_hands.
+
     }
   },
 
@@ -224,7 +193,6 @@ export const tfjsProvider: SignVisionProvider = {
         return Array.from(output.dataSync());
       });
 
-      // Argmax
       let bestIdx = 0;
       let bestProb = probs[0] ?? 0;
       for (let i = 1; i < probs.length; i++) {

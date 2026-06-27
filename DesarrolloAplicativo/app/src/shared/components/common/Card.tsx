@@ -1,8 +1,4 @@
-/**
- * @file Card.tsx
- * @description Tarjeta reutilizable con sombra y radio consistentes con el sistema de diseño.
- * Usa `useColors()` para que el fondo siga el tema activo.
- */
+
 import React from 'react';
 import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import { useColors } from '../../../app/providers/ThemeContext';

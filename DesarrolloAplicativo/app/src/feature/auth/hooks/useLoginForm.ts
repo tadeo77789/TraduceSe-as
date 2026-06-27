@@ -1,13 +1,4 @@
-/**
- * @file useLoginForm.ts
- * @description Hook personalizado para el formulario de inicio de sesión.
- *
- * Gestiona el estado de los campos `email` y `password`, la validación
- * (formato de correo y campo vacío), el estado de carga y los mensajes de error.
- * Llama a `AuthContext.login` al enviar el formulario.
- *
- * @returns email, setEmail, password, setPassword, loading, errors, handleLogin
- */
+
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { useAuth } from '../../../app/providers/AuthContext';

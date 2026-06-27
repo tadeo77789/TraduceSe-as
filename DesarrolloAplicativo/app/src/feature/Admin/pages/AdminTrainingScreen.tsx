@@ -1,4 +1,4 @@
-// Archivo: app/presentation/screens/Admin/AdminTrainingScreen.tsx
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
@@ -98,8 +98,6 @@ export const AdminTrainingScreen: React.FC = () => {
     await refreshCounts();
   }, [t, refreshCounts, agentLastResult]);
 
-  /** Cuánto dura la toma de un gesto: la persona hace la seña completa
-   *  mientras el loop de movimiento llena el buffer. */
   const GESTURE_CAPTURE_MS = 2400;
 
   const handleRecordGesture = useCallback(async () => {
@@ -113,7 +111,7 @@ export const AdminTrainingScreen: React.FC = () => {
       return;
     }
     setRecordingGesture(true);
-    beginGestureCapture(); // Vacía el buffer: la plantilla solo tendrá lo que sigue.
+    beginGestureCapture();
     await new Promise(resolve => setTimeout(resolve, GESTURE_CAPTURE_MS));
     const ok = await recordGesture(label);
     setRecordingGesture(false);
@@ -186,7 +184,6 @@ export const AdminTrainingScreen: React.FC = () => {
       <ScrollView contentContainerStyle={[styles.content, isDesktop && styles.contentDesktop]}>
         <View style={[styles.inner, isTablet && styles.innerWide]}>
 
-          {/* Botón volver (visible en web — en mobile lo cubre AppHeader) */}
           {Platform.OS === 'web' && (
             <TouchableOpacity
               style={[styles.backRow, { backgroundColor: C.surface, borderColor: C.border }]}
@@ -198,7 +195,6 @@ export const AdminTrainingScreen: React.FC = () => {
             </TouchableOpacity>
           )}
 
-          {/* Métricas resumen */}
           <View style={styles.metricsRow}>
             <View style={[styles.metricCard, { backgroundColor: C.surface, borderColor: C.border }]}>
               <Text style={[styles.metricValue, { color: C.primary }]}>{totalSamples}</Text>
@@ -216,7 +212,6 @@ export const AdminTrainingScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Cámara */}
           <View style={[styles.cameraCard, { shadowColor: C.primary }]}>
             {isActive && (
               <View style={styles.liveBadge}>
@@ -253,7 +248,6 @@ export const AdminTrainingScreen: React.FC = () => {
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* Panel entrenamiento */}
           <View style={[styles.trainPanel, { backgroundColor: C.surface, borderColor: C.border }]}>
             <View style={styles.trainHeader}>
               <Ionicons name="school" size={18} color={C.primary} />
@@ -302,7 +296,6 @@ export const AdminTrainingScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Panel de gestos: señas de palabra con movimiento */}
           <View style={[styles.trainPanel, { backgroundColor: C.surface, borderColor: C.border }]}>
             <View style={styles.trainHeader}>
               <Ionicons name="hand-right" size={18} color={C.primary} />

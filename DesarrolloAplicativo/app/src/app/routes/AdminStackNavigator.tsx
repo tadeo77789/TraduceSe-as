@@ -1,9 +1,4 @@
-/**
- * @file AdminStackNavigator.tsx
- * @description Stack del tab Admin. Contiene el dashboard (pantalla por defecto)
- * y la pantalla de entrenamiento de la IA. Solo se monta cuando el usuario
- * tiene rol admin (chequeo en `MainTabNavigator`).
- */
+
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AdminDashboardScreen } from '../../feature/Admin/pages/AdminDashboardScreen';
