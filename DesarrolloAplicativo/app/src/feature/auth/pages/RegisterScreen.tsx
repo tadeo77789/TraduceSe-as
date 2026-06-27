@@ -79,20 +79,27 @@ export const RegisterScreen: React.FC = () => {
 
         <PasswordStrengthMeter password={form.password} />
 
-        <TouchableOpacity
-          style={styles.checkRow}
-          onPress={() => setField('terminos', !form.terminos)}
-          activeOpacity={0.7}
-        >
-          <View style={[styles.checkbox, form.terminos && styles.checkboxChecked]}>
-            {form.terminos && <Ionicons name="checkmark" size={13} color="#fff" />}
-          </View>
+        <View style={styles.checkRow}>
+          <TouchableOpacity
+            onPress={() => setField('terminos', !form.terminos)}
+            activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <View style={[styles.checkbox, form.terminos && styles.checkboxChecked]}>
+              {form.terminos && <Ionicons name="checkmark" size={13} color="#fff" />}
+            </View>
+          </TouchableOpacity>
           <Text style={styles.termsText}>
-            {t('registerTerms')}
-            <Text style={styles.termsLink}>{t('registerTermsLink')}</Text>
-            {t('registerTermsEnd')}
+            <Text onPress={() => setField('terminos', !form.terminos)}>{t('registerTerms')}</Text>
+            <Text
+              style={styles.termsLink}
+              onPress={() => navigation.navigate('Terms' as never)}
+            >
+              {t('registerTermsLink')}
+            </Text>
+            <Text onPress={() => setField('terminos', !form.terminos)}>{t('registerTermsEnd')}</Text>
           </Text>
-        </TouchableOpacity>
+        </View>
         {errors.terminos ? <Text style={styles.errorText}>{errors.terminos}</Text> : null}
 
         <View style={styles.btnWrapper}>
