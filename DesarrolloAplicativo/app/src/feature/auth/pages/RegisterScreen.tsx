@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../shared/constants/colors';
 import { Input } from '../../../shared/components/common/Input';
+import { PasswordStrengthMeter } from '../../../shared/components/common/PasswordStrengthMeter';
 import { useRegisterForm } from '../hooks/useRegisterForm';
 import { useTranslation } from '../../../app/config/i18n';
 
@@ -75,6 +76,8 @@ export const RegisterScreen: React.FC = () => {
           accentColor={Colors.primary}
           containerStyle={styles.inputSpacing}
         />
+
+        <PasswordStrengthMeter password={form.password} />
 
         <TouchableOpacity
           style={styles.checkRow}

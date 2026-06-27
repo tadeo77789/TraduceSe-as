@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { useAuth } from '../../../app/providers/AuthContext';
 import { useTranslation } from '../../../app/config/i18n';
+import { evaluatePassword } from '../../../shared/utils/passwordStrength';
 
 interface RegisterForm {
   nombre: string;
@@ -34,8 +35,13 @@ export function useRegisterForm() {
     if (!form.nombre.trim()) e.nombre = t('registerNameRequired');
     if (!form.correo) e.correo = t('registerEmailRequired');
     else if (!/\S+@\S+\.\S+/.test(form.correo)) e.correo = t('registerEmailInvalid');
-    if (!form.password) e.password = t('registerPasswordRequired');
-    else if (form.password.length < 8) e.password = t('registerPasswordShort');
+    if (!form.password) {
+      e.password = t('registerPasswordRequired');
+    } else {
+      const { checks, meetsMinimum } = evaluatePassword(form.password);
+      if (!checks.length) e.password = t('registerPasswordShort');
+      else if (!meetsMinimum) e.password = t('registerPasswordWeak');
+    }
     if (!form.terminos) e.terminos = t('registerTermsRequired');
     setErrors(e);
     return Object.keys(e).length === 0;
