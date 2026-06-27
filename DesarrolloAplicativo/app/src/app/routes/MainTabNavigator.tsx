@@ -35,49 +35,45 @@ export type MainTabParams = { // Define y exporta el tipo TypeScript que mapea c
   Profile: undefined; // Ruta 'Profile' no recibe parámetros de navegación
 }; // Cierra la definición del tipo MainTabParams
 
-const Tab = createBottomTabNavigator<MainTabParams>(); // Crea la instancia del navegador de tabs inferior tipada con MainTabParams; expone Tab.Navigator y Tab.Screen
-
-export const MainTabNavigator: React.FC = () => { // Define y exporta el componente funcional MainTabNavigator; gestiona todas las pestañas de la app autenticada
-  const { width } = useWindowDimensions(); // Obtiene el ancho actual del viewport; se actualiza automáticamente si el usuario rota el dispositivo o redimensiona la ventana
-  const C = useColors(); // Obtiene los tokens de color reactivos del tema activo (claro u oscuro)
+const Tab = createBottomTabNavigator<MainTabParams>(); 
+export const MainTabNavigator: React.FC = () => { 
+  const { width } = useWindowDimensions(); 
+  const C = useColors(); 
   const { t } = useTranslation();
   const { user } = useAuth();
   const userIsAdmin = isAdmin(user);
-  // Muestra la barra superior solo en web con viewport ancho (≥ 1024 px)
-  // En móvil real y en web con viewport estrecho usa la barra de tabs inferior
-  const isWide = Platform.OS === 'web' && width >= 1024; // Calcula si la pantalla es web de escritorio (≥1024px); true activa la barra superior WebTopBar y oculta la barra inferior
-  // En pantallas muy estrechas (< 480 px) oculta las etiquetas de los tabs
-  const hideLabels = width < 480; // Calcula si el viewport es muy estrecho; true oculta los textos de las pestañas para ganar espacio vertical
+  
+  const isWide = Platform.OS === 'web' && width >= 1024; 
+  const hideLabels = width < 480; 
+  const tabBarTheme = { 
+    backgroundColor: C.surface, 
+    borderTopColor: C.border, 
+  }; 
 
-  const tabBarTheme = { // Define un objeto con los colores dinámicos de la barra de tabs según el tema activo
-    backgroundColor: C.surface, // Color de fondo de la barra de tabs según el tema (claro/oscuro)
-    borderTopColor: C.border, // Color del borde superior de la barra de tabs según el tema (claro/oscuro)
-  }; // Cierra el objeto tabBarTheme
-
-  return ( // Retorna el árbol JSX del navegador de pestañas
-  <Tab.Navigator // Inicia el navegador de pestañas con su configuración global
-    screenOptions={({ route }) => ({ // Función que recibe la ruta activa y retorna las opciones de pantalla; se evalúa para cada tab
-      headerShown: isWide, // Muestra el header solo en modo web de escritorio (isWide=true); en móvil se oculta
-      header: isWide ? (props) => <WebTopBar {...props} /> : undefined, // Si es web de escritorio usa WebTopBar como header personalizado; si no, no hay header
-      tabBarActiveTintColor: C.primary, // Color del ícono y texto del tab activo; usa el acento del tema activo
-      tabBarInactiveTintColor: C.textSecondary, // Color del ícono y texto de los tabs inactivos; usa el token de texto secundario del tema activo
-      tabBarStyle: isWide ? styles.hidden : (hideLabels // Controla el estilo de la barra de tabs: oculta en web de escritorio, compacta en viewports estrechos, normal en los demás
-        ? { ...styles.tabBarCompact, ...tabBarTheme } // Si es viewport estrecho aplica el estilo compacto (altura 56px) mezclado con los colores del tema
-        : { ...styles.tabBar, ...tabBarTheme }), // Si es viewport normal aplica el estilo estándar (altura 74px) mezclado con los colores del tema
-      tabBarShowLabel: !hideLabels, // Muestra las etiquetas de texto solo cuando el viewport es suficientemente ancho (≥480px)
-      tabBarLabelStyle: styles.tabLabel, // Aplica el estilo tipográfico (tamaño y peso) a las etiquetas de todos los tabs
-      tabBarIcon: ({ focused, color }) => { // Función que renderiza el ícono de cada tab; recibe si está enfocado y el color correspondiente
-        const icons: Record<string, [string, string]> = { // Mapa que asocia cada nombre de ruta con su par de íconos [inactivo, activo] de Ionicons
-          Translation: ['language-outline', 'language'], // Íconos para el tab de traducción: outline (inactivo) y sólido (activo)
-          Alphabet:    ['hand-left-outline','hand-left'], // Íconos para el tab de alfabeto: outline (inactivo) y sólido (activo)
-          Stats:       ['bar-chart-outline','bar-chart'], // Íconos para el tab de estadísticas: outline (inactivo) y sólido (activo)
-          History:     ['time-outline',     'time'], // Íconos para el tab de historial: outline (inactivo) y sólido (activo)
-          Admin:       ['shield-outline',   'shield'], // Íconos para el tab de admin: outline (inactivo) y sólido (activo)
-          Profile:     ['person-outline',   'person'], // Íconos para el tab de perfil: outline (inactivo) y sólido (activo)
-        }; // Cierra el objeto de mapeo de íconos
-        const [inactive, active] = icons[route.name] || ['ellipse-outline', 'ellipse']; // Extrae el par de íconos para la ruta actual; usa íconos genéricos si la ruta no está en el mapa
-        return <Ionicons name={(focused ? active : inactive) as any} size={22} color={color} />; // Renderiza el ícono Ionicons: usa el ícono activo si el tab está seleccionado, inactivo si no; tamaño 22px con el color provisto por el navigator
-      }, // Cierra la función tabBarIcon
+  return ( 
+  <Tab.Navigator 
+    screenOptions={({ route }) => ({ 
+      headerShown: isWide, 
+      header: isWide ? (props) => <WebTopBar {...props} /> : undefined, 
+      tabBarActiveTintColor: C.primary, 
+      tabBarInactiveTintColor: C.textSecondary, 
+      tabBarStyle: isWide ? styles.hidden : (hideLabels
+        ? { ...styles.tabBarCompact, ...tabBarTheme } 
+        : { ...styles.tabBar, ...tabBarTheme }),
+      tabBarShowLabel: !hideLabels,
+      tabBarLabelStyle: styles.tabLabel, 
+      tabBarIcon: ({ focused, color }) => { 
+        const icons: Record<string, [string, string]> = { 
+          Translation: ['language-outline', 'language'], 
+          Alphabet:    ['hand-left-outline','hand-left'], 
+          Stats:       ['bar-chart-outline','bar-chart'], 
+          History:     ['time-outline',     'time'], 
+          Admin:       ['shield-outline',   'shield'], 
+          Profile:     ['person-outline',   'person'], 
+        }; 
+        const [inactive, active] = icons[route.name] || ['ellipse-outline', 'ellipse']; 
+        return <Ionicons name={(focused ? active : inactive) as any} size={22} color={color} />; 
+      }, 
       tabBarLabel: ({
         Translation: t('tabTranslation'),
         Alphabet:    t('tabAlphabet'),
@@ -86,7 +82,7 @@ export const MainTabNavigator: React.FC = () => { // Define y exporta el compone
         Admin:       t('tabAdmin'),
         Profile:     t('tabProfile'),
       } as Record<string, string>)[route.name] || route.name,
-    })} // Cierra el objeto retornado por screenOptions y la prop screenOptions
+    })} 
   >
     <Tab.Screen name="Translation" component={TranslationScreen} />
     <Tab.Screen name="Alphabet"    component={AlphabetScreen}    />
@@ -97,12 +93,12 @@ export const MainTabNavigator: React.FC = () => { // Define y exporta el compone
     )}
     <Tab.Screen name="Profile"     component={ProfileStackNavigator} />
   </Tab.Navigator>
-  ); // Cierra el return del componente MainTabNavigator
-}; // Cierra la definición del componente MainTabNavigator
+  ); 
+}; 
 
-const styles = StyleSheet.create({ // Crea el objeto de estilos estático para la barra de tabs; StyleSheet.create optimiza el rendimiento
-  tabBar: { // Estilo de la barra de tabs en modo normal (viewport ≥ 480px en móvil)
-    backgroundColor: Colors.surface, // Color de fondo de la barra usando el token de superficie de la paleta estática
+const styles = StyleSheet.create({ 
+  tabBar: {
+    backgroundColor: Colors.surface, 
     borderTopColor: Colors.border, // Color del borde superior de la barra usando el token de borde de la paleta estática
     borderTopWidth: 1, // Grosor del borde superior separador de la barra de tabs en 1 píxel
     height: 74, // Altura total de la barra de tabs en modo normal (incluye íconos, etiquetas y padding)

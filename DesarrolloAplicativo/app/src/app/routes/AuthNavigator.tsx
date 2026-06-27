@@ -25,20 +25,20 @@ import { NewPasswordScreen } from '../../feature/auth/pages/NewPasswordScreen'; 
 import { TermsScreen } from '../../feature/Profile/pages/TermsScreen';
 import { PrivacyPolicyScreen } from '../../feature/Profile/pages/PrivacyPolicyScreen';
 
-export type AuthStackParams = { // Define y exporta el tipo TypeScript que mapea cada ruta del stack con sus parámetros esperados
-  Landing: undefined; // Ruta 'Landing' no recibe parámetros de navegación
-  Login: undefined; // Ruta 'Login' no recibe parámetros de navegación
-  Register: undefined; // Ruta 'Register' no recibe parámetros de navegación
+export type AuthStackParams = { 
+  Landing: undefined; 
+  Login: undefined; 
+  Register: undefined; 
   ForgotPassword: { fromProfile?: boolean } | undefined;
   VerifyCode: { fromProfile?: boolean } | undefined;
   NewPassword: { fromProfile?: boolean } | undefined;
   Terms: undefined;
   PrivacyPolicy: undefined;
-}; // Cierra la definición del tipo AuthStackParams
+}; 
 
-const Stack = createNativeStackNavigator<AuthStackParams>(); // Crea la instancia del stack navigator tipada con AuthStackParams; expone Stack.Navigator y Stack.Screen
+const Stack = createNativeStackNavigator<AuthStackParams>(); 
 
-export const AuthNavigator: React.FC = () => ( // Define y exporta el componente funcional AuthNavigator; usa sintaxis de retorno implícito con paréntesis
+export const AuthNavigator: React.FC = () => ( 
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="Landing" component={LandingScreen} />
     <Stack.Screen name="Login" component={LoginScreen} />
@@ -49,4 +49,4 @@ export const AuthNavigator: React.FC = () => ( // Define y exporta el componente
     <Stack.Screen name="Terms" component={TermsScreen} />
     <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
   </Stack.Navigator>
-); // Cierra el retorno implícito y la definición del componente AuthNavigator
+);
