@@ -382,6 +382,7 @@ const en: typeof es = {
   termsSection4Body: 'To access all features you must create an account. You are responsible for keeping your credentials confidential and for all activity that occurs under your account. Notify us immediately of any unauthorized use.',
   termsSection5Title: '5. Intellectual property',
   termsSection5Body: 'All TraduceSeña content — including 3D models, animations, recognition algorithms and interface design — is the intellectual property of the development team. Total or partial reproduction without authorization is prohibited.',
+  termsPrivacyLinkText: 'Privacy Policy',
   termsSection6Title: '6. Privacy and data',
   termsSection6Body: 'The processing of your personal data is governed by our Privacy Policy. User privacy is guaranteed at all stages of communication through secure protocols (HTTPS, encrypted WebSockets). We do not sell or share your data with third parties without your consent.',
   termsSection7Title: '7. Limitation of liability',

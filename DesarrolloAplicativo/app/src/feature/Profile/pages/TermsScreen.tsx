@@ -29,6 +29,29 @@ export const TermsScreen: React.FC = () => {
   const { t } = useTranslation();
   const isWide = width >= 768;
 
+  const renderBody = (bodyKey: TranslationKey) => {
+    const text = t(bodyKey);
+    if (bodyKey === 'termsSection6Body') {
+      const linkText = t('termsPrivacyLinkText');
+      const idx = text.indexOf(linkText);
+      if (idx !== -1) {
+        return (
+          <>
+            {text.slice(0, idx)}
+            <Text
+              style={[styles.link, { color: C.primary }]}
+              onPress={() => navigation.navigate('PrivacyPolicy' as never)}
+            >
+              {linkText}
+            </Text>
+            {text.slice(idx + linkText.length)}
+          </>
+        );
+      }
+    }
+    return text;
+  };
+
   return (
     <View style={[styles.root, { backgroundColor: C.background }]}>
 
@@ -57,7 +80,7 @@ export const TermsScreen: React.FC = () => {
         {SECTION_KEYS.map((s, i) => (
           <View key={i} style={[styles.section, { backgroundColor: C.surface, borderColor: C.border }]}>
             <Text style={[styles.sectionTitle, { color: C.textPrimary }]}>{t(s.title)}</Text>
-            <Text style={[styles.sectionBody, { color: C.textSecondary }]}>{t(s.body)}</Text>
+            <Text style={[styles.sectionBody, { color: C.textSecondary }]}>{renderBody(s.body)}</Text>
           </View>
         ))}
 
@@ -130,6 +153,10 @@ const styles = StyleSheet.create({
   sectionBody: {
     fontSize: 14,
     lineHeight: 22,
+  },
+  link: {
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
 
   footer: {

@@ -381,6 +381,7 @@ const es = {
   termsSection4Body: 'Para acceder a todas las funcionalidades es necesario crear una cuenta. Usted es responsable de mantener la confidencialidad de sus credenciales y de toda actividad que ocurra bajo su cuenta. Notifíquenos de inmediato ante cualquier uso no autorizado.',
   termsSection5Title: '5. Propiedad intelectual',
   termsSection5Body: 'Todos los contenidos de TraduceSeña — incluyendo modelos 3D, animaciones, algoritmos de reconocimiento y diseño de interfaz — son propiedad intelectual del equipo de desarrollo. Su reproducción total o parcial sin autorización está prohibida.',
+  termsPrivacyLinkText: 'Política de Privacidad',
   termsSection6Title: '6. Privacidad y datos',
   termsSection6Body: 'El tratamiento de sus datos personales se rige por nuestra Política de Privacidad. La privacidad del usuario está garantizada en todas las etapas de la comunicación mediante el uso de protocolos seguros (HTTPS, WebSockets cifrados). No vendemos ni compartimos sus datos con terceros sin su consentimiento.',
   termsSection7Title: '7. Limitación de responsabilidad',
