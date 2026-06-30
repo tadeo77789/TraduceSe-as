@@ -24,11 +24,6 @@ VALUES
 ('hola', 'hello', NOW(), false, 1),
 ('gracias', 'thank you', NOW(), false, 2);
 
-INSERT INTO alarm (time, message, is_active, user_id)
-VALUES 
-('08:00:00', 'Wake up', true, 1),
-('22:00:00', 'Sleep', false, 2);
-
 INSERT INTO usage_event (section, action, created_at, user_id)
 VALUES 
 ('home', 'login', NOW(), 1),
@@ -58,10 +53,6 @@ SET name = 'Juan David Perez',
     terms_accepted_at = NOW()
 WHERE user_id = 1;
 
-UPDATE alarm
-SET is_active = false
-WHERE alarm_id = 1;
-
 UPDATE sign_lexicon
 SET type = 'gratitude'
 WHERE lexicon_id = 1;
@@ -70,9 +61,6 @@ WHERE lexicon_id = 1;
 
 DELETE FROM multimedia_resource
 WHERE resource_id = 1;
-
-DELETE FROM alarm
-WHERE alarm_id = 2;
 
 DELETE FROM usage_event
 WHERE user_id = 2;
@@ -84,10 +72,6 @@ WHERE user_id = 1;
 SELECT section, action, created_at
 FROM usage_event
 ORDER BY created_at DESC;
-
-SELECT * FROM alarm
-WHERE is_active = true;
-
 
 SELECT s.word, s.type, m.type AS resource_type, m.url
 FROM sign_lexicon s

@@ -8,7 +8,7 @@ Carpeta raíz del desarrollo de Traduce Señas, una aplicación móvil y web par
 
 ```
 DesarrolloAplicativo/
-├── app/        → Aplicación móvil y web (React Native + Expo)
+├── src/        → Aplicación móvil y web (React Native + Expo)
 ├── backend/    → Servidor API REST (Node.js + Express + PostgreSQL)
 └── readme.md   → Este archivo
 ```
@@ -44,7 +44,7 @@ npm --version     # 9 o superior
 ### Paso 2 — Instalar dependencias de la app
 
 ```bash
-cd app
+cd src
 npm install
 ```
 
@@ -90,16 +90,16 @@ npm install
 
 ```bash
 # Navegador web (recomendado para desarrollo rápido)
-cd app && npx expo start --web --port 8082
+cd src && npx expo start --web --port 8082
 
 # Celular físico (escanear QR con Expo Go)
-cd app && npx expo start
+cd src && npx expo start
 
 # Emulador Android
-cd app && npx expo start --android
+cd src && npx expo start --android
 
 # Simulador iOS (solo Mac + Xcode)
-cd app && npx expo start --ios
+cd src && npx expo start --ios
 ```
 
 ---
@@ -112,9 +112,9 @@ La pantalla de **Alfabeto** integra un modelo 3D animado que reproduce la seña 
 
 | Archivo | Ubicación | Descripción |
 |---|---|---|
-| `signia_model.glb` | `app/assets/` | Modelo 3D del personaje con 26 animaciones del alfabeto exportado desde Blender |
-| `model_viewer.html` | `app/assets/` | Visor Three.js: fondo gradiente, spinner de carga, barra de progreso, auto-rotación, animación de entrada, aro de luz en el suelo |
-| `AlphabetScreen.tsx` | `app/presentation/screens/Alphabet/` | Pantalla con grilla A-Z + modal centrado con visor 3D, navegación prev/next y botón Repetir |
+| `signia_model.glb` | `src/assets/` | Modelo 3D del personaje con 26 animaciones del alfabeto exportado desde Blender |
+| `model_viewer.html` | `src/assets/` | Visor Three.js: fondo gradiente, spinner de carga, barra de progreso, auto-rotación, animación de entrada, aro de luz en el suelo |
+| `AlphabetScreen.tsx` | `src/presentation/screens/Alphabet/` | Pantalla con grilla A-Z + modal centrado con visor 3D, navegación prev/next y botón Repetir |
 
 ### Diseño de la pantalla
 
@@ -183,14 +183,14 @@ Después de modificar el modelo o las animaciones, exportarlo como GLB:
 1. En Blender: **File → Export → glTF 2.0 (.glb/.gltf)**
 2. Seleccionar **Format: GLB**
 3. Activar: `Animations`, `Skinning`, `Materials`
-4. Guardar en `app/assets/signia_model.glb` (sobreescribir)
+4. Guardar en `src/assets/signia_model.glb` (sobreescribir)
 
 ### Agregar una nueva seña al alfabeto
 
 1. Abrir `cuerpo.blend` en Blender.
 2. Crear una nueva acción con el nombre `Letra_X` (donde X es la letra).
 3. Animar los huesos del brazo y los dedos de la mano derecha.
-4. Exportar el GLB actualizado a `app/assets/signia_model.glb`.
+4. Exportar el GLB actualizado a `src/assets/signia_model.glb`.
 5. La pantalla la detecta automáticamente — no requiere cambios en código.
 
 ---
@@ -200,24 +200,30 @@ Después de modificar el modelo o las animaciones, exportarlo como GLB:
 El frontend sigue una arquitectura en capas (Clean Architecture simplificada):
 
 ```
-app/
-├── presentation/          ← Capa visual
-│   ├── screens/           → Pantallas (una carpeta por módulo)
-│   ├── components/        → Componentes reutilizables
-│   └── navigation/        → Navegación entre pantallas
+src/
+├── presentation/              ← Capa de presentación (UI)
+│   ├── screens/               → Pantallas (una carpeta por módulo)
+│   ├── components/            → Componentes reutilizables
+│   └── navigation/            → Navegación entre pantallas
 │
-├── state/                 ← Estado global (AuthContext, ThemeContext)
-├── hooks/                 ← Lógica extraída de pantallas
+├── domain/                    ← Capa de dominio: entidades y reglas (placeholder)
+├── data/                      ← Capa de datos: repositorios (placeholder)
 │
-├── assets/                ← Imágenes, modelo 3D, visor HTML
-├── config/                ← URL del backend y mapa de endpoints
-├── constants/             ← Sistema de diseño (colores, tamaños, strings)
-├── types/                 ← Interfaces TypeScript globales
+├── infrastructure/            ← Capa de infraestructura (acceso externo)
+│   ├── api.service.ts         → Cliente Axios + interceptor JWT
+│   ├── translations.service.ts → Cliente HTTP del módulo de traducciones
+│   └── vision/                → Agente de visión (MediaPipe / TFJS / mock)
 │
-├── business/              ← Pendiente: lógica de negocio
-├── data/                  ← Pendiente: repositorios de datos
-├── services/              ← Pendiente: llamadas a la API
-└── utils/                 ← Pendiente: funciones utilitarias
+└── shared/                    ← Transversal a todas las capas
+    ├── config/                → URL del backend y mapa de endpoints
+    ├── constants/             → Sistema de diseño (colores, tamaños, strings)
+    ├── hooks/                 → Lógica reutilizable de pantallas
+    ├── i18n/                  → Internacionalización (es / en / fr / pt)
+    ├── state/                 → Estado global (AuthContext, ThemeContext, LanguageContext)
+    ├── types/                 → Interfaces TypeScript globales
+    └── utils/                 → Funciones utilitarias (diálogos, fileIO, accesos)
+
+assets/ y web/ permanecen en la raíz del proyecto (imágenes, modelo 3D, visor HTML).
 ```
 
 ### Estado de implementación
@@ -225,21 +231,15 @@ app/
 | Capa | Estado | Contenido |
 |---|---|---|
 | `presentation/` | ✅ Completa | Todas las pantallas, componentes y navegación |
-| `state/` | ✅ Completo | `AuthContext` y `ThemeContext` |
-| `hooks/` | ✅ Completo | `useLoginForm`, `useRegisterForm` |
-| `config/` | ✅ Completo | `api.config.ts` con todos los endpoints |
-| `constants/` | ✅ Completo | Colores, tamaños, strings del sistema de diseño |
-| `types/` | ✅ Completo | User, Auth, Traduccion, Lexico, Alarma, etc. |
-| `assets/` | ✅ Completo | Imágenes, `signia_model.glb`, `model_viewer.html` |
-| `services/` | ⏳ Pendiente | Se implementa al conectar el backend real |
-| `data/` | ⏳ Pendiente | Se implementa con los servicios |
-| `business/` | ⏳ Pendiente | Lógica compleja desacoplada de pantallas |
-| `utils/` | ⏳ Pendiente | Formateo, validaciones genéricas |
+| `infrastructure/` | ✅ Completa | `api.service`, `translations.service`, agente `vision/` |
+| `shared/` | ✅ Completa | `config`, `constants`, `hooks`, `i18n`, `state`, `types`, `utils` |
+| `domain/` | ⏳ Placeholder | Entidades y reglas de negocio (sin extraer) |
+| `data/` | ⏳ Placeholder | Repositorios de datos (sin extraer) |
 
-### Flujo de datos previsto (al conectar backend)
+### Flujo de datos
 
 ```
-Pantalla → Hook → Service → Data → API backend
+presentation → shared/hooks → infrastructure (api) → API backend
 ```
 
 ---
@@ -266,7 +266,7 @@ Pantalla → Hook → Service → Data → API backend
 
 ## Sistema de diseño
 
-Todo el sistema visual está centralizado en `app/constants/`. Cambiar un valor aquí lo propaga a toda la app.
+Todo el sistema visual está centralizado en `src/shared/constants/`. Cambiar un valor aquí lo propaga a toda la app.
 
 ### Colores principales — `colors.ts`
 
@@ -348,12 +348,12 @@ La app soporta **4 idiomas** seleccionables desde la pantalla de Perfil: Españo
 
 | Archivo | Descripción |
 |---|---|
-| `app/i18n/locales/es.ts` | Fuente de verdad con ~150 claves en español |
-| `app/i18n/locales/en.ts` | Traducciones al inglés (tipadas como `typeof es`) |
-| `app/i18n/locales/fr.ts` | Traducciones al francés |
-| `app/i18n/locales/pt.ts` | Traducciones al portugués |
-| `app/i18n/index.ts` | Hook `useTranslation()` con fallback `es` |
-| `app/state/LanguageContext.tsx` | Contexto global + persistencia en AsyncStorage |
+| `src/shared/i18n/locales/es.ts` | Fuente de verdad con ~150 claves en español |
+| `src/shared/i18n/locales/en.ts` | Traducciones al inglés (tipadas como `typeof es`) |
+| `src/shared/i18n/locales/fr.ts` | Traducciones al francés |
+| `src/shared/i18n/locales/pt.ts` | Traducciones al portugués |
+| `src/shared/i18n/index.ts` | Hook `useTranslation()` con fallback `es` |
+| `src/shared/state/LanguageContext.tsx` | Contexto global + persistencia en AsyncStorage |
 
 ### Cómo funciona
 
@@ -374,14 +374,14 @@ const MyScreen = () => {
 
 ### Cómo agregar un idioma nuevo
 
-1. Crear `app/i18n/locales/xx.ts` tipado como `typeof es` y completar todas las claves.
-2. Importarlo en `app/i18n/index.ts` y agregarlo al objeto `translations`.
-3. Agregar el código al tipo `LanguageCode` y su nombre en `LANGUAGE_NAMES` en `app/state/LanguageContext.tsx`.
+1. Crear `src/shared/i18n/locales/xx.ts` tipado como `typeof es` y completar todas las claves.
+2. Importarlo en `src/shared/i18n/index.ts` y agregarlo al objeto `translations`.
+3. Agregar el código al tipo `LanguageCode` y su nombre en `LANGUAGE_NAMES` en `src/shared/state/LanguageContext.tsx`.
 4. El selector en `ProfileScreen` lo detecta automáticamente.
 
 ### Cómo agregar una nueva clave
 
-1. Agregar la clave con su valor en español a `app/i18n/locales/es.ts`.
+1. Agregar la clave con su valor en español a `src/shared/i18n/locales/es.ts`.
 2. Agregar la traducción equivalente en `en.ts`, `fr.ts` y `pt.ts` (TypeScript marcará un error si falta).
 3. Usar `t('nuevaClave')` en el componente.
 
@@ -399,7 +399,6 @@ Todas las pantallas de la app usan `useTranslation()`:
 | NewPasswordScreen | ✅ |
 | TranslationScreen | ✅ |
 | AlphabetScreen | ✅ |
-| AlarmsScreen | ✅ |
 | HistoryScreen | ✅ |
 | StatsScreen | ✅ |
 | ProfileScreen | ✅ |
@@ -407,20 +406,20 @@ Todas las pantallas de la app usan `useTranslation()`:
 
 ---
 
-## Configuración web (`app/web/`)
+## Configuración web (`src/web/`)
 
 ### Título de pestaña del navegador
 
 El título se controla en dos niveles:
 
-1. **Estático** — `app/web/index.html` define `<title>Traduce Señas</title>` como valor inicial.
+1. **Estático** — `src/web/index.html` define `<title>Traduce Señas</title>` como valor inicial.
 2. **Dinámico** — `AppNavigator.tsx` usa la prop `documentTitle` de `NavigationContainer` para mantener siempre el mismo título al navegar:
 
 ```tsx
 <NavigationContainer documentTitle={{ formatter: () => 'Traduce Señas' }}>
 ```
 
-Si en el futuro se necesita mostrar el nombre de la pantalla (p. ej. `"Traducción | Traduce Señas"`), basta cambiar el formatter en `app/presentation/navigation/AppNavigator.tsx`.
+Si en el futuro se necesita mostrar el nombre de la pantalla (p. ej. `"Traducción | Traduce Señas"`), basta cambiar el formatter en `src/presentation/navigation/AppNavigator.tsx`.
 
 ### Ícono de la app en web (favicon)
 
@@ -435,10 +434,10 @@ El ícono vive en dos lugares con roles distintos:
 
 | Archivo | Ruta | Para qué |
 |---|---|---|
-| Ícono en la app (código React Native) | `app/images/icono.png` | Referenciado con `require()` en pantallas |
-| Favicon del navegador web | `app/web/images/icono.png` | Servido estáticamente en `/images/icono.png` |
+| Ícono en la app (código React Native) | `src/images/icono.png` | Referenciado con `require()` en pantallas |
+| Favicon del navegador web | `src/web/images/icono.png` | Servido estáticamente en `/images/icono.png` |
 
-> **Por qué dos copias:** Expo con Metro procesa y hashea los archivos de `app/assets/` — no son accesibles como rutas URL simples. Solo los archivos dentro de `app/web/` se sirven estáticamente. Si actualizas el ícono, cópialo en ambas ubicaciones.
+> **Por qué dos copias:** Expo con Metro procesa y hashea los archivos de `src/assets/` — no son accesibles como rutas URL simples. Solo los archivos dentro de `src/web/` se sirven estáticamente. Si actualizas el ícono, cópialo en ambas ubicaciones.
 
 ---
 
@@ -446,16 +445,16 @@ El ícono vive en dos lugares con roles distintos:
 
 | Archivo | Ubicación | Usado en |
 |---|---|---|
-| `comunicate-sinbarreras.png` | `app/assets/images/` | LandingScreen — slide 1 del carrusel |
-| `traducion-real.png` | `app/assets/images/` | LandingScreen — slide 2 del carrusel |
-| `historial.png` | `app/assets/images/` | LandingScreen — slide 3 del carrusel |
-| `alfabeto.png` | `app/assets/images/` | LandingScreen — banner "Aprende el alfabeto dactilológico" |
-| `slide1.jpg` / `slide2.jpg` / `slide3.jpg` | `app/assets/images/` | LoginScreen / RegisterScreen (split-screen en web) y card "Reconocida oficialmente" del Landing |
-| `testimonial.jpg` | `app/assets/images/` | LandingScreen — avatar del testimonio |
-| `camera_placeholder.jpg` | `app/assets/images/` | TranslationScreen |
-| `signia_model.glb` | `app/assets/` | AlphabetScreen (modelo 3D del personaje) |
-| `model_viewer.html` | `app/assets/` | AlphabetScreen (visor Three.js cargado en WebView) |
-| `icono.png` | `app/assets/images/` | Favicon y apple-touch-icon en web |
+| `comunicate-sinbarreras.png` | `src/assets/images/` | LandingScreen — slide 1 del carrusel |
+| `traducion-real.png` | `src/assets/images/` | LandingScreen — slide 2 del carrusel |
+| `historial.png` | `src/assets/images/` | LandingScreen — slide 3 del carrusel |
+| `alfabeto.png` | `src/assets/images/` | LandingScreen — banner "Aprende el alfabeto dactilológico" |
+| `slide1.jpg` / `slide2.jpg` / `slide3.jpg` | `src/assets/images/` | LoginScreen / RegisterScreen (split-screen en web) y card "Reconocida oficialmente" del Landing |
+| `testimonial.jpg` | `src/assets/images/` | LandingScreen — avatar del testimonio |
+| `camera_placeholder.jpg` | `src/assets/images/` | TranslationScreen |
+| `signia_model.glb` | `src/assets/` | AlphabetScreen (modelo 3D del personaje) |
+| `model_viewer.html` | `src/assets/` | AlphabetScreen (visor Three.js cargado en WebView) |
+| `icono.png` | `src/assets/images/` | Favicon y apple-touch-icon en web |
 
 ---
 
@@ -487,12 +486,12 @@ El ícono vive en dos lugares con roles distintos:
 | `Port 8082 already in use` | Puerto ocupado | Cambiar a `--port 8083` |
 | Pantalla en blanco | Error de JS | Abrir **F12 → Console** |
 | `Cannot find module '...'` | Dependencias faltantes | `npm install` |
-| Modelo 3D no carga | GLB no copiado a assets | Verificar `app/assets/signia_model.glb` |
+| Modelo 3D no carga | GLB no copiado a assets | Verificar `src/assets/signia_model.glb` |
 | Modelo 3D no carga en iOS | Rutas `file://` no resueltas en iOS Expo | El código usa `expo-asset` para obtener el `localUri` real; verificar que `expo-asset` esté instalado |
 | WebView en blanco | `react-native-webview` no instalado | `npm install react-native-webview` |
 | Visor 3D sin fondo / negro | Three.js no cargó desde CDN (sin internet) | El visor requiere conexión para cargar Three.js r160 desde jsDelivr |
-| `node_modules` no existe | Primera ejecución | `npm install` en `app/` |
-| `Project is incompatible with this version of Expo Go` | SDK desactualizado | Ejecutar `npm install --legacy-peer-deps` en `app/` (proyecto ya actualizado a SDK 54) |
+| `node_modules` no existe | Primera ejecución | `npm install` en `src/` |
+| `Project is incompatible with this version of Expo Go` | SDK desactualizado | Ejecutar `npm install --legacy-peer-deps` en `src/` (proyecto ya actualizado a SDK 54) |
 | **`PlatformConstants could not be found` en móvil** | `react-native-worklets` declarado manualmente en versión incorrecta, conflicto con TurboModules de RN 0.81 | Eliminar `react-native-worklets` de `package.json`, luego `rm -rf node_modules && npm install && npx expo start --clear` |
 
 ---

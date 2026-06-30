@@ -5,7 +5,9 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.traducsenas.app",
@@ -16,7 +18,10 @@
     },
     "android": {
       "package": "com.traducsenas.app",
-      "permissions": ["CAMERA", "RECORD_AUDIO"]
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -28,6 +33,11 @@
       "backgroundColor": "#EDE9FE",
       "favicon": "./assets/images/icono.png"
     },
-    "plugins": ["expo-camera", "expo-notifications"]
+    "plugins": [
+      "expo-camera",
+      "expo-notifications",
+      "expo-font",
+      "expo-asset"
+    ]
   }
 }

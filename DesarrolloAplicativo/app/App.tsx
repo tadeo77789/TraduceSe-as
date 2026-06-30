@@ -3,10 +3,10 @@ import { StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { AuthProvider } from './state/AuthContext';
-import { ThemeProvider, useTheme } from './state/ThemeContext';
-import { LanguageProvider } from './state/LanguageContext';
-import { AppNavigator } from './presentation/navigation/AppNavigator';
+import { AuthProvider } from './src/app/providers/AuthContext';
+import { ThemeProvider, useTheme } from './src/app/providers/ThemeContext';
+import { LanguageProvider } from './src/app/providers/LanguageContext';
+import { AppNavigator } from './src/app/routes/AppNavigator';
 
 function AppContent() {
   const { isDark } = useTheme();

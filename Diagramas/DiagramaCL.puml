@@ -81,10 +81,6 @@ package "«Factory Method»" #FFF3E0 {
   class NotificacionPushFactory extends NotificacionFactory {
     + crearNotificacion() : INotificacion
   }
-
-  class AlarmaFactory extends NotificacionFactory {
-    + crearNotificacion() : INotificacion
-  }
 }
 
 ' ══════════════════════════════════════════
@@ -133,20 +129,6 @@ package "«Observer»" #EAF6EE {
     + enviar() : void
     + cancelar() : void
     + marcarLeida() : void
-  }
-
-  ' ── Alineado con BD: tabla alarma ──
-  class AlarmaObserver implements IObserver {
-    - id_alarma : int
-    - hora : Time
-    - mensaje : String
-    - activa : boolean
-    --
-    + actualizar(evento : String, datos : Object) : void
-    + enviar() : void
-    + cancelar() : void
-    + activar() : void
-    + desactivar() : void
   }
 
   ' ── Alineado con BD: tabla eventoUso ──
@@ -354,7 +336,6 @@ package "Dominio" #FAFAFA {
 ' ══════════════════════════════════════════
 
 Usuario "1" -- "0..*" Traduccion
-Usuario "1" -- "0..*" AlarmaObserver
 Usuario "1" -- "0..*" SeccionUso
 Usuario "1" -- "0..*" EventoUsoObserver
 Usuario "1" -- "0..1" PasswordResetToken
@@ -377,7 +358,6 @@ DispositivoUsuario "1" -- "0..*" NotificacionObserver
 ' ══════════════════════════════════════════
 
 NotificacionObserver ..|> INotificacion
-AlarmaObserver ..|> INotificacion
 NotificacionFactory ..> INotificacion : retorna
 
 ' ══════════════════════════════════════════
@@ -389,14 +369,12 @@ TraduccionSenaTextoFactory ..> Traduccion : crea
 TraduccionVozSenaFactory ..> Traduccion : crea
 
 NotificacionPushFactory ..> NotificacionObserver : crea
-AlarmaFactory ..> AlarmaObserver : crea
 
 ' ══════════════════════════════════════════
 ' RELACIONES OBSERVER
 ' ══════════════════════════════════════════
 
 GestorEventos --> NotificacionObserver
-GestorEventos --> AlarmaObserver
 GestorEventos --> EventoUsoObserver
 
 GestorEventos ..> Traduccion : observa cambios

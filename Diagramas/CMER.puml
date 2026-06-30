@@ -12,7 +12,6 @@
 '  7. `password` → `password_hash` y campos de auditoría (created_at/updated_at)
 '  8. Valores de ENUM documentados
 '  9. `email` marcado como UNIQUE
-' 10. Relación `alarma → notificacion` agregada
 ' ─────────────────────────────────────────────────────────────────────────────
 
 skinparam linetype ortho
@@ -93,17 +92,6 @@ entity "recurso_multimedia" as recurso_multimedia {
   id_lexico : INT <<FK>>
 }
 
-entity "alarma" as alarma {
-  * id_alarma : INT <<PK>>
-  --
-  hora : TIME
-  mensaje : VARCHAR(255)
-  activa : BOOLEAN
-  id_usuario : INT <<FK>>
-  created_at : DATETIME
-  updated_at : DATETIME
-}
-
 entity "notificacion" as notificacion {
   * id_notif : INT <<PK>>
   --
@@ -112,7 +100,6 @@ entity "notificacion" as notificacion {
   leida : BOOLEAN
   created_at : DATETIME
   id_usuario : INT <<FK>>
-  id_alarma : INT <<FK>>
 }
 
 entity "evento_uso" as evento_uso {
@@ -150,12 +137,10 @@ usuario       ||--o{ usuario_auth
 usuario       ||--|{ usuario_rol
 rol           ||--|{ usuario_rol
 usuario       ||--o{ traduccion
-usuario       ||--o{ alarma
 usuario       ||--o{ notificacion
 usuario       ||--o{ evento_uso
 usuario       ||--o{ sesion_uso
 usuario       ||--o{ password_reset_token
 lexico_senas  ||--o{ recurso_multimedia
-alarma        ||--o{ notificacion
 
 @enduml
