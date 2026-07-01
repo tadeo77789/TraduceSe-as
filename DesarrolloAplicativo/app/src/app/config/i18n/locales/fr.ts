@@ -112,6 +112,7 @@ const fr: typeof es = {
   loginEmailInvalid: 'E-mail invalide',
   loginPasswordRequired: 'Le mot de passe est obligatoire',
   loginErrorMsg: 'E-mail ou mot de passe incorrect',
+  loginNetworkError: 'Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.',
   loginEmailPlaceholder: 'Adresse e-mail',
   loginPasswordPlaceholder: 'Mot de passe',
   loginForgotPassword: 'Mot de passe oublié ?',

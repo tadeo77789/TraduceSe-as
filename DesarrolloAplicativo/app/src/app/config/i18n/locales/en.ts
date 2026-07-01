@@ -112,6 +112,7 @@ const en: typeof es = {
   loginEmailInvalid: 'Invalid email',
   loginPasswordRequired: 'Password is required',
   loginErrorMsg: 'Incorrect email or password',
+  loginNetworkError: 'Could not reach the server. Check your connection and try again.',
   loginEmailPlaceholder: 'Email address',
   loginPasswordPlaceholder: 'Password',
   loginForgotPassword: 'Forgot your password?',

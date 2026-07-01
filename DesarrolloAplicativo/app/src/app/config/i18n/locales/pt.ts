@@ -112,6 +112,7 @@ const pt: typeof es = {
   loginEmailInvalid: 'E-mail inválido',
   loginPasswordRequired: 'A senha é obrigatória',
   loginErrorMsg: 'E-mail ou senha incorretos',
+  loginNetworkError: 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
   loginEmailPlaceholder: 'Endereço de e-mail',
   loginPasswordPlaceholder: 'Senha',
   loginForgotPassword: 'Esqueceu sua senha?',

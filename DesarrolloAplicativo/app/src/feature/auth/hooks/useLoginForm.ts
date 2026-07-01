@@ -19,10 +19,9 @@ export function useLoginForm() {
 
   const validate = useCallback((): boolean => {
     const e: LoginErrors = {};
-    if (!email) e.email = t('loginEmailRequired');
-    else if (!/\S+@\S+\.\S+/.test(email)) e.email = t('loginEmailInvalid');
+    if (!email.trim()) e.email = t('loginEmailRequired');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) e.email = t('loginEmailInvalid');
     if (!password) e.password = t('loginPasswordRequired');
-    else if (password.length < 8) e.password = t('registerPasswordShort');
     setErrors(e);
     return Object.keys(e).length === 0;
   }, [email, password, t]);
@@ -31,9 +30,11 @@ export function useLoginForm() {
     if (!validate()) return;
     setLoading(true);
     try {
-      await login({ email, password });
-    } catch {
-      Alert.alert(t('error'), t('loginErrorMsg'));
+      await login({ email: email.trim().toLowerCase(), password });
+    } catch (error: any) {
+      const hasResponse = !!error?.response;
+      if (__DEV__) console.warn('[login]', error?.response?.status, error?.message);
+      Alert.alert(t('error'), hasResponse ? t('loginErrorMsg') : t('loginNetworkError'));
     } finally {
       setLoading(false);
     }
