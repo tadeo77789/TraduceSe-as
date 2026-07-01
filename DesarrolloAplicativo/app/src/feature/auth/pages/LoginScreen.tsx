@@ -104,7 +104,7 @@ export const LoginScreen: React.FC = () => {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.facebookBtn}>
-          <Image source={facebookIcon} style={styles.socialLogoImg} resizeMode="contain" />
+          <Image source={facebookIcon} style={styles.facebookLogoImg} resizeMode="contain" />
           <Text style={styles.facebookText}>{t('loginContinueFacebook')}</Text>
         </TouchableOpacity>
 
@@ -286,6 +286,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   socialLogoImg: { width: 20, height: 20 },
+  facebookLogoImg: { width: 30, height: 30, marginVertical: -5 },
   googleText: {
     fontSize: 16,
     fontWeight: '700',
