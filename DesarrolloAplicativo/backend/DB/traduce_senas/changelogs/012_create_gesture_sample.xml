@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="012" author="juan">
+
+        <createTable tableName="gesture_sample">
+
+            <column name="sample_id" type="SERIAL">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <column name="landmarks" type="JSONB"/>
+
+            <column name="confidence" type="DECIMAL(5,2)"/>
+
+            <column name="capture_date" type="TIMESTAMP"/>
+
+            <column name="user_id" type="INT"/>
+
+            <column name="lexicon_id" type="INT"/>
+
+        </createTable>
+
+        <addForeignKeyConstraint
+            baseTableName="gesture_sample"
+            baseColumnNames="user_id"
+            referencedTableName="users"
+            referencedColumnNames="user_id"
+            constraintName="fk_gesture_sample_user"/>
+
+        <addForeignKeyConstraint
+            baseTableName="gesture_sample"
+            baseColumnNames="lexicon_id"
+            referencedTableName="sign_lexicon"
+            referencedColumnNames="lexicon_id"
+            constraintName="fk_gesture_sample_lexicon"/>
+
+    </changeSet>
+
+</databaseChangeLog>
