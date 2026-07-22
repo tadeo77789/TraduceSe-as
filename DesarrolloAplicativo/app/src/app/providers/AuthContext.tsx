@@ -2,9 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { api } from '../../feature/Translation/services/api.service';
-import { ENDPOINTS } from '../config/api.config';
 import { User, AuthState, LoginPayload, RegisterPayload } from '../../shared/types';
+
+const SIM_TOKEN = 'sim-token';
 
 interface BackendUser {
   user_id: number;
@@ -72,35 +72,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = useCallback(async (payload: LoginPayload) => {
-    const { data } = await api.post(ENDPOINTS.login, {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    const simulatedUser = mapBackendUser({
+      user_id: 1,
+      name: payload.email.split('@')[0] || 'Usuario',
       email: payload.email,
-      password: payload.password,
     });
-    const token: string | undefined = data?.data?.token;
-    const backendUser: BackendUser | undefined = data?.data?.user;
-    if (!token || !backendUser) throw new Error(data?.message ?? 'Respuesta de login inválida');
-    await persistSession(mapBackendUser(backendUser), token);
+    await persistSession(simulatedUser, SIM_TOKEN);
   }, [persistSession]);
 
   const register = useCallback(async (payload: RegisterPayload) => {
-    const { data } = await api.post(ENDPOINTS.register, {
-      name: payload.nombre,
-      email: payload.email,
-      password: payload.password,
-    });
-    if (!data?.success) throw new Error(data?.message ?? 'No fue posible registrar el usuario');
-
-    const { data: loginData } = await api.post(ENDPOINTS.login, {
-      email: payload.email,
-      password: payload.password,
-    });
-    const token: string | undefined = loginData?.data?.token;
-    const backendUser: BackendUser | undefined = loginData?.data?.user;
-    if (!token || !backendUser) throw new Error(loginData?.message ?? 'Registro exitoso pero el login falló');
-    await persistSession(
-      mapBackendUser(backendUser, { edad: payload.edad, termino_acept: payload.termino_acept }),
-      token,
+    await new Promise(resolve => setTimeout(resolve, 400));
+    const simulatedUser = mapBackendUser(
+      { user_id: 1, name: payload.nombre, email: payload.email },
+      { edad: payload.edad, termino_acept: payload.termino_acept },
     );
+    await persistSession(simulatedUser, SIM_TOKEN);
   }, [persistSession]);
 
   const logout = useCallback(async () => {

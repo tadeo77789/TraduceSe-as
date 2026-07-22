@@ -111,6 +111,7 @@ const es = {
   loginEmailInvalid: 'Correo inválido',
   loginPasswordRequired: 'La contraseña es obligatoria',
   loginErrorMsg: 'Correo o contraseña incorrectos',
+  loginNetworkError: 'No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.',
   loginEmailPlaceholder: 'Correo electrónico',
   loginPasswordPlaceholder: 'Contraseña',
   loginForgotPassword: '¿Has olvidado tu contraseña?',

@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "icon": "./src/assets/images/icono.png",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -18,6 +19,10 @@
     },
     "android": {
       "package": "com.traducsenas.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/images/icono.png",
+        "backgroundColor": "#EDE9FE"
+      },
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO"
@@ -31,7 +36,7 @@
       "description": "Traduce Lengua de Señas Colombiana a texto en tiempo real.",
       "themeColor": "#7C3AED",
       "backgroundColor": "#EDE9FE",
-      "favicon": "./assets/images/icono.png"
+      "favicon": "./src/assets/images/icono.png"
     },
     "plugins": [
       "expo-camera",

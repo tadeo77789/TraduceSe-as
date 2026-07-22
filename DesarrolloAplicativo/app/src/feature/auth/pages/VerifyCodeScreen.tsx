@@ -69,7 +69,7 @@ export const VerifyCodeScreen: React.FC = () => {
       <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
         <Ionicons name="chevron-back" size={22} color={C.primary} />
       </TouchableOpacity>
-      <View style={styles.logoCorner}>
+      <View style={[styles.logoCorner, { top: insets.top + 8 }]}>
         <LinearGradient colors={[C.primaryLight, C.primary]} style={styles.logoBox}>
           <Text style={styles.logoEmoji}>👌</Text>
         </LinearGradient>

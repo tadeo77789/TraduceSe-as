@@ -8,6 +8,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Image,
   useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -131,9 +132,13 @@ export const RegisterScreen: React.FC = () => {
       <TouchableOpacity style={[styles.backBtn, { top: insets.top + 10 }]} onPress={() => navigation.goBack()}>
         <Ionicons name="chevron-back" size={22} color={Colors.primary} />
       </TouchableOpacity>
-      <View style={styles.logoCorner}>
+      <View style={[styles.logoCorner, { top: insets.top + 8 }]}>
         <LinearGradient colors={['#9333EA', '#7C3AED']} style={styles.logoBox}>
-          <Text style={styles.logoEmoji}>👌</Text>
+          <Image
+            source={require('../../../assets/images/icono.png')}
+            style={styles.logoImg}
+            resizeMode="cover"
+          />
         </LinearGradient>
         <Text style={styles.brandName}>TraduceSeña</Text>
       </View>
@@ -217,6 +222,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   logoEmoji: { fontSize: 22 },
+  logoImg: { width: 42, height: 42, borderRadius: 12 },
   brandName: { fontSize: 17, fontWeight: '800', color: Colors.textPrimary, letterSpacing: 0.2 },
 
   title: {
