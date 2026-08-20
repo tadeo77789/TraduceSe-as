@@ -14,7 +14,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       # Los .sql se ejecutan en orden alfabetico solo la primera vez
       # que se crea el volumen (000_users.sql, 001_translations.sql, ...)
-      - ./backend/sql:/docker-entrypoint-initdb.d:ro
+      - ./backend/migrations:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d traduce_senas"]
       interval: 10s
