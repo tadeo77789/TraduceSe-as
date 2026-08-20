@@ -14,10 +14,10 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
 } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { Video, ResizeMode } from 'expo-av';
+import { Asset } from 'expo-asset';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Asset } from 'expo-asset';
 import { AppHeader } from '../../../shared/components/common/AppHeader';
 import { Colors } from '../../../shared/constants/colors';
 import { useColors, useTheme } from '../../../app/providers/ThemeContext';
@@ -50,8 +50,35 @@ const DARK_ACCENTS = [
   { bg: '#2A0A10', fg: '#FB7185' },
 ];
 
-const HTML_ASSET  = require('../../../assets/model_viewer.html');
-const MODEL_ASSET = require('../../../assets/signia_model.glb');
+// Clips MP4 por letra (Metro exige require con ruta literal)
+const LETTER_VIDEOS: Record<string, number> = {
+  A: require('../../../assets/clips/letra_A.mp4'),
+  B: require('../../../assets/clips/letra_B.mp4'),
+  C: require('../../../assets/clips/letra_C.mp4'),
+  D: require('../../../assets/clips/letra_D.mp4'),
+  E: require('../../../assets/clips/letra_E.mp4'),
+  F: require('../../../assets/clips/letra_F.mp4'),
+  G: require('../../../assets/clips/letra_G.mp4'),
+  H: require('../../../assets/clips/letra_H.mp4'),
+  I: require('../../../assets/clips/letra_I.mp4'),
+  J: require('../../../assets/clips/letra_J.mp4'),
+  K: require('../../../assets/clips/letra_K.mp4'),
+  L: require('../../../assets/clips/letra_L.mp4'),
+  M: require('../../../assets/clips/letra_M.mp4'),
+  N: require('../../../assets/clips/letra_N.mp4'),
+  O: require('../../../assets/clips/letra_O.mp4'),
+  P: require('../../../assets/clips/letra_P.mp4'),
+  Q: require('../../../assets/clips/letra_Q.mp4'),
+  R: require('../../../assets/clips/letra_R.mp4'),
+  S: require('../../../assets/clips/letra_S.mp4'),
+  T: require('../../../assets/clips/letra_T.mp4'),
+  U: require('../../../assets/clips/letra_U.mp4'),
+  V: require('../../../assets/clips/letra_V.mp4'),
+  W: require('../../../assets/clips/letra_W.mp4'),
+  X: require('../../../assets/clips/letra_X.mp4'),
+  Y: require('../../../assets/clips/letra_Y.mp4'),
+  Z: require('../../../assets/clips/letra_Z.mp4'),
+};
 
 export const AlphabetScreen: React.FC = () => {
   const { width, height } = useWindowDimensions();
@@ -61,31 +88,12 @@ export const AlphabetScreen: React.FC = () => {
   const PALETTE = isDark
     ? [{ bg: C.primaryBg, fg: C.primary }, ...DARK_ACCENTS.slice(1)]
     : [{ bg: C.primaryBg, fg: C.primary }, ...ACCENTS.slice(1)];
-  const webViewRef    = useRef<WebView>(null);
-  const webViewLoaded = useRef(false);
+  const videoRef      = useRef<any>(null);
   const backdropAnim  = useRef(new Animated.Value(0)).current;
 
   const [selected,   setSelected]   = useState<LetterItem | null>(null);
-  const [modelReady, setModelReady] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const [sheetOpen,  setSheetOpen]  = useState(false);
-  const [viewerUri,  setViewerUri]  = useState<string | null>(null);
-  const [modelUri,   setModelUri]   = useState<string | null>(null);
-
-  useEffect(() => {
-    if (Platform.OS === 'web') {
-      Asset.loadAsync([MODEL_ASSET]).then(([glb]) => {
-        const mUri = glb.localUri ?? glb.uri;
-        setModelUri(mUri);
-
-        setViewerUri(`/model_viewer.html?model=${encodeURIComponent(mUri)}`);
-      }).catch(err => console.error('[AlphabetScreen] GLB load error:', err));
-    } else {
-      Asset.loadAsync([HTML_ASSET, MODEL_ASSET]).then(([html, glb]) => {
-        setViewerUri(html.localUri ?? html.uri);
-        setModelUri(glb.localUri  ?? glb.uri);
-      }).catch(err => console.error('[AlphabetScreen] Asset.loadAsync error:', err));
-    }
-  }, []);
 
   const COLS      = width >= 1024 ? 9 : width >= 768 ? 7 : 5;
   const GAP       = 10;
@@ -93,7 +101,7 @@ export const AlphabetScreen: React.FC = () => {
   const ITEM_SIZE = Math.floor((width - H_PAD * 2 - (COLS - 1) * GAP) / COLS);
   const ITEM_H    = ITEM_SIZE + 28;
 
-  const VIEWER_H = height < 600 ? 200 : 250;
+  const VIEWER_H = height < 600 ? 240 : 300;
 
   const sheetAnim = useRef(new Animated.Value(500)).current;
 
@@ -129,58 +137,19 @@ export const AlphabetScreen: React.FC = () => {
     ]).start(() => {
       setSheetOpen(false);
       setSelected(null);
-      setModelReady(false);
+      setVideoReady(false);
     });
   }, [sheetAnim, backdropAnim]);
 
-  const sendPlayAnimation = useCallback((animName: string) => {
-    if (Platform.OS === 'web') {
-      webViewRef.current?.injectJavaScript(`playAnimation(${JSON.stringify(animName)}); true;`);
-    } else {
-      webViewRef.current?.postMessage(
-        JSON.stringify({ type: 'PLAY_ANIMATION', animation: animName })
-      );
-    }
+  // reinicia el estado de carga al cambiar de letra
+  useEffect(() => { setVideoReady(false); }, [selected?.letter]);
+
+  const replayVideo = useCallback(() => {
+    const v: any = videoRef.current;
+    if (!v) return;
+    if (Platform.OS === 'web') { v.currentTime = 0; v.play?.(); }
+    else { v.replayAsync?.(); }
   }, []);
-
-  const sendLoadModel = useCallback((uri: string) => {
-    webViewRef.current?.postMessage(
-      JSON.stringify({ type: 'LOAD_MODEL', url: uri })
-    );
-  }, []);
-
-  const onWebViewLoad = useCallback(() => {
-    webViewLoaded.current = true;
-    if (Platform.OS === 'web') {
-      setModelReady(true);
-    } else if (modelUri) {
-      sendLoadModel(modelUri);
-    }
-  }, [modelUri, sendLoadModel]);
-
-  useEffect(() => {
-    if (Platform.OS !== 'web' && modelUri && webViewLoaded.current) {
-      sendLoadModel(modelUri);
-    }
-  }, [modelUri, sendLoadModel]);
-
-  const onWebViewMessage = useCallback((e: { nativeEvent: { data: string } }) => {
-    try {
-      const msg = JSON.parse(e.nativeEvent.data);
-      if (msg.type === 'MODEL_LOADED') setModelReady(true);
-    } catch (_) {}
-  }, []);
-
-  useEffect(() => {
-    if (selected && modelReady) {
-      sendPlayAnimation(`Letra_${selected.letter}`);
-    }
-  }, [selected, modelReady, sendPlayAnimation]);
-
-  const replayAnimation = useCallback(() => {
-    if (!selected || !modelReady) return;
-    sendPlayAnimation(`Letra_${selected.letter}`);
-  }, [selected, modelReady, sendPlayAnimation]);
 
   const navigateLetter = useCallback((direction: 'prev' | 'next') => {
     if (!selected) return;
@@ -188,15 +157,8 @@ export const AlphabetScreen: React.FC = () => {
     const nextIdx = direction === 'next'
       ? (idx + 1) % ALPHABET.length
       : (idx - 1 + ALPHABET.length) % ALPHABET.length;
-    const nextLetter = ALPHABET[nextIdx];
-    setSelected(nextLetter);
-
-    if (modelReady) {
-      webViewRef.current?.postMessage(
-        JSON.stringify({ type: 'PLAY_ANIMATION', animation: `Letra_${nextLetter.letter}` })
-      );
-    }
-  }, [selected, modelReady]);
+    setSelected(ALPHABET[nextIdx]);
+  }, [selected]);
 
   const handleSelect = useCallback((item: LetterItem) => {
     setSelected(item);
@@ -329,24 +291,32 @@ export const AlphabetScreen: React.FC = () => {
             </TouchableOpacity>
           </LinearGradient>
 
-          <View style={[styles.viewerWrap, { height: VIEWER_H, backgroundColor: C.inputBg, shadowColor: C.primary }]}>
-            {viewerUri ? (
-              <WebView
-                ref={webViewRef}
-                source={{ uri: viewerUri }}
-                style={styles.webview}
-                onLoad={onWebViewLoad}
-                onMessage={onWebViewMessage}
-                originWhitelist={['*']}
-                allowFileAccess
-                allowFileAccessFromFileURLs
-                allowUniversalAccessFromFileURLs
-                scrollEnabled={false}
-                bounces={false}
-              />
-            ) : null}
+          <View style={[styles.viewerWrap, { width: VIEWER_H * 0.75, height: VIEWER_H, backgroundColor: C.inputBg, shadowColor: C.primary }]}>
+            {selected && (Platform.OS === 'web'
+              ? React.createElement('video', {
+                  ref: videoRef,
+                  src: Image.resolveAssetSource(LETTER_VIDEOS[selected.letter]).uri,
+                  autoPlay: true,
+                  loop: true,
+                  muted: true,
+                  playsInline: true,
+                  onLoadedData: () => setVideoReady(true),
+                  style: { width: '100%', height: '100%', objectFit: 'contain', backgroundColor: 'transparent' },
+                })
+              : (
+                <Video
+                  ref={videoRef}
+                  source={LETTER_VIDEOS[selected.letter]}
+                  style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
+                  resizeMode={ResizeMode.CONTAIN}
+                  isLooping
+                  shouldPlay
+                  isMuted
+                  onReadyForDisplay={() => setVideoReady(true)}
+                />
+              ))}
 
-            {!modelReady && (
+            {!videoReady && (
               <View style={[styles.loadingOverlay, { backgroundColor: C.inputBg }]}>
                 <View style={[styles.loadingPill, { backgroundColor: C.surface, shadowColor: C.primary }]}>
                   <ActivityIndicator size="small" color={C.primary} />
@@ -359,10 +329,10 @@ export const AlphabetScreen: React.FC = () => {
           <TouchableOpacity
             style={[
               styles.replayBtn,
-              { backgroundColor: selAccent.bg, borderColor: selAccent.fg, opacity: modelReady ? 1 : 0.4 },
+              { backgroundColor: selAccent.bg, borderColor: selAccent.fg, opacity: videoReady ? 1 : 0.4 },
             ]}
-            onPress={replayAnimation}
-            disabled={!modelReady}
+            onPress={replayVideo}
+            disabled={!videoReady}
             activeOpacity={0.75}
           >
             <Ionicons name="refresh" size={15} color={selAccent.fg} />
@@ -532,7 +502,8 @@ const styles = StyleSheet.create({
   },
 
   viewerWrap: {
-    marginHorizontal: 16,
+    alignSelf: 'center',
+    marginTop: 4,
     borderRadius: 20,
     overflow: 'hidden',
     backgroundColor: '#ECEEF5',
